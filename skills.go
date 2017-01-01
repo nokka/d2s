@@ -1,6 +1,6 @@
 package d2s
 
-var skillMap = [...]string{
+var skillMap = [357]string{
 	"attack",
 	"kick",
 	"throw_item",
@@ -222,140 +222,140 @@ var skillMap = [...]string{
 	"book_of_identify",
 	"scroll_of_townportal",
 	"book_of_townportal",
-	/*221	raven
-	  222	plague_poppy
-	  223	wearwolf
-	  224	shape_shifting
-	  225	firestorm
-	  226	oak_sage
-	  227	summon_spirit_wolf
-	  228	wearbear
-	  229	molten_boulder
-	  230	arctic_blast
-	  231	cycle_of_life
-	  232	feral_rage
-	  233	maul
-	  234	eruption
-	  235	cyclone_armor
-	  236	heart_of_wolverine
-	  237	summon_fenris
-	  238	rabies
-	  239	fire_claws
-	  240	twister
-	  241	vines
-	  242	hunger
-	  243	shock_wave
-	  244	volcano
-	  245	tornado
-	  246	spirit_of_barbs
-	  247	summon_grizzly
-	  248	fury
-	  249	armageddon
-	  250	hurricane
-	  251	fire_trauma
-	  252	claw_mastery
-	  253	psychic_hammer
-	  254	tiger_strike
-	  255	dragon_talon
-	  256	shock_field
-	  257	blade_sentinel
-	  258	quickness
-	  259	fists_of_fire
-	  260	dragon_claw
-	  261	charged_bolt_sentry
-	  262	wake_of_fire_sentry
-	  263	weapon_block
-	  264	cloak_of_shadows
-	  265	cobra_strike
-	  266	blade_fury
-	  267	fade
-	  268	shadow_warrior
-	  269	claws_of_thunder
-	  270	dragon_tail
-	  271	lightning_sentry
-	  272	inferno_sentry
-	  273	mind_blast
-	  274	blades_of_ice
-	  275	dragon_flight
-	  276	death_sentry
-	  277	blade_shield
-	  278	venom
-	  279	shadow_master
-	  280	royal_strike
-	  281	wake_of_destruction_sentry
-	  282	imp_inferno
-	  283	imp_fireball
-	  284	baal_taunt
-	  285	baal_corpse_explode
-	  286	baal_monster_spawn
-	  287	catapult_charged_ball
-	  288	catapult_spike_ball
-	  289	suck_blood
-	  290	cry_help
-	  291	healing_vortex
-	  292	teleport_2
-	  293	self-resurrect
-	  294	vine_attack
-	  295	overseer_whip
-	  296	barbs_aura
-	  297	wolverine_aura
-	  298	oak_sage_aura
-	  299	imp_fire_missile
-	  300	impregnate
-	  301	siege_beast_stomp
-	  302	minionspawner
-	  303	catapultblizzard
-	  304	catapultplague
-	  305	catapultmeteor
-	  306	boltsentry
-	  307	corpsecycler
-	  308	deathmaul
-	  309	defense_curse
-	  310	blood_mana
-	  311	mon_inferno_sentry
-	  312	mon_death_sentry
-	  313	sentry_lightning
-	  314	fenris_rage
-	  315	baal_tentacle
-	  316	baal_nova
-	  317	baal_inferno
-	  318	baal_cold_missiles
-	  319	megademoninferno
-	  320	evilhutspawner
-	  321	countessfirewall
-	  322	impbolt
-	  323	horror_arctic_blast
-	  324	death_sentry_ltng
-	  325	vinecycler
-	  326	bearsmite
-	  327	resurrect2
-	  328	bloodlordfrenzy
-	  329	baal_teleport
-	  330	imp_teleport
-	  331	baal_clone_teleport
-	  332	zakarumlightning
-	  333	vampiremissile
-	  334	mephistomissile
-	  335	doomknightmissile
-	  336	roguemissile
-	  337	hydramissile
-	  338	necromagemissile
-	  339	monbow
-	  340	monfirearrow
-	  341	moncoldarrow
-	  342	monexplodingarrow
-	  343	monfreezingarrow
-	  344	monpowerstrike
-	  345	succubusbolt
-	  346	mephfrostnova
-	  347	monicespear
-	  348	shamanice
-	  349	diablogeddon
-	  350	delerium_change
-	  351	nihlathakcorpseexplosion
-	  352	serpentcharge
-	  353	trap_nova
-	  354	unholyboltex
-	  355	shamanfireex
-	  356	imp_fire_missile_ex*/
+	"raven",
+	"plague_poppy",
+	"wearwolf",
+	"shape_shifting",
+	"firestorm",
+	"oak_sage",
+	"summon_spirit_wolf",
+	"wearbear",
+	"molten_boulder",
+	"arctic_blast",
+	"cycle_of_life",
+	"feral_rage",
+	"maul",
+	"eruption",
+	"cyclone_armor",
+	"heart_of_wolverine",
+	"summon_fenris",
+	"rabies",
+	"fire_claws",
+	"twister",
+	"vines",
+	"hunger",
+	"shock_wave",
+	"volcano",
+	"tornado",
+	"spirit_of_barbs",
+	"summon_grizzly",
+	"fury",
+	"armageddon",
+	"hurricane",
+	"fire_trauma",
+	"claw_mastery",
+	"psychic_hammer",
+	"tiger_strike",
+	"dragon_talon",
+	"shock_field",
+	"blade_sentinel",
+	"quickness",
+	"fists_of_fire",
+	"dragon_claw",
+	"charged_bolt_sentry",
+	"wake_of_fire_sentry",
+	"weapon_block",
+	"cloak_of_shadows",
+	"cobra_strike",
+	"blade_fury",
+	"fade",
+	"shadow_warrior",
+	"claws_of_thunder",
+	"dragon_tail",
+	"lightning_sentry",
+	"inferno_sentry",
+	"mind_blast",
+	"blades_of_ice",
+	"dragon_flight",
+	"death_sentry",
+	"blade_shield",
+	"venom",
+	"shadow_master",
+	"royal_strike",
+	"wake_of_destruction_sentry",
+	"imp_inferno",
+	"imp_fireball",
+	"baal_taunt",
+	"baal_corpse_explode",
+	"baal_monster_spawn",
+	"catapult_charged_ball",
+	"catapult_spike_ball",
+	"suck_blood",
+	"cry_help",
+	"healing_vortex",
+	"teleport_2",
+	"self-resurrect",
+	"vine_attack",
+	"overseer_whip",
+	"barbs_aura",
+	"wolverine_aura",
+	"oak_sage_aura",
+	"imp_fire_missile",
+	"impregnate",
+	"siege_beast_stomp",
+	"minionspawner",
+	"catapultblizzard",
+	"catapultplague",
+	"catapultmeteor",
+	"boltsentry",
+	"corpsecycler",
+	"deathmaul",
+	"defense_curse",
+	"blood_mana",
+	"mon_inferno_sentry",
+	"mon_death_sentry",
+	"sentry_lightning",
+	"fenris_rage",
+	"baal_tentacle",
+	"baal_nova",
+	"baal_inferno",
+	"baal_cold_missiles",
+	"megademoninferno",
+	"evilhutspawner",
+	"countessfirewall",
+	"impbolt",
+	"horror_arctic_blast",
+	"death_sentry_ltng",
+	"vinecycler",
+	"bearsmite",
+	"resurrect2",
+	"bloodlordfrenzy",
+	"baal_teleport",
+	"imp_teleport",
+	"baal_clone_teleport",
+	"zakarumlightning",
+	"vampiremissile",
+	"mephistomissile",
+	"doomknightmissile",
+	"roguemissile",
+	"hydramissile",
+	"necromagemissile",
+	"monbow",
+	"monfirearrow",
+	"moncoldarrow",
+	"monexplodingarrow",
+	"monfreezingarrow",
+	"monpowerstrike",
+	"succubusbolt",
+	"mephfrostnova",
+	"monicespear",
+	"shamanice",
+	"diablogeddon",
+	"delerium_change",
+	"nihlathakcorpseexplosion",
+	"serpentcharge",
+	"trap_nova",
+	"unholyboltex",
+	"shamanfireex",
+	"imp_fire_missile_ex",
 }

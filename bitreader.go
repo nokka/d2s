@@ -56,23 +56,6 @@ func (br *bitReader) ReadBits64(bits uint, reverse bool) (n uint64) {
 	return
 }
 
-func (br *bitReader) ReadBit(reverse bool) bool {
-	n := br.ReadBits64(1, reverse)
-	return n != 0
-}
-
-func (br *bitReader) ReadAndReverseBitsToBinary(n int) string {
-	var bin string
-	for i := 0; i < n; i++ {
-		if br.ReadBit(true) {
-			bin += "1"
-		} else {
-			bin += "0"
-		}
-	}
-	return bin
-}
-
 func reverseByte(b byte) byte {
 	var d byte
 	for i := 0; i < 8; i++ {

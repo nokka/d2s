@@ -95,8 +95,8 @@ type Skills struct {
 	List   [30]byte
 }
 
-// Items determines the header data of a d2s file.
-type Items struct {
+// ItemHeader determines the header data of a d2s file.
+type ItemHeader struct {
 	Header [2]byte
 	Count  uint16
 }
@@ -132,15 +132,17 @@ var skillOffsetMap = map[uint]int{
 }
 
 // Parse does stuff
-func Parse(derp io.Reader) {
+func Parse(character io.Reader) {
 
 	// Implements buffered reading, wraps io.Reader.
-	bfr := bufio.NewReader(derp)
+	bfr := bufio.NewReader(character)
 
 	// MARK: Header
 
-	// Read Header which is the first 767 bytes, including stats header.
+	// Make a buffer that can hold 767 bytes, which can hold the entire header.
+	// We'll reuse this buffer through out to avoid another alloc.
 	buf := make([]byte, 767)
+
 	_, err := io.ReadFull(bfr, buf)
 	if err != nil {
 		log.Fatal("Error reading from file:", err)
@@ -230,18 +232,17 @@ func Parse(derp io.Reader) {
 	// MARK: Skills
 
 	// Right now we've read n amount of bits, which means we're probably
-	// not byte aligned, offset % 8 = remainder, if remainder is not 0,
-	// we need to read (8 - remainder) bits to reach the next boundry.
+	// not byte aligned, offset % 8 = remainder, and if remainder is not 0,
+	// we need to read (8 - remainder) bits to reach the next byte boundry.
 	// BitReader reads in 1 byte chunks, which means bfr is queued at
-	// the next byte boundry already.
-	skillsBuf := make([]byte, 32)
-	_, err = io.ReadFull(bfr, skillsBuf)
+	// the next byte boundry already. We'll reuse the buf from before.
+	_, err = io.ReadFull(bfr, buf[:32])
 	if err != nil {
 		log.Fatal("Error reading from file:", err)
 	}
 
 	skills := Skills{}
-	err = binary.Read(bytes.NewBuffer(skillsBuf), binary.LittleEndian, &skills)
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &skills)
 
 	if err != nil {
 		log.Fatal("binary.Read failed", err)
@@ -260,14 +261,13 @@ func Parse(derp io.Reader) {
 
 	// MARK: Items
 
-	itemsBuf := make([]byte, 4)
-	_, err = io.ReadFull(bfr, itemsBuf)
+	_, err = io.ReadFull(bfr, buf[:4])
 	if err != nil {
 		log.Fatal("Error reading from file:", err)
 	}
 
-	items := Items{}
-	err = binary.Read(bytes.NewBuffer(itemsBuf), binary.LittleEndian, &items)
+	items := ItemHeader{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &items)
 
 	if err != nil {
 		log.Fatal("binary.Read failed", err)
