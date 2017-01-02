@@ -278,4 +278,29 @@ func Parse(character io.Reader) {
 	}
 
 	fmt.Printf("Parsed data:\n%+v\n", items)
+
+	ibr := bitReader{r: bfr}
+
+	// offset: 0
+	j := ibr.ReadBits64(8, false)
+
+	// offset: 8
+	m := ibr.ReadBits64(8, false)
+
+	// offset: 16
+	_ = ibr.ReadBits64(4, false)
+
+	// offset: 20
+	isIdentified := ibr.ReadBits64(1, false)
+
+	// offset: 21
+	_ = ibr.ReadBits64(6, false)
+
+	// offset: 27
+	isSocketed := ibr.ReadBits64(1, false)
+
+	fmt.Printf("Header[0]: %s\n", string(j))
+	fmt.Printf("Header[1]: %s\n", string(m))
+	fmt.Printf("Is identified: %d\n", isIdentified)
+	fmt.Printf("Is socketed: %d\n", isSocketed)
 }
