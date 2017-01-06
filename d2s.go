@@ -287,20 +287,104 @@ func Parse(character io.Reader) {
 	// offset: 8
 	m := ibr.ReadBits64(8, false)
 
-	// offset: 16
-	_ = ibr.ReadBits64(4, false)
+	// offset: 16, unknown
+	ibr.ReadBits64(4, false)
 
 	// offset: 20
-	isIdentified := ibr.ReadBits64(1, false)
+	isIdentified := ibr.ReadBits64(1, true)
 
-	// offset: 21
-	_ = ibr.ReadBits64(6, false)
+	// offset: 21, unknown
+	ibr.ReadBits64(6, false)
 
 	// offset: 27
 	isSocketed := ibr.ReadBits64(1, false)
+
+	// offset 28, unknown
+	ibr.ReadBits64(1, false)
+
+	// offset 29
+	newlyPickedUp := ibr.ReadBits64(1, false)
+
+	// offset 30, unknown
+	ibr.ReadBits64(2, false)
+
+	// offset 32
+	playerEar := ibr.ReadBits64(1, false)
+
+	// offset 33
+	starterItem := ibr.ReadBits64(1, false)
+
+	// offset 34, unknown
+	ibr.ReadBits64(3, false)
+
+	// offset 37, if it's a simple item, it only contains 111 bits data
+	simpleItem := ibr.ReadBits64(1, false)
+
+	// offset 38
+	ethereal := ibr.ReadBits64(1, false)
+
+	// offset 39, unknown
+	ibr.ReadBits64(1, false)
+
+	// offset 40
+	personalized := ibr.ReadBits64(1, false)
+
+	// offset 41, unknown
+	ibr.ReadBits64(1, false)
+
+	// offset 42
+	runeword := ibr.ReadBits64(1, false)
+
+	// offset 43, unknown
+	ibr.ReadBits64(15, false)
+
+	// offset 58
+	positionID := ibr.ReadBits64(3, false)
+
+	// offset 61
+	slotID := ibr.ReadBits64(4, false)
+
+	// offset 65
+	inventoryX := ibr.ReadBits64(4, false)
+
+	// offset 69
+	inventoryY := ibr.ReadBits64(3, false)
+
+	// offset 72
+	ibr.ReadBits64(1, false)
+
+	// offset 73, if item is neither equipped or in the belt
+	// this tells us where it is.
+	altPositionID1 := ibr.ReadBits64(1, false)
+	altPositionID2 := ibr.ReadBits64(1, false)
+	altPositionID3 := ibr.ReadBits64(1, false)
+
+	// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
+	itemType1 := ibr.ReadBits64(8, false)
+	itemType2 := ibr.ReadBits64(8, false)
+	itemType3 := ibr.ReadBits64(8, false)
 
 	fmt.Printf("Header[0]: %s\n", string(j))
 	fmt.Printf("Header[1]: %s\n", string(m))
 	fmt.Printf("Is identified: %d\n", isIdentified)
 	fmt.Printf("Is socketed: %d\n", isSocketed)
+	fmt.Printf("Newly picked up: %d\n", newlyPickedUp)
+	fmt.Printf("Is player ear??: %d\n", playerEar)
+	fmt.Printf("Is starter item: %d\n", starterItem)
+	fmt.Printf("Simple item: %d\n", simpleItem)
+	fmt.Printf("Ethereal: %d\n", ethereal)
+	fmt.Printf("Personalized: %d\n", personalized)
+	fmt.Printf("Runeword: %d\n", runeword)
+	fmt.Printf("Position ID: %d\n", positionID)
+	fmt.Printf("Slot ID: %d\n", slotID)
+	fmt.Printf("Inventory X: %d\n", inventoryX)
+	fmt.Printf("Inventory Y: %d\n", inventoryY)
+
+	fmt.Printf("Alt position ID1: %d\n", altPositionID1)
+	fmt.Printf("Alt position ID2: %d\n", altPositionID2)
+	fmt.Printf("Alt position ID3: %d\n", altPositionID3)
+
+	fmt.Printf("Item type ID1: %s\n", string(itemType1))
+	fmt.Printf("Item type ID2: %s\n", string(itemType2))
+	fmt.Printf("Item type ID3: %s\n", string(itemType3))
 }
