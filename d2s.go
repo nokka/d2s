@@ -277,14 +277,17 @@ func Parse(character io.Reader) {
 		log.Fatal("Failed to find the items header")
 	}
 
-	fmt.Printf("Parsed data:\n%+v\n", items)
+	fmt.Printf("Item section header: %s\n", string(items.Header[:]))
+	fmt.Printf("Items count: %d\n", items.Count)
+
+	// Unaligned bit reading
 
 	ibr := bitReader{r: bfr}
 
-	// offset: 0
+	// offset: 0 "J"
 	j := ibr.ReadBits64(8, false)
 
-	// offset: 8
+	// offset: 8, "M"
 	m := ibr.ReadBits64(8, false)
 
 	// offset: 16, unknown
