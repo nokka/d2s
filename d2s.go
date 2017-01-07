@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 )
 
 // CharacterStats represents the characters stats
@@ -99,6 +100,37 @@ type Skills struct {
 type ItemHeader struct {
 	Header [2]byte
 	Count  uint16
+}
+
+// Item represents an actual item
+type Item struct {
+	Identified        uint64
+	Socketed          uint64
+	New               uint64
+	IsEar             uint64
+	StarterItem       uint64
+	SimpleItem        uint64
+	Ethereal          uint64
+	Personalized      uint64
+	GivenRuneword     uint64
+	LocationID        uint64
+	EquippedID        uint64
+	PositionY         uint64
+	PositionX         uint64
+	AltPositionID     uint64
+	Type              string
+	Sockets           uint64
+	ID                uint64
+	Level             uint64
+	Quality           uint64
+	MultiplePictures  uint64
+	PictureID         uint64
+	ClassSpecific     uint64
+	LowQualityID      uint64
+	StructureHeader   uint64
+	DefenseRating     uint64
+	MaxDurability     uint64
+	CurrentDurability uint64
 }
 
 // statsBitMap holds all the references to bit sites of all attributes.
@@ -285,109 +317,148 @@ func Parse(character io.Reader) {
 	ibr := bitReader{r: bfr}
 
 	// offset: 0 "J"
-	j := ibr.ReadBits64(8, false)
+	ibr.ReadBits64(8, false)
 
 	// offset: 8, "M"
-	m := ibr.ReadBits64(8, false)
+	ibr.ReadBits64(8, false)
+
+	item := Item{}
 
 	// offset: 16, unknown
-	ibr.ReadBits64(4, false)
+	ibr.ReadBits64(4, true)
 
 	// offset: 20
-	isIdentified := ibr.ReadBits64(1, true)
+	item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset: 21, unknown
-	ibr.ReadBits64(6, false)
+	ibr.ReadBits64(6, true)
 
 	// offset: 27
-	isSocketed := ibr.ReadBits64(1, false)
+	item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 28, unknown
-	ibr.ReadBits64(1, false)
+	ibr.ReadBits64(1, true)
 
 	// offset 29
-	newlyPickedUp := ibr.ReadBits64(1, false)
+	item.New = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 30, unknown
-	ibr.ReadBits64(2, false)
+	ibr.ReadBits64(2, true)
 
 	// offset 32
-	playerEar := ibr.ReadBits64(1, false)
+	item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 33
-	starterItem := ibr.ReadBits64(1, false)
+	item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 34, unknown
-	ibr.ReadBits64(3, false)
+	ibr.ReadBits64(3, true)
 
 	// offset 37, if it's a simple item, it only contains 111 bits data
-	simpleItem := ibr.ReadBits64(1, false)
+	item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 38
-	ethereal := ibr.ReadBits64(1, false)
+	item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 39, unknown
-	ibr.ReadBits64(1, false)
+	ibr.ReadBits64(1, true)
 
 	// offset 40
-	personalized := ibr.ReadBits64(1, false)
+	item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 41, unknown
-	ibr.ReadBits64(1, false)
+	ibr.ReadBits64(1, true)
 
 	// offset 42
-	runeword := ibr.ReadBits64(1, false)
+	item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
 
 	// offset 43, unknown
-	ibr.ReadBits64(15, false)
+	ibr.ReadBits64(15, true)
 
 	// offset 58
-	positionID := ibr.ReadBits64(3, false)
+	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
 
 	// offset 61
-	slotID := ibr.ReadBits64(4, false)
+	item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
 
 	// offset 65
-	inventoryX := ibr.ReadBits64(4, false)
+	item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
 
 	// offset 69
-	inventoryY := ibr.ReadBits64(3, false)
+	item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
 
 	// offset 72
-	ibr.ReadBits64(1, false)
+	ibr.ReadBits64(1, true)
 
 	// offset 73, if item is neither equipped or in the belt
 	// this tells us where it is.
-	altPositionID1 := ibr.ReadBits64(1, false)
-	altPositionID2 := ibr.ReadBits64(1, false)
-	altPositionID3 := ibr.ReadBits64(1, false)
+	item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
 
 	// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
-	itemType1 := ibr.ReadBits64(8, false)
-	itemType2 := ibr.ReadBits64(8, false)
-	itemType3 := ibr.ReadBits64(8, false)
+	var itemType string
+	for i := 0; i < 4; i++ {
+		itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+	}
 
-	fmt.Printf("Header[0]: %s\n", string(j))
-	fmt.Printf("Header[1]: %s\n", string(m))
-	fmt.Printf("Is identified: %d\n", isIdentified)
-	fmt.Printf("Is socketed: %d\n", isSocketed)
-	fmt.Printf("Newly picked up: %d\n", newlyPickedUp)
-	fmt.Printf("Is player ear??: %d\n", playerEar)
-	fmt.Printf("Is starter item: %d\n", starterItem)
-	fmt.Printf("Simple item: %d\n", simpleItem)
-	fmt.Printf("Ethereal: %d\n", ethereal)
-	fmt.Printf("Personalized: %d\n", personalized)
-	fmt.Printf("Runeword: %d\n", runeword)
-	fmt.Printf("Position ID: %d\n", positionID)
-	fmt.Printf("Slot ID: %d\n", slotID)
-	fmt.Printf("Inventory X: %d\n", inventoryX)
-	fmt.Printf("Inventory Y: %d\n", inventoryY)
+	item.Type = strings.Trim(itemType, " ")
 
-	fmt.Printf("Alt position ID1: %d\n", altPositionID1)
-	fmt.Printf("Alt position ID2: %d\n", altPositionID2)
-	fmt.Printf("Alt position ID3: %d\n", altPositionID3)
+	// offset 108
+	// TODO: If sockets exist, read items, basic structure x sockets
+	item.Sockets = reverseBits(ibr.ReadBits64(3, true), 3)
 
-	fmt.Printf("Item type ID1: %s\n", string(itemType1))
-	fmt.Printf("Item type ID2: %s\n", string(itemType2))
-	fmt.Printf("Item type ID3: %s\n", string(itemType3))
+	// offset 111, item id is 8 chars, each 4 bit
+	// TODO: Convert to hex, 4 bit each, should be 59BA3CAB
+	item.ID = reverseBits(ibr.ReadBits64(32, true), 32)
+
+	// offset 143
+	item.Level = reverseBits(ibr.ReadBits64(7, true), 7)
+
+	// offset 150
+	item.Quality = reverseBits(ibr.ReadBits64(4, true), 4)
+
+	// If this is true, it means the item has more than one picture associated
+	// with it.
+	item.MultiplePictures = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	if item.MultiplePictures == 1 {
+		// The next 3 bits contain the picture ID.
+		item.PictureID = reverseBits(ibr.ReadBits64(3, true), 3)
+	}
+
+	// If this is true, it means the item is class specific.
+	item.ClassSpecific = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// If the item is class specific, the next 11 bits will
+	// contain the class specific data.
+	if item.ClassSpecific == 1 {
+		// TODO: Parse this into something useful
+		reverseBits(ibr.ReadBits64(11, true), 11)
+	}
+
+	// MARK: Quality based data
+
+	switch item.Quality {
+	case 1:
+		item.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
+	case 2:
+		// No extra data present
+	case 3:
+		// TODO: Figure out what these 3 bits are on a superior item
+		reverseBits(ibr.ReadBits64(3, true), 3)
+	}
+
+	// All items have this field between the personalization (if it exists)
+	// and the item specific data
+	item.StructureHeader = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// TODO: Make an item type mapper and determine type from here on out.
+	// If the item is an armor, it will have this field of defense data.
+	//item.DefenseRating = reverseBits(ibr.ReadBits64(10, true), 10)
+
+	// TODO: Make an item type mapper and determine type from here on out.
+	// If item is an armor or weapon it will have 8x2 bits of durability data.
+	item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+	item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+
+	fmt.Printf("Item data:\n%+v\n", item)
 }
