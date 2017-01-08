@@ -37,11 +37,11 @@ type Header struct {
 	FileSize          uint32     // : 8 4 bytes
 	CheckSum          uint32     // : 12 4 bytes
 	ActiveArms        uint32     // : 16 4 bytes
-	Name              [16]byte   // : 20 16 bytes
+	Name              name       // : 20 16 bytes
 	Status            byte       // : 36 4 bytes
 	Progression       byte       // : 37 1 bytes
 	_                 [2]byte    // : 38 2 bytes
-	Class             Class      // : 40 1 bytes
+	Class             class      // : 40 1 bytes
 	_                 [2]byte    // : 41 2 bytes
 	Level             byte       // : 43 1 bytes
 	_                 [4]byte    // : 44 4 bytes
@@ -53,7 +53,7 @@ type Header struct {
 	LeftSwapSkill     uint32     // : 128 4 bytes
 	RightSwapSkill    uint32     // : 132 4 bytes
 	_                 [32]byte   // : 136 32 bytes
-	CurrentDifficulty [3]byte    // : 168 3 bytes
+	CurrentDifficulty difficulty // : 168 3 bytes
 	MapID             uint32     // : 171 4 bytes
 	_                 [2]byte    // : 175 2 bytes
 	DeadMerc          uint16     // : 177 2 bytes
@@ -286,7 +286,7 @@ func Parse(character io.Reader) {
 
 	fmt.Printf("Parsed data:\n%+v\n", skills)
 
-	skillOffset, ok := skillOffsetMap[uint(header.Class.ID)]
+	skillOffset, ok := skillOffsetMap[uint(header.Class)]
 	if !ok {
 		log.Fatalf("Unknown skill offset for class %d", header.Class)
 	}

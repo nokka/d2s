@@ -1,5 +1,7 @@
 package d2s
 
+import "fmt"
+
 // Mapper of the hex values of classes.
 const (
 	Amazon      = 0x00
@@ -11,28 +13,23 @@ const (
 	Assassin    = 0x06
 )
 
-// Class struct will represent the characters in game class.
-type Class struct {
-	ID byte
+var classMap = map[class]string{
+	Amazon:    "Amazon",
+	Sorceress: "Sorceress",
+	Paladin:   "Paladin",
+	Barbarian: "Barbarian",
+	Druid:     "Druid",
+	Assassin:  "Assassin",
 }
 
-// Name will return a class specific name based on the ID:
-func (c Class) Name() (name string) {
-	switch c.ID {
-	case Amazon:
-		name = "Amazon"
-	case Sorceress:
-		name = "Sorceress"
-	case Necromancer:
-		name = "Necromancer"
-	case Paladin:
-		name = "Paladin"
-	case Barbarian:
-		name = "Barbarian"
-	case Druid:
-		name = "Druid"
-	case Assassin:
-		name = "Assassin"
+// CharClass struct will represent the characters in game class.
+type class byte
+
+// String will return a class specific name.
+func (c class) String() string {
+	name, ok := classMap[c]
+	if !ok {
+		return fmt.Sprintf("Unknown class %#02x", byte(c))
 	}
-	return
+	return name
 }
