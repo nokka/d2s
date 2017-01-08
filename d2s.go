@@ -41,7 +41,7 @@ type Header struct {
 	Status            byte       // : 36 4 bytes
 	Progression       byte       // : 37 1 bytes
 	_                 [2]byte    // : 38 2 bytes
-	Class             byte       // : 40 1 bytes
+	Class             Class      // : 40 1 bytes
 	_                 [2]byte    // : 41 2 bytes
 	Level             byte       // : 43 1 bytes
 	_                 [4]byte    // : 44 4 bytes
@@ -286,7 +286,7 @@ func Parse(character io.Reader) {
 
 	fmt.Printf("Parsed data:\n%+v\n", skills)
 
-	skillOffset, ok := skillOffsetMap[uint(header.Class)]
+	skillOffset, ok := skillOffsetMap[uint(header.Class.ID)]
 	if !ok {
 		log.Fatalf("Unknown skill offset for class %d", header.Class)
 	}
