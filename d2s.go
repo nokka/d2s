@@ -104,33 +104,37 @@ type ItemHeader struct {
 
 // Item represents an actual item
 type Item struct {
-	Identified        uint64
-	Socketed          uint64
-	New               uint64
-	IsEar             uint64
-	StarterItem       uint64
-	SimpleItem        uint64
-	Ethereal          uint64
-	Personalized      uint64
-	GivenRuneword     uint64
-	LocationID        uint64
-	EquippedID        uint64
-	PositionY         uint64
-	PositionX         uint64
-	AltPositionID     uint64
-	Type              string
-	Sockets           uint64
-	ID                uint64
-	Level             uint64
-	Quality           uint64
-	MultiplePictures  uint64
-	PictureID         uint64
-	ClassSpecific     uint64
-	LowQualityID      uint64
-	StructureHeader   uint64
-	DefenseRating     uint64
-	MaxDurability     uint64
-	CurrentDurability uint64
+	Identified         uint64
+	Socketed           uint64
+	New                uint64
+	IsEar              uint64
+	StarterItem        uint64
+	SimpleItem         uint64
+	Ethereal           uint64
+	Personalized       uint64
+	GivenRuneword      uint64
+	LocationID         uint64
+	EquippedID         uint64
+	PositionY          uint64
+	PositionX          uint64
+	AltPositionID      uint64
+	Type               string
+	NrOfItemsInSockets uint64
+	ID                 uint64
+	Level              uint64
+	Quality            uint64
+	MultiplePictures   uint64
+	PictureID          uint64
+	ClassSpecific      uint64
+	LowQualityID       uint64
+	StructureHeader    uint64
+	DefenseRating      uint64
+	MaxDurability      uint64
+	CurrentDurability  uint64
+	MagicPrefix        uint64
+	MagicSuffix        uint64
+	TotalNrOfSockets   uint64
+	Quantity           uint64
 }
 
 // statsBitMap holds all the references to bit sites of all attributes.
@@ -169,7 +173,7 @@ func Parse(character io.Reader) {
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(character)
 
-	// MARK: Header
+	// MARK: Header.
 
 	// Make a buffer that can hold 767 bytes, which can hold the entire header.
 	// We'll reuse this buffer through out to avoid another alloc.
@@ -261,7 +265,7 @@ func Parse(character io.Reader) {
 
 	fmt.Printf("Parsed data:\n%+v\n", characterStats)
 
-	// MARK: Skills
+	// MARK: Skills.
 
 	// Right now we've read n amount of bits, which means we're probably
 	// not byte aligned, offset % 8 = remainder, and if remainder is not 0,
@@ -291,7 +295,7 @@ func Parse(character io.Reader) {
 		fmt.Printf("%s: %d \n", skillMap[i+skillOffset], allocatedPoints)
 	}
 
-	// MARK: Items
+	// MARK: Items.
 
 	_, err = io.ReadFull(bfr, buf[:4])
 	if err != nil {
@@ -403,8 +407,8 @@ func Parse(character io.Reader) {
 	item.Type = strings.Trim(itemType, " ")
 
 	// offset 108
-	// TODO: If sockets exist, read items, basic structure x sockets
-	item.Sockets = reverseBits(ibr.ReadBits64(3, true), 3)
+	// TODO: If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
+	item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
 
 	// offset 111, item id is 8 chars, each 4 bit
 	// TODO: Convert to hex, 4 bit each, should be 59BA3CAB
@@ -435,17 +439,29 @@ func Parse(character io.Reader) {
 		reverseBits(ibr.ReadBits64(11, true), 11)
 	}
 
-	// MARK: Quality based data
+	// MARK: Quality based data.
 
 	switch item.Quality {
+	// Low quality
 	case 1:
 		item.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// Normal item
 	case 2:
 		// No extra data present
+
+	// Superior white item
 	case 3:
 		// TODO: Figure out what these 3 bits are on a superior item
 		reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// Magical item
+	case 4:
+		item.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
+		item.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
 	}
+
+	// MARK: Structure - all items have this part.
 
 	// All items have this field between the personalization (if it exists)
 	// and the item specific data
@@ -459,6 +475,20 @@ func Parse(character io.Reader) {
 	// If item is an armor or weapon it will have 8x2 bits of durability data.
 	item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 	item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+
+	// If the item is socketed, it will contain 4 bits of data which are the nr
+	// of total sockets the item have, regardless of how many are occupied by
+	// an item.
+	if item.Socketed == 1 {
+		item.TotalNrOfSockets = reverseBits(ibr.ReadBits64(4, true), 4)
+	}
+
+	// TODO: Find out if item is a tome, then read 5 bits of unknown data here
+	// reverseBits(ibr.ReadBits64(5, true), 5)
+
+	// If the item is a stacked item, e.g. a javelin or something, these 9
+	// bits will contain the quantity.
+	item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
 
 	fmt.Printf("Item data:\n%+v\n", item)
 }
