@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+// Character is the exported character
+type Character struct {
+	Name string
+}
+
 // CharacterStats represents the characters stats
 type CharacterStats struct {
 	Strength          uint64
@@ -102,41 +107,6 @@ type ItemHeader struct {
 	Count  uint16
 }
 
-// Item represents an actual item
-type Item struct {
-	Identified         uint64
-	Socketed           uint64
-	New                uint64
-	IsEar              uint64
-	StarterItem        uint64
-	SimpleItem         uint64
-	Ethereal           uint64
-	Personalized       uint64
-	GivenRuneword      uint64
-	LocationID         uint64
-	EquippedID         uint64
-	PositionY          uint64
-	PositionX          uint64
-	AltPositionID      uint64
-	Type               string
-	NrOfItemsInSockets uint64
-	ID                 uint64
-	Level              uint64
-	Quality            uint64
-	MultiplePictures   uint64
-	PictureID          uint64
-	ClassSpecific      uint64
-	LowQualityID       uint64
-	StructureHeader    uint64
-	DefenseRating      uint64
-	MaxDurability      uint64
-	CurrentDurability  uint64
-	MagicPrefix        uint64
-	MagicSuffix        uint64
-	TotalNrOfSockets   uint64
-	Quantity           uint64
-}
-
 // statsBitMap holds all the references to bit sites of all attributes.
 var statsBitMap = map[uint64]uint{
 	0:  10,
@@ -168,7 +138,7 @@ var skillOffsetMap = map[uint]int{
 }
 
 // Parse does stuff
-func Parse(character io.Reader) {
+func Parse(character io.Reader) Character {
 
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(character)
@@ -316,7 +286,7 @@ func Parse(character io.Reader) {
 	fmt.Printf("Item section header: %s\n", string(items.Header[:]))
 	fmt.Printf("Items count: %d\n", items.Count)
 
-	// Unaligned bit reading
+	// TODO: Refactor into for loop where i < items.Count
 
 	ibr := bitReader{r: bfr}
 
@@ -457,6 +427,7 @@ func Parse(character io.Reader) {
 
 	// Magical item
 	case 4:
+		item := MagicalItem{Item: item}
 		item.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
 		item.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
 	}
@@ -491,4 +462,11 @@ func Parse(character io.Reader) {
 	item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
 
 	fmt.Printf("Item data:\n%+v\n", item)
+
+	// MARK: Compose to the exposed interface.
+	c := Character{
+		Name: header.Name.String(),
+	}
+
+	return c
 }
