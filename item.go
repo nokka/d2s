@@ -1,6 +1,31 @@
 package d2s
 
+type magicalProperty struct {
+	Bits     int
+	Bias     int
+	Property string
+}
+
+var magicalProperties = map[uint64]magicalProperty{
+	0: {Bits: 7, Bias: 32, Property: "Strength"},
+	1: {Bits: 7, Bias: 32, Property: "Energy"},
+	2: {Bits: 7, Bias: 32, Property: "Dexterity"},
+}
+
+// Rarity ID.
+const (
+	lowQuality        = 0x01
+	normal            = 0x02
+	highQuality       = 0x03
+	magicallyEnhanced = 0x04
+	partOfSet         = 0x05
+	rare              = 0x06
+	unique            = 0x07
+	crafted           = 0x08
+)
+
 // Item represents a base 111 bit item.
+// Item represents an actual item
 type Item struct {
 	Identified         uint64
 	Socketed           uint64
@@ -31,11 +56,15 @@ type Item struct {
 	CurrentDurability  uint64
 	TotalNrOfSockets   uint64
 	Quantity           uint64
-}
 
-// MagicalItem specific fields.
-type MagicalItem struct {
-	Item
+	// Magical Item properties
 	MagicPrefix uint64
 	MagicSuffix uint64
+
+	// Set item properties
+	SetID        uint64
+	SetItemLists uint64
+
+	// All item types >= magicallyEnhanced
+	MagicalProperties []magicalProperty
 }
