@@ -290,6 +290,7 @@ func Parse(character io.Reader) Character {
 
 	ibr := bitReader{r: bfr}
 
+	var equippedItems []Item
 	var readBits int
 
 	// offset: 0 "J"
@@ -495,24 +496,33 @@ func Parse(character io.Reader) Character {
 	item.StructureHeader = reverseBits(ibr.ReadBits64(1, true), 1)
 	readBits++
 
-	if defenseRatingMap[item.Type] {
+	typeID := item.getTypeID()
+	fmt.Printf("Item type is %d\n", typeID)
+
+	if typeID == armor {
 		// If the item is an armor, it will have this field of defense data.
 		item.DefenseRating = reverseBits(ibr.ReadBits64(10, true), 10)
 		readBits += 10
 	}
 
-	// TODO: Make an item type mapper and determine type from here on out.
-	// If item is an armor or weapon it will have 8x2 bits of durability data.
-
-	if durabilityMap[item.Type] {
+	if typeID == armor || typeID == weapon {
 		item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 		readBits += 8
-		item.CurrentDurability = reverseBits(ibr.ReadBits64(9, true), 8)
+		item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 		readBits += 8
 
-		// WAT, 1 extra bit here, should not exist.
-		//reverseBits(ibr.ReadBits64(1, true), 1)
-		//readBits++
+		// 1 extra bit here if it's a weapon
+		if typeID == weapon {
+			reverseBits(ibr.ReadBits64(1, true), 1)
+			readBits++
+		}
+	}
+
+	if quantityMap[item.Type] {
+		// If the item is a stacked item, e.g. a javelin or something, these 9
+		// bits will contain the quantity.
+		item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
+		readBits += 9
 	}
 
 	// If the item is socketed, it will contain 4 bits of data which are the nr
@@ -526,13 +536,6 @@ func Parse(character io.Reader) Character {
 	// TODO: Find out if item is a tome, then read 5 bits of unknown data here
 	// reverseBits(ibr.ReadBits64(5, true), 5)
 
-	if quantityMap[item.Type] {
-		// If the item is a stacked item, e.g. a javelin or something, these 9
-		// bits will contain the quantity.
-		item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
-		readBits += 9
-	}
-
 	// If the item is part of a set, these bit will tell us how many lists
 	// of magical properties follow the one regular magical property list.
 	if item.Quality == partOfSet {
@@ -540,18 +543,16 @@ func Parse(character io.Reader) Character {
 		readBits += 5
 	}
 
-	// MARK: Time to parse 9 bit stat ids followed by
-	// a n bit length value list again, hurray.
+	fmt.Printf("Read bits until magic list: %d \n", readBits)
 
-	fmt.Printf("Read bits: %d \n", readBits)
+	// MARK: Time to parse 9 bit magical property ids followed by their n bit
+	// length values.
 
-	var itemCount int
+	var propertyCount int
 
 	for {
-
 		id := reverseBits(ibr.ReadBits64(9, true), 9)
-
-		fmt.Println(id)
+		readBits += 9
 
 		if br.Err() != nil {
 			log.Fatal(br.Err())
@@ -560,6 +561,7 @@ func Parse(character io.Reader) Character {
 		// If all 9 bits are set, we've hit the end of the stats section
 		//  at 0x1ff and exit the loop.
 		if id == 0x1ff {
+			fmt.Println("breaking out at 511")
 			break
 		}
 
@@ -572,6 +574,8 @@ func Parse(character io.Reader) Character {
 		for _, bitLength := range prop.Bits {
 
 			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
+			readBits += int(bitLength)
+			fmt.Printf("found id: %d, reading bit size field: %d:\n", id, bitLength)
 
 			if prop.Bias != 0 {
 				val = val / prop.Bias
@@ -588,13 +592,19 @@ func Parse(character io.Reader) Character {
 
 		item.MagicAttributes = append(item.MagicAttributes, attr)
 
-		itemCount++
-		if itemCount == 1 {
+		fmt.Printf("bits read after property id %d: %d \n", id, readBits)
+
+		propertyCount++
+		if propertyCount == 2 {
 			break
 		}
 	}
 
-	fmt.Printf("Item data:\n%+v\n", item)
+	if item.LocationID == equipped {
+		equippedItems = append(equippedItems, item)
+	}
+
+	fmt.Printf("Item data:\n%+v\n", equippedItems)
 
 	// MARK: Compose to the exposed interface.
 	c := Character{

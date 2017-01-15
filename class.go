@@ -22,7 +22,7 @@ var classMap = map[class]string{
 	Assassin:  "Assassin",
 }
 
-// CharClass struct will represent the characters in game class.
+// class struct will represent the characters in game class.
 type class byte
 
 // String will return a class specific name.
