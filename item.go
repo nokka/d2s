@@ -27,7 +27,7 @@ type Item struct {
 	PictureID          uint64
 	ClassSpecific      uint64
 	LowQualityID       uint64
-	StructureHeader    uint64
+	Timestamp          uint64
 	DefenseRating      uint64
 	MaxDurability      uint64
 	CurrentDurability  uint64
@@ -95,6 +95,8 @@ const (
 // Armor codes.
 var armorCodes = map[string]string{
 	"sml": "Small Shield",
+	"qui": "Quilted Armor",
+	"skp": "Skull Cap",
 }
 
 // Weapon Codes.
@@ -741,7 +743,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	1:  {Bits: []uint{7}, Bias: 32, Name: "+X to Energy"},
 	2:  {Bits: []uint{7}, Bias: 32, Name: "+X to Dexterity"},
 	3:  {Bits: []uint{7}, Bias: 32, Name: "+X to Vitality"},
-	7:  {Bits: []uint{8}, Bias: 32, Name: "+X to Life"},
+	7:  {Bits: []uint{9}, Bias: 32, Name: "+X to Life"},
 	9:  {Bits: []uint{8}, Bias: 32, Name: "+X to Mana"},
 	11: {Bits: []uint{8}, Bias: 32, Name: "+X to Maximum Stamina"},
 	16: {Bits: []uint{9}, Name: "+X% Enhanced Defense"},

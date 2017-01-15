@@ -283,328 +283,346 @@ func Parse(character io.Reader) Character {
 		log.Fatal("Failed to find the items header")
 	}
 
-	fmt.Printf("Item section header: %s\n", string(items.Header[:]))
 	fmt.Printf("Items count: %d\n", items.Count)
 
-	// Unaligned bit reading
-
+	// Read the list of items
 	ibr := bitReader{r: bfr}
-
 	var equippedItems []Item
-	var readBits int
 
-	// offset: 0 "J"
-	ibr.ReadBits64(8, false)
-	readBits += 8
+	//for i := 0; i < int(items.Count); i++ {
+	for i := 0; i < 2; i++ {
+		var readBits int
 
-	// offset: 8, "M"
-	ibr.ReadBits64(8, false)
-	readBits += 8
+		// offset: 0 "J"
+		ibr.ReadBits64(8, false)
+		readBits += 8
 
-	item := Item{}
+		// offset: 8, "M"
+		ibr.ReadBits64(8, false)
+		readBits += 8
 
-	// offset: 16, unknown
-	ibr.ReadBits64(4, true)
-	readBits += 4
+		item := Item{}
 
-	// offset: 20
-	item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+		// offset: 16, unknown
+		ibr.ReadBits64(4, true)
+		readBits += 4
 
-	// offset: 21, unknown
-	ibr.ReadBits64(6, true)
-	readBits += 6
+		// offset: 20
+		item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// offset: 27
-	item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+		// offset: 21, unknown
+		ibr.ReadBits64(6, true)
+		readBits += 6
 
-	// offset 28, unknown
-	ibr.ReadBits64(1, true)
-	readBits++
+		// offset: 27
+		item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// offset 29
-	item.New = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+		// offset 28, unknown
+		ibr.ReadBits64(1, true)
+		readBits++
 
-	// offset 30, unknown
-	reverseBits(ibr.ReadBits64(2, true), 2)
-	readBits += 2
+		// offset 29
+		item.New = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// offset 32
-	item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+		// offset 30, unknown
+		reverseBits(ibr.ReadBits64(2, true), 2)
+		readBits += 2
 
-	// offset 33
-	item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+		// offset 32
+		item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// offset 34, unknown
-	reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
+		// offset 33
+		item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// offset 37, if it's a simple item, it only contains 111 bits data
-	item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 38
-	item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 39, unknown
-	reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 40
-	item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 41, unknown
-	reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 42
-	item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 43, unknown
-	reverseBits(ibr.ReadBits64(15, true), 15)
-	readBits += 15
-
-	// offset 58
-	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
-
-	// offset 61
-	item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
-	readBits += 4
-
-	// offset 65
-	item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
-	readBits += 4
-
-	// offset 69
-	item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
-
-	// offset 72
-	reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// offset 73, if item is neither equipped or in the belt
-	// this tells us where it is.
-	item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
-
-	// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
-	var itemType string
-	for i := 0; i < 4; i++ {
-		itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
-	}
-
-	item.Type = strings.Trim(itemType, " ")
-	readBits += 32
-
-	// offset 108
-	// TODO: If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
-	item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
-
-	// offset 111, item id is 8 chars, each 4 bit
-	// TODO: Convert to hex, 4 bit each, should be 59BA3CAB
-	item.ID = reverseBits(ibr.ReadBits64(32, true), 32)
-	readBits += 32
-
-	// offset 143
-	item.Level = reverseBits(ibr.ReadBits64(7, true), 7)
-	readBits += 7
-
-	// offset 150
-	item.Quality = reverseBits(ibr.ReadBits64(4, true), 4)
-	readBits += 4
-
-	// If this is true, it means the item has more than one picture associated
-	// with it.
-	item.MultiplePictures = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	if item.MultiplePictures == 1 {
-		// The next 3 bits contain the picture ID.
-		item.PictureID = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-	}
-
-	// If this is true, it means the item is class specific.
-	item.ClassSpecific = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	// If the item is class specific, the next 11 bits will
-	// contain the class specific data.
-	if item.ClassSpecific == 1 {
-		// TODO: Parse this into something useful
-		reverseBits(ibr.ReadBits64(11, true), 11)
-		readBits += 11
-	}
-
-	// MARK: Quality based data.
-
-	switch item.Quality {
-
-	case lowQuality:
-		item.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
-	case normal:
-		// No extra data present
-
-	case highQuality:
-		// TODO: Figure out what these 3 bits are on a high quality item
+		// offset 34, unknown
 		reverseBits(ibr.ReadBits64(3, true), 3)
 		readBits += 3
 
-	case magicallyEnhanced:
-		item.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
-		item.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
-		readBits += 22
+		// offset 37, if it's a simple item, it only contains 111 bits data
+		item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	case partOfSet:
-		item.SetID = reverseBits(ibr.ReadBits64(12, true), 12)
-		readBits += 12
+		// offset 38
+		item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	case rare:
-		// TODO: Parse rare bits.
+		// offset 39, unknown
+		reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	case unique:
-		// TODO: Parse unique bits.
+		// offset 40
+		item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	case crafted:
-		// TODO: Parse crafted bits.
+		// offset 41, unknown
+		reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	}
+		// offset 42
+		item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// MARK: Runeword data
-	// TODO: Parse 16 bits here if the item has a runeword.
+		// offset 43, unknown
+		reverseBits(ibr.ReadBits64(15, true), 15)
+		readBits += 15
 
-	// MARK: Personalization data
-	// TODO: Parse Personalization data here if the item is personalized.
+		// offset 58
+		item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
+		readBits += 3
 
-	// MARK: Structure - all items have this part.
-
-	// All items have this field between the personalization (if it exists)
-	// and the item specific data
-	// TODO: Should this be here?
-	item.StructureHeader = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
-
-	typeID := item.getTypeID()
-	fmt.Printf("Item type is %d\n", typeID)
-
-	if typeID == armor {
-		// If the item is an armor, it will have this field of defense data.
-		item.DefenseRating = reverseBits(ibr.ReadBits64(10, true), 10)
-		readBits += 10
-	}
-
-	if typeID == armor || typeID == weapon {
-		item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-		readBits += 8
-		item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-		readBits += 8
-
-		// 1 extra bit here if it's a weapon
-		if typeID == weapon {
-			reverseBits(ibr.ReadBits64(1, true), 1)
-			readBits++
-		}
-	}
-
-	if quantityMap[item.Type] {
-		// If the item is a stacked item, e.g. a javelin or something, these 9
-		// bits will contain the quantity.
-		item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
-		readBits += 9
-	}
-
-	// If the item is socketed, it will contain 4 bits of data which are the nr
-	// of total sockets the item have, regardless of how many are occupied by
-	// an item.
-	if item.Socketed == 1 {
-		item.TotalNrOfSockets = reverseBits(ibr.ReadBits64(4, true), 4)
+		// offset 61
+		item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
 		readBits += 4
-	}
 
-	// TODO: Find out if item is a tome, then read 5 bits of unknown data here
-	// reverseBits(ibr.ReadBits64(5, true), 5)
+		// offset 65
+		item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
+		readBits += 4
 
-	// If the item is part of a set, these bit will tell us how many lists
-	// of magical properties follow the one regular magical property list.
-	if item.Quality == partOfSet {
-		item.SetItemLists = reverseBits(ibr.ReadBits64(5, true), 5)
-		readBits += 5
-	}
+		// offset 69
+		item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
+		readBits += 3
 
-	fmt.Printf("Read bits until magic list: %d \n", readBits)
+		// offset 72
+		reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
 
-	// MARK: Time to parse 9 bit magical property ids followed by their n bit
-	// length values.
+		// offset 73, if item is neither equipped or in the belt
+		// this tells us where it is.
+		item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
+		readBits += 3
 
-	var propertyCount int
-
-	for {
-		id := reverseBits(ibr.ReadBits64(9, true), 9)
-		readBits += 9
-
-		if br.Err() != nil {
-			log.Fatal(br.Err())
+		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
+		var itemType string
+		for i := 0; i < 4; i++ {
+			itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
 		}
 
-		// If all 9 bits are set, we've hit the end of the stats section
-		//  at 0x1ff and exit the loop.
-		if id == 0x1ff {
-			fmt.Println("breaking out at 511")
-			break
+		item.Type = strings.Trim(itemType, " ")
+		readBits += 32
+
+		// offset 108
+		// TODO: If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
+		item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
+		readBits += 3
+
+		// offset 111, item id is 8 chars, each 4 bit
+		// TODO: Convert to hex, 4 bit each, should be 59BA3CAB
+		item.ID = reverseBits(ibr.ReadBits64(32, true), 32)
+		readBits += 32
+
+		// offset 143
+		item.Level = reverseBits(ibr.ReadBits64(7, true), 7)
+		readBits += 7
+
+		// offset 150
+		item.Quality = reverseBits(ibr.ReadBits64(4, true), 4)
+		readBits += 4
+
+		// If this is true, it means the item has more than one picture associated
+		// with it.
+		item.MultiplePictures = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
+
+		if item.MultiplePictures == 1 {
+			// The next 3 bits contain the picture ID.
+			item.PictureID = reverseBits(ibr.ReadBits64(3, true), 3)
+			readBits += 3
 		}
 
-		prop, ok := magicalProperties[id]
-		if !ok {
-			log.Fatalf("Unknown magical property: %d", id)
+		// If this is true, it means the item is class specific.
+		item.ClassSpecific = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
+
+		// If the item is class specific, the next 11 bits will
+		// contain the class specific data.
+		if item.ClassSpecific == 1 {
+			// TODO: Parse this into something useful
+			reverseBits(ibr.ReadBits64(11, true), 11)
+			readBits += 11
 		}
 
-		var values []uint64
-		for _, bitLength := range prop.Bits {
+		// MARK: Quality based data.
 
-			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
-			readBits += int(bitLength)
-			fmt.Printf("found id: %d, reading bit size field: %d:\n", id, bitLength)
+		switch item.Quality {
 
-			if prop.Bias != 0 {
-				val = val / prop.Bias
+		case lowQuality:
+			item.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
+			readBits += 3
+
+		case normal:
+			// No extra data present
+
+		case highQuality:
+			// TODO: Figure out what these 3 bits are on a high quality item
+			reverseBits(ibr.ReadBits64(3, true), 3)
+			readBits += 3
+
+		case magicallyEnhanced:
+			item.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
+			item.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
+			readBits += 22
+
+		case partOfSet:
+			item.SetID = reverseBits(ibr.ReadBits64(12, true), 12)
+			readBits += 12
+
+		case rare:
+			// TODO: Parse rare bits.
+
+		case unique:
+			// TODO: Parse unique bits.
+
+		case crafted:
+			// TODO: Parse crafted bits.
+
+		}
+
+		// MARK: Runeword data
+		// TODO: Parse 16 bits here if the item has a runeword.
+
+		// MARK: Personalization data
+		// TODO: Parse Personalization data here if the item is personalized.
+
+		// MARK: Structure - all items have this part.
+
+		// All items have this field between the personalization (if it exists)
+		// and the item specific data
+		// TODO: Should this be here?
+		fmt.Printf("Bits read before timestamp: %d \n", readBits)
+		item.Timestamp = reverseBits(ibr.ReadBits64(1, true), 1)
+		readBits++
+
+		typeID := item.getTypeID()
+		fmt.Printf("Item type is %d\n", typeID)
+
+		if typeID == armor {
+			fmt.Printf("Bits read before armor: %d \n", readBits)
+			// TODO: Figure out which items have 11 bits of defense rating data.
+			// If the item is an armor, it will have this field of defense data.
+			item.DefenseRating = reverseBits(ibr.ReadBits64(11, true), 11)
+			fmt.Printf("Defense rating: %d \n", item.DefenseRating)
+			readBits += 11
+		}
+
+		if typeID == armor || typeID == weapon {
+			fmt.Printf("Bits read before durability: %d \n", readBits)
+			item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+			readBits += 8
+			item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+			readBits += 8
+
+			// If the item is an armor, it seems it has an extra bit here.
+			if typeID == armor {
+				reverseBits(ibr.ReadBits64(1, true), 1)
+				readBits++
 			}
 
-			values = append(values, val)
+			fmt.Printf("Max durability: %d \n", item.MaxDurability)
+			fmt.Printf("Current durability: %d \n", item.CurrentDurability)
+
+			// 1 extra bit here if it's a weapon
+			if typeID == weapon {
+				reverseBits(ibr.ReadBits64(1, true), 1)
+				readBits++
+			}
 		}
 
-		attr := magicAttribute{
-			ID:     id,
-			Name:   prop.Name,
-			Values: values,
+		if quantityMap[item.Type] {
+			// If the item is a stacked item, e.g. a javelin or something, these 9
+			// bits will contain the quantity.
+			item.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
+			readBits += 9
 		}
 
-		item.MagicAttributes = append(item.MagicAttributes, attr)
-
-		fmt.Printf("bits read after property id %d: %d \n", id, readBits)
-
-		propertyCount++
-		if propertyCount == 2 {
-			break
+		// If the item is socketed, it will contain 4 bits of data which are the nr
+		// of total sockets the item have, regardless of how many are occupied by
+		// an item.
+		if item.Socketed == 1 {
+			item.TotalNrOfSockets = reverseBits(ibr.ReadBits64(4, true), 4)
+			readBits += 4
 		}
+
+		// TODO: Find out if item is a tome, then read 5 bits of unknown data here
+		// reverseBits(ibr.ReadBits64(5, true), 5)
+
+		// If the item is part of a set, these bit will tell us how many lists
+		// of magical properties follow the one regular magical property list.
+		if item.Quality == partOfSet {
+			item.SetItemLists = reverseBits(ibr.ReadBits64(5, true), 5)
+			readBits += 5
+		}
+
+		fmt.Printf("Read bits until magic list: %d \n", readBits)
+
+		// MARK: Time to parse 9 bit magical property ids followed by their n bit
+		// length values.
+
+		for {
+			id := reverseBits(ibr.ReadBits64(9, true), 9)
+			readBits += 9
+
+			if br.Err() != nil {
+				log.Fatal(br.Err())
+			}
+
+			// If all 9 bits are set, we've hit the end of the stats section
+			//  at 0x1ff and exit the loop.
+			if id == 0x1ff {
+				fmt.Println("breaking out at 511")
+				break
+			}
+
+			prop, ok := magicalProperties[id]
+			if !ok {
+				log.Fatalf("Unknown magical property: %d", id)
+			}
+
+			var values []uint64
+			for _, bitLength := range prop.Bits {
+
+				val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
+				readBits += int(bitLength)
+				fmt.Printf("found id: %d, reading bit size field: %d:, value is: %d\n", id, bitLength, val)
+
+				if prop.Bias != 0 {
+					val = val - prop.Bias
+				}
+
+				values = append(values, val)
+			}
+
+			attr := magicAttribute{
+				ID:     id,
+				Name:   prop.Name,
+				Values: values,
+			}
+
+			item.MagicAttributes = append(item.MagicAttributes, attr)
+
+			fmt.Printf("bits read after property id %d: %d \n", id, readBits)
+		}
+
+		if item.LocationID == equipped {
+			equippedItems = append(equippedItems, item)
+		}
+
+		// If the item is not byte aligned, we'll have to byte align it before
+		// reading the next item, so we'll simply queue the reader at the next
+		// byte boundry.
+		remainder := (8 - readBits%8)
+		if remainder > 0 {
+			reverseBits(ibr.ReadBits64(uint(remainder), true), uint(remainder))
+		}
+
+		fmt.Printf("Item index: %d\n%+v\n", i, item)
 	}
 
-	if item.LocationID == equipped {
-		equippedItems = append(equippedItems, item)
-	}
-
-	fmt.Printf("Item data:\n%+v\n", equippedItems)
+	//fmt.Printf("Item data:\n%+v\n", equippedItems)
 
 	// MARK: Compose to the exposed interface.
 	c := Character{
