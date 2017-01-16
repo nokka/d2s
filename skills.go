@@ -6,6 +6,16 @@ type skill struct {
 	name   string
 }
 
+var skillOffsetMap = map[uint]int{
+	Amazon:      6,
+	Sorceress:   36,
+	Necromancer: 66,
+	Paladin:     96,
+	Barbarian:   126,
+	Druid:       221,
+	Assassin:    251,
+}
+
 var skillMap = [357]string{
 	"attack",
 	"kick",
