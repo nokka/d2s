@@ -84,7 +84,7 @@ type skillData struct {
 	List   [30]byte
 }
 
-type itemHeader struct {
+type itemData struct {
 	Header [2]byte
 	Count  uint16
 }
@@ -245,7 +245,7 @@ func parseEquippedItems(bfr io.ByteReader, char *Character) error {
 		return err
 	}
 
-	itemHeaderData := itemHeader{}
+	itemHeaderData := itemData{}
 	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData)
 
 	if err != nil {
