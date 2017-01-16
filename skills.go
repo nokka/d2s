@@ -1,5 +1,11 @@
 package d2s
 
+type skill struct {
+	id     int
+	points int
+	name   string
+}
+
 var skillMap = [357]string{
 	"attack",
 	"kick",

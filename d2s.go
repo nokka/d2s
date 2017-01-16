@@ -4,15 +4,18 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"strings"
 )
 
-// Character is the exported character
+// Character stuff
 type Character struct {
-	Name string
+	Header
+	CharacterStats
+	Skills []skill
 }
 
 // CharacterStats represents the characters stats
@@ -95,14 +98,12 @@ type Header struct {
 	StatHeader        [2]byte    // : 765 2 byte
 }
 
-// Skills holds a list reference on allocated skills.
-type Skills struct {
+type skillData struct {
 	Header [2]byte
 	List   [30]byte
 }
 
-// ItemHeader determines the header data of a d2s file.
-type ItemHeader struct {
+type itemHeader struct {
 	Header [2]byte
 	Count  uint16
 }
@@ -137,13 +138,7 @@ var skillOffsetMap = map[uint]int{
 	0x06: 251,
 }
 
-// Parse does stuff
-func Parse(character io.Reader) Character {
-
-	// Implements buffered reading, wraps io.Reader.
-	bfr := bufio.NewReader(character)
-
-	// MARK: Header.
+func parseHeader(bfr io.Reader, char *Character) error {
 
 	// Make a buffer that can hold 767 bytes, which can hold the entire header.
 	// We'll reuse this buffer through out to avoid another alloc.
@@ -151,32 +146,25 @@ func Parse(character io.Reader) Character {
 
 	_, err := io.ReadFull(bfr, buf)
 	if err != nil {
-		log.Fatal("Error reading from file:", err)
+		return err
 	}
 
-	header := Header{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &header)
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &char.Header)
 	if err != nil {
-		log.Fatal("binary.Read failed", err)
+		return err
 	}
 
-	fmt.Printf("Parsed data:\n%+v\n", header)
+	return nil
+}
 
-	// MARK: Stats
-
-	// Create a bit reader from the buffered reader to read the stats
-	// by 9 bit stat ids and n bit stat values, also bit reversed... twice.
-	br := bitReader{r: bfr}
-
-	characterStats := CharacterStats{}
+func parseStats(br bitReader, char *Character) error {
 
 	for {
-
 		// 9 bit stat id, bit reversed twice.
 		id := reverseBits(br.ReadBits64(9, true), 9)
 
 		if br.Err() != nil {
-			log.Fatal(br.Err())
+			return br.Err()
 		}
 
 		// If all 9 bits are set, we've hit the end of the stats section
@@ -188,109 +176,122 @@ func Parse(character io.Reader) Character {
 		// The stat value bit length, so we'll know how many bits to read next.
 		bitLength, ok := statsBitMap[id]
 		if !ok {
-			log.Fatalf("Unknown stat id: %d", id)
+			return fmt.Errorf("Unknown stat id: %d", id)
 		}
 
 		// The stat value, bit reversed, twice.
 		statVal := reverseBits(br.ReadBits64(bitLength, true), bitLength)
 		if br.Err() != nil {
-			log.Fatal(br.Err())
+			return br.Err()
 		}
 
 		switch id {
 		case 0:
-			characterStats.Strength = statVal
+			char.CharacterStats.Strength = statVal
 		case 1:
-			characterStats.Energy = statVal
+			char.CharacterStats.Energy = statVal
 		case 2:
-			characterStats.Dexterity = statVal
+			char.CharacterStats.Dexterity = statVal
 		case 3:
-			characterStats.Vitality = statVal
+			char.CharacterStats.Vitality = statVal
 		case 4:
-			characterStats.UnusedStats = statVal
+			char.CharacterStats.UnusedStats = statVal
 		case 5:
-			characterStats.UnusedSkillPoints = statVal
+			char.CharacterStats.UnusedSkillPoints = statVal
 		case 6:
-			characterStats.CurrentHP = statVal / 256
+			char.CharacterStats.CurrentHP = statVal / 256
 		case 7:
-			characterStats.MaxHP = statVal / 256
+			char.CharacterStats.MaxHP = statVal / 256
 		case 8:
-			characterStats.CurrentMana = statVal / 256
+			char.CharacterStats.CurrentMana = statVal / 256
 		case 9:
-			characterStats.MaxMana = statVal / 256
+			char.CharacterStats.MaxMana = statVal / 256
 		case 10:
-			characterStats.CurrentStamina = statVal / 256
+			char.CharacterStats.CurrentStamina = statVal / 256
 		case 11:
-			characterStats.MaxStamina = statVal / 256
+			char.CharacterStats.MaxStamina = statVal / 256
 		case 12:
-			characterStats.Level = statVal
+			char.CharacterStats.Level = statVal
 		case 13:
-			characterStats.Experience = statVal
+			char.CharacterStats.Experience = statVal
 		case 14:
-			characterStats.Gold = statVal
+			char.CharacterStats.Gold = statVal
 		case 15:
-			characterStats.StashedGold = statVal
+			char.CharacterStats.StashedGold = statVal
 		}
 	}
 
-	fmt.Printf("Parsed data:\n%+v\n", characterStats)
+	return nil
+}
 
-	// MARK: Skills.
+func parseSkills(bfr io.Reader, char *Character) error {
 
-	// Right now we've read n amount of bits, which means we're probably
-	// not byte aligned, offset % 8 = remainder, and if remainder is not 0,
-	// we need to read (8 - remainder) bits to reach the next byte boundry.
-	// BitReader reads in 1 byte chunks, which means bfr is queued at
-	// the next byte boundry already. We'll reuse the buf from before.
-	_, err = io.ReadFull(bfr, buf[:32])
+	// Make a buffer that can hold 32 bytes, which can hold the entire skillset.
+	buf := make([]byte, 32)
+
+	_, err := io.ReadFull(bfr, buf[:32])
 	if err != nil {
-		log.Fatal("Error reading from file:", err)
+		return err
 	}
 
-	skills := Skills{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &skills)
+	rawSkills := skillData{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &rawSkills)
 
 	if err != nil {
-		log.Fatal("binary.Read failed", err)
+		return err
 	}
 
-	fmt.Printf("Parsed data:\n%+v\n", skills)
+	if string(rawSkills.Header[:]) != "if" {
+		return errors.New("Failed to find skill header, parsing cancelled")
+	}
 
-	skillOffset, ok := skillOffsetMap[uint(header.Class)]
+	skillOffset, ok := skillOffsetMap[uint(char.Header.Class)]
 	if !ok {
-		log.Fatalf("Unknown skill offset for class %d", header.Class)
+		return fmt.Errorf("Unknown skill offset for class %d", char.Header.Class)
 	}
 
-	for i, allocatedPoints := range skills.List {
-		fmt.Printf("%s: %d \n", skillMap[i+skillOffset], allocatedPoints)
+	for i, allocatedPoints := range rawSkills.List {
+		id := (i + skillOffset)
+		s := skill{
+			id:     id,
+			points: int(allocatedPoints),
+			name:   skillMap[id],
+		}
+		char.Skills = append(char.Skills, s)
 	}
 
-	// MARK: Items.
+	return nil
+}
 
-	_, err = io.ReadFull(bfr, buf[:4])
+func parseItems(bfr io.ByteReader, char *Character) error {
+
+	// Make a buffer that can hold 4 bytes, which can hold the items header.
+	buf := make([]byte, 4)
+
+	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
 	if err != nil {
-		log.Fatal("Error reading from file:", err)
+		return err
 	}
 
-	items := ItemHeader{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &items)
+	itemHeaderData := itemHeader{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData)
 
 	if err != nil {
-		log.Fatal("binary.Read failed", err)
+		return err
 	}
 
-	if string(items.Header[:]) != "JM" {
-		log.Fatal("Failed to find the items header")
+	if string(itemHeaderData.Header[:]) != "JM" {
+		return errors.New("Failed to find the items header")
 	}
 
-	fmt.Printf("Items count: %d\n", items.Count)
+	fmt.Printf("Items count: %d\n", itemHeaderData.Count)
 
 	// Read the list of items
 	ibr := bitReader{r: bfr}
+
 	var equippedItems []Item
 
-	//for i := 0; i < int(items.Count); i++ {
-	for i := 0; i < 2; i++ {
+	for i := 0; i < int(itemHeaderData.Count); i++ {
 		var readBits int
 
 		// offset: 0 "J"
@@ -398,7 +399,7 @@ func Parse(character io.Reader) Character {
 
 		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
 		var itemType string
-		for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
 			itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
 		}
 
@@ -566,8 +567,10 @@ func Parse(character io.Reader) Character {
 			id := reverseBits(ibr.ReadBits64(9, true), 9)
 			readBits += 9
 
-			if br.Err() != nil {
-				log.Fatal(br.Err())
+			fmt.Printf("id before doing stuff: %d \n", id)
+
+			if ibr.Err() != nil {
+				return ibr.Err()
 			}
 
 			// If all 9 bits are set, we've hit the end of the stats section
@@ -614,20 +617,48 @@ func Parse(character io.Reader) Character {
 		// If the item is not byte aligned, we'll have to byte align it before
 		// reading the next item, so we'll simply queue the reader at the next
 		// byte boundry.
-		remainder := (8 - readBits%8)
+		/*remainder := (8 - readBits%8)
 		if remainder > 0 {
 			reverseBits(ibr.ReadBits64(uint(remainder), true), uint(remainder))
-		}
+		}*/
 
 		fmt.Printf("Item index: %d\n%+v\n", i, item)
 	}
 
-	//fmt.Printf("Item data:\n%+v\n", equippedItems)
+	return nil
+}
 
-	// MARK: Compose to the exposed interface.
-	c := Character{
-		Name: header.Name.String(),
-	}
+// Parse does stuff
+func Parse(file io.Reader) {
 
-	return c
+	// Implements buffered reading, wraps io.Reader.
+	bfr := bufio.NewReader(file)
+	char := new(Character)
+
+	_ = parseHeader(bfr, char)
+
+	// Create a bit reader from the buffered reader to read the stats
+	br := bitReader{r: bfr}
+
+	_ = parseStats(br, char)
+
+	_ = parseSkills(bfr, char)
+
+	_ = parseItems(bfr, char)
+
+	fmt.Printf("Character data:\n%+v\n", char)
+
+	// Right now we've read n amount of bits, which means we're probably
+	// not byte aligned, offset % 8 = remainder, and if remainder is not 0,
+	// we need to read (8 - remainder) bits to reach the next byte boundry.
+	// BitReader reads in 1 byte chunks, which means bfr is queued at
+	// the next byte boundry already. We'll reuse the buf from before.
+
+	/*
+		// MARK: Items.
+
+
+
+		//fmt.Printf("Item data:\n%+v\n", equippedItems)
+	*/
 }
