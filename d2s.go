@@ -263,7 +263,7 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 		item := Item{}
 
 		// Read the 111 bit basic item structure, all items have this structure.
-		err = parseSimpleProperties(&ibr, &item)
+		err = parseSimpleBits(&ibr, &item)
 		readBits += 111
 
 		if err != nil {
@@ -333,7 +333,7 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 		case rare, crafted:
 			// TODO: Parse rare bits.
 			fmt.Printf("Read bits until rare / crafted list: %d \n", readBits)
-			parseRareOrCraftedProperties(&ibr, &item)
+			parseRareOrCraftedBits(&ibr, &item)
 
 		case unique:
 			// TODO: Parse unique bits.
@@ -481,7 +481,7 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 	return nil
 }
 
-func parseSimpleProperties(ibr *bitReader, item *Item) error {
+func parseSimpleBits(ibr *bitReader, item *Item) error {
 
 	// offset: 0 "J"
 	j := ibr.ReadBits64(8, false)
@@ -576,7 +576,7 @@ func parseSimpleProperties(ibr *bitReader, item *Item) error {
 	return nil
 }
 
-func parseRareOrCraftedProperties(ibr *bitReader, item *Item) error {
+func parseRareOrCraftedBits(ibr *bitReader, item *Item) error {
 
 	item.RareNameID1 = reverseBits(ibr.ReadBits64(8, true), 8)
 	item.RareNameID2 = reverseBits(ibr.ReadBits64(8, true), 8)
