@@ -12,11 +12,11 @@ import (
 )
 
 // Character represents all the d2s character data.
-type Character struct {
+type character struct {
 	header
 	attributes
-	Skills        []skill
-	EquippedItems []Item
+	skills        []skill
+	equippedItems []Item
 }
 
 // Header determines the header data of a d2s file.
@@ -94,23 +94,20 @@ func Parse(file io.Reader) {
 
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
-	char := new(Character)
+	char := new(character)
 
 	_ = parseHeader(bfr, char)
 
-	// Create a bit reader from the buffered reader to read the stats
-	br := bitReader{r: bfr}
-
-	_ = parseAttributes(br, char)
+	_ = parseAttributes(bfr, char)
 
 	_ = parseSkills(bfr, char)
 
 	_ = parseEquippedItems(bfr, char)
 
-	fmt.Printf("Character data:\n%+v\n", char.EquippedItems)
+	fmt.Printf("Character data:\n%+v\n", char)
 }
 
-func parseHeader(bfr io.Reader, char *Character) error {
+func parseHeader(bfr io.Reader, char *character) error {
 
 	// Make a buffer that can hold 767 bytes, which can hold the entire header.
 	// We'll reuse this buffer through out to avoid another alloc.
@@ -129,7 +126,10 @@ func parseHeader(bfr io.Reader, char *Character) error {
 	return nil
 }
 
-func parseAttributes(br bitReader, char *Character) error {
+func parseAttributes(bfr io.ByteReader, char *character) error {
+
+	// Create a bit reader from the buffered reader to read the stats
+	br := bitReader{r: bfr}
 
 	for {
 		// 9 bit attribute id, bit reversed twice.
@@ -196,7 +196,7 @@ func parseAttributes(br bitReader, char *Character) error {
 	return nil
 }
 
-func parseSkills(bfr io.Reader, char *Character) error {
+func parseSkills(bfr io.Reader, char *character) error {
 
 	// Make a buffer that can hold 32 bytes, which can hold the entire skillset.
 	buf := make([]byte, 32)
@@ -229,13 +229,13 @@ func parseSkills(bfr io.Reader, char *Character) error {
 			points: int(allocatedPoints),
 			name:   skillMap[id],
 		}
-		char.Skills = append(char.Skills, s)
+		char.skills = append(char.skills, s)
 	}
 
 	return nil
 }
 
-func parseEquippedItems(bfr io.ByteReader, char *Character) error {
+func parseEquippedItems(bfr io.ByteReader, char *character) error {
 
 	// Make a buffer that can hold 4 bytes, which can hold the items header.
 	buf := make([]byte, 4)
@@ -450,7 +450,6 @@ func parseEquippedItems(bfr io.ByteReader, char *Character) error {
 
 		case crafted:
 			// TODO: Parse crafted bits.
-
 		}
 
 		// MARK: Runeword data
@@ -533,7 +532,6 @@ func parseEquippedItems(bfr io.ByteReader, char *Character) error {
 		// MARK: Time to parse 9 bit magical property ids followed by their n bit
 		// length values.
 
-		var attrCounter int
 		for {
 			id := reverseBits(ibr.ReadBits64(9, true), 9)
 			readBits += 9
@@ -542,10 +540,6 @@ func parseEquippedItems(bfr io.ByteReader, char *Character) error {
 
 			if ibr.Err() != nil {
 				return ibr.Err()
-			}
-
-			if attrCounter > 100 {
-				break
 			}
 
 			// If all 9 bits are set, we've hit the end of the stats section
@@ -581,14 +575,11 @@ func parseEquippedItems(bfr io.ByteReader, char *Character) error {
 			}
 
 			item.MagicAttributes = append(item.MagicAttributes, attr)
-
-			attrCounter++
-
 			fmt.Printf("bits read after property id %d: %d \n", id, readBits)
 		}
 
 		if item.LocationID == equipped {
-			char.EquippedItems = append(char.EquippedItems, item)
+			char.equippedItems = append(char.equippedItems, item)
 		}
 
 		// If the item is not byte aligned, we'll have to byte align it before
