@@ -38,6 +38,11 @@ type Item struct {
 	MagicPrefix uint64
 	MagicSuffix uint64
 
+	// Rare or Crafted data
+	RareNameID1    uint64
+	RareNameID2    uint64
+	MagicalNameIDs [6]uint64
+
 	// Set item properties
 	SetID        uint64
 	SetItemLists uint64

@@ -106,7 +106,7 @@ func Parse(file io.Reader) {
 
 	_ = parseEquippedItems(bfr, &char)
 
-	fmt.Printf("Character data:\n%+v\n", char)
+	fmt.Printf("Character data:\n%+v\n", char.equippedItems)
 }
 
 func parseHeader(bfr io.Reader, char *character) error {
@@ -332,15 +332,13 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 			item.SetID = reverseBits(ibr.ReadBits64(12, true), 12)
 			readBits += 12
 
-		case rare:
+		case rare, crafted:
 			// TODO: Parse rare bits.
-			parseRareProperties(&ibr, &item)
+			fmt.Printf("Read bits until rare / crafted list: %d \n", readBits)
+			parseRareOrCraftedProperties(&ibr, &item)
 
 		case unique:
 			// TODO: Parse unique bits.
-
-		case crafted:
-			// TODO: Parse crafted bits.
 		}
 
 		// MARK: Runeword data
@@ -580,6 +578,25 @@ func parseSimpleProperties(ibr *bitReader, item *Item) error {
 	return nil
 }
 
-func parseRareProperties(ibr *bitReader, item *Item) error {
+func parseRareOrCraftedProperties(ibr *bitReader, item *Item) error {
+
+	item.RareNameID1 = reverseBits(ibr.ReadBits64(8, true), 8)
+	item.RareNameID2 = reverseBits(ibr.ReadBits64(8, true), 8)
+
+	// Following the name IDs, we got 6 possible magical name IDs, the pattern
+	// is 1 bit id, 11 bit value... But the value will only exist if the prefix
+	// is 1. So we'll read the id first and check it against 1.
+	var magicalNameIDs [6]uint64
+	for i := 0; i < 6; i++ {
+		prefix := reverseBits(ibr.ReadBits64(1, true), 1)
+
+		if prefix == 1 {
+			item.MagicalNameIDs[i] = reverseBits(ibr.ReadBits64(11, true), 11)
+		}
+	}
+
+	fmt.Println(magicalNameIDs)
+	fmt.Printf("Ring data:\n%+v\n", item)
+
 	return nil
 }
