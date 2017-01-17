@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Character stuff
+// Character represents all the d2s character data.
 type Character struct {
 	header
 	attributes
