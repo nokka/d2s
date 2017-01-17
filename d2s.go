@@ -94,15 +94,17 @@ func Parse(file io.Reader) {
 
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
-	char := new(character)
 
-	_ = parseHeader(bfr, char)
+	// Create character, we'll pass it around
+	char := character{}
 
-	_ = parseAttributes(bfr, char)
+	_ = parseHeader(bfr, &char)
 
-	_ = parseSkills(bfr, char)
+	_ = parseAttributes(bfr, &char)
 
-	_ = parseEquippedItems(bfr, char)
+	_ = parseSkills(bfr, &char)
+
+	_ = parseEquippedItems(bfr, &char)
 
 	fmt.Printf("Character data:\n%+v\n", char)
 }
@@ -260,129 +262,17 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 
 	for i := 0; i < int(itemHeaderData.Count); i++ {
 		var readBits int
-
-		// offset: 0 "J"
-		j := ibr.ReadBits64(8, false)
-		readBits += 8
-
-		// offset: 8, "M"
-		m := ibr.ReadBits64(8, false)
-		readBits += 8
-
-		if string(j) != "J" || string(m) != "M" {
-			return errors.New("Failed to find item header JM")
-		}
-
 		item := Item{}
 
-		// offset: 16, unknown
-		ibr.ReadBits64(4, true)
-		readBits += 4
+		// Read the 111 bit basic item structure, all items have this structure.
+		err = parseSimpleProperties(&ibr, &item)
+		readBits += 111
 
-		// offset: 20
-		item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset: 21, unknown
-		ibr.ReadBits64(6, true)
-		readBits += 6
-
-		// offset: 27
-		item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 28, unknown
-		ibr.ReadBits64(1, true)
-		readBits++
-
-		// offset 29
-		item.New = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 30, unknown
-		reverseBits(ibr.ReadBits64(2, true), 2)
-		readBits += 2
-
-		// offset 32
-		item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 33
-		item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 34, unknown
-		reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
-		// offset 37, if it's a simple item, it only contains 111 bits data
-		item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 38
-		item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 39, unknown
-		reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 40
-		item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 41, unknown
-		reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 42
-		item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 43, unknown
-		reverseBits(ibr.ReadBits64(15, true), 15)
-		readBits += 15
-
-		// offset 58
-		item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
-		// offset 61
-		item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
-		readBits += 4
-
-		// offset 65
-		item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
-		readBits += 4
-
-		// offset 69
-		item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
-		// offset 72
-		reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
-
-		// offset 73, if item is neither equipped or in the belt, this tells us where it is.
-		item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
-		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
-		var itemType string
-		for j := 0; j < 4; j++ {
-			itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+		if err != nil {
+			return err
 		}
 
-		item.Type = strings.Trim(itemType, " ")
-		readBits += 32
-
-		// offset 108
-		// TODO: If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
-		item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
-
 		// offset 111, item id is 8 chars, each 4 bit
-		// TODO: Convert to hex, 4 bit each, should be 59BA3CAB
 		item.ID = reverseBits(ibr.ReadBits64(32, true), 32)
 		readBits += 32
 
@@ -444,6 +334,7 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 
 		case rare:
 			// TODO: Parse rare bits.
+			parseRareProperties(&ibr, &item)
 
 		case unique:
 			// TODO: Parse unique bits.
@@ -591,5 +482,104 @@ func parseEquippedItems(bfr io.ByteReader, char *character) error {
 		}
 	}
 
+	return nil
+}
+
+func parseSimpleProperties(ibr *bitReader, item *Item) error {
+
+	// offset: 0 "J"
+	j := ibr.ReadBits64(8, false)
+
+	// offset: 8, "M"
+	m := ibr.ReadBits64(8, false)
+
+	if string(j) != "J" || string(m) != "M" {
+		return errors.New("Failed to find item header JM")
+	}
+
+	ibr.ReadBits64(4, true)
+
+	// offset: 20
+	item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset: 21, unknown
+	ibr.ReadBits64(6, true)
+
+	// offset: 27
+	item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 28, unknown
+	ibr.ReadBits64(1, true)
+
+	// offset 29
+	item.New = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 30, unknown
+	reverseBits(ibr.ReadBits64(2, true), 2)
+
+	// offset 32
+	item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 33
+	item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 34, unknown
+	reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// offset 37, if it's a simple item, it only contains 111 bits data
+	item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 38
+	item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 39, unknown
+	reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 40
+	item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 41, unknown
+	reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 42
+	item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 43, unknown
+	reverseBits(ibr.ReadBits64(15, true), 15)
+
+	// offset 58
+	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// offset 61
+	item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
+
+	// offset 65
+	item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
+
+	// offset 69
+	item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// offset 72
+	reverseBits(ibr.ReadBits64(1, true), 1)
+
+	// offset 73, if item is neither equipped or in the belt, this tells us where it is.
+	item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
+
+	// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
+	var itemType string
+	for j := 0; j < 4; j++ {
+		itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+	}
+
+	item.Type = strings.Trim(itemType, " ")
+
+	// offset 108
+	// TODO: If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
+	item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
+
+	return nil
+}
+
+func parseRareProperties(ibr *bitReader, item *Item) error {
 	return nil
 }
