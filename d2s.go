@@ -95,7 +95,7 @@ func Parse(file io.Reader) {
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
 
-	// Create character, we'll pass it around
+	// Create character, we'll pass it around.
 	char := character{}
 
 	_ = parseHeader(bfr, &char)
@@ -112,7 +112,6 @@ func Parse(file io.Reader) {
 func parseHeader(bfr io.Reader, char *character) error {
 
 	// Make a buffer that can hold 767 bytes, which can hold the entire header.
-	// We'll reuse this buffer through out to avoid another alloc.
 	buf := make([]byte, 767)
 
 	_, err := io.ReadFull(bfr, buf)
@@ -130,11 +129,10 @@ func parseHeader(bfr io.Reader, char *character) error {
 
 func parseAttributes(bfr io.ByteReader, char *character) error {
 
-	// Create a bit reader from the buffered reader to read the stats
+	// Create a bit reader from the buffered reader to read the stats.
 	br := bitReader{r: bfr}
 
 	for {
-		// 9 bit attribute id, bit reversed twice.
 		id := reverseBits(br.ReadBits64(9, true), 9)
 
 		if br.Err() != nil {
@@ -153,7 +151,7 @@ func parseAttributes(bfr io.ByteReader, char *character) error {
 			return fmt.Errorf("Unknown attribute id: %d", id)
 		}
 
-		// The attribute value, bit reversed, twice.
+		// The attribute value.
 		attr := reverseBits(br.ReadBits64(length, true), length)
 		if br.Err() != nil {
 			return br.Err()
