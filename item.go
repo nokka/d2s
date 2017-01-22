@@ -1255,7 +1255,7 @@ var quantityMap = map[string]bool{
 	"ama": true,
 }
 
-// Items that are tome contain 5 extra bits, so we need to keep track of what
+// Items that are tomes contain 5 extra bits, so we need to keep track of what
 // items are tome, and read the bits accordingly.
 var tomeMap = map[string]bool{
 	"tbk": true,
