@@ -1002,7 +1002,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	27: {Bits: []uint{8}, Name: "Regenerate Mana X%"},
 	28: {Bits: []uint{8}, Name: "Heal Stamina X%"},
 	31: {Bits: []uint{11}, Bias: 10, Name: "+X Defense"},
-	32: {Bits: []uint{10}, Bias: 10, Name: "+X vs. Missile"},
+	32: {Bits: []uint{9}, Bias: 10, Name: "+X vs. Missile"},
 	33: {Bits: []uint{10}, Bias: 10, Name: "+X vs. Melee"},
 	34: {Bits: []uint{6}, Name: "Damage Reduced by X"},
 	35: {Bits: []uint{6}, Name: "Magic Damage Reduced by X"},
@@ -1040,16 +1040,19 @@ var magicalProperties = map[uint64]magicalProperty{
 
 	// TODO: Check if experience gained really have a bias of 50.
 	85: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Experience Gained"},
-	86: {Bits: []uint{3, 3}, Name: "+{2} to {1} Skill Levels"},
+	86: {Bits: []uint{7}, Name: "+{0} Life After Each Kill"},
 	87: {Bits: []uint{7}, Name: "Reduces Prices {0}%"},
 	89: {Bits: []uint{4}, Bias: 4, Name: "+X to Light Radius"},
 	// This property is not displayed on the item, but its effect is to alter
 	// the color of the ambient light.
 	90: {Bits: []uint{5}, Name: "Ambient light"},
 	// After subtracting the bias, this is usually a negative number.
-	91:  {Bits: []uint{8}, Bias: 100, Name: "Requirements -X%"},
-	93:  {Bits: []uint{7}, Bias: 20, Name: "X% Increased Attack Speed"},
-	96:  {Bits: []uint{7}, Bias: 20, Name: "X% Faster Run/Walk"},
+	91: {Bits: []uint{8}, Bias: 100, Name: "Requirements -X%"},
+	93: {Bits: []uint{7}, Bias: 20, Name: "X% Increased Attack Speed"},
+	96: {Bits: []uint{7}, Bias: 20, Name: "X% Faster Run/Walk"},
+
+	// Number of levels to a certain skill, e.g. +1 To Teleport.
+	97:  {Bits: []uint{9, 6}, Name: "+{0} To {1}"},
 	99:  {Bits: []uint{7}, Bias: 20, Name: "X% Faster Hit Recovery"},
 	102: {Bits: []uint{7}, Bias: 20, Name: "X% Faster Block Rate"},
 	105: {Bits: []uint{7}, Bias: 20, Name: "X% Faster Cast Rate"},
@@ -1058,7 +1061,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// first value selects the skill, the second determines how many
 	// additional skill points are given.
 	107: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
-	108: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
+	108: {Bits: []uint{1}, Name: "Rest In Peace"},
 	109: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
 	181: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
 	182: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
@@ -1121,8 +1124,9 @@ var magicalProperties = map[uint64]magicalProperty{
 	180: {Bits: []uint{3}, Name: "+X to Assassin Skill Levels"},
 
 	// A skill set is a class specific skill tree id, e.g bow and crossbow skills,
-	// traps or war cries. ID's are described below.
-	// TODO: Can't figure these out
+	// traps or war cries. ID's are described below. The second value is number
+	// of levels, but divided by 64 it seems, e.g. a second value of 128 is
+	// 128 / 64 = 2 + to the skill tree.
 	188: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
 	189: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
 	190: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
@@ -1187,7 +1191,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	235: {Bits: []uint{6}, Name: "+X Fire Absorb (Based on Character Level)"},
 	236: {Bits: []uint{6}, Name: "+X Lightning Absorb (Based on Character Level)"},
 	237: {Bits: []uint{6}, Name: "X Poison Absorb (Based on Character Level)"},
-	238: {Bits: []uint{6}, Name: "Attacker Takes Damage of X (Based on Character Level)"},
+	238: {Bits: []uint{5}, Name: "Attacker Takes Damage of X (Based on Character Level)"},
 	239: {Bits: []uint{6}, Name: "X% Extra Gold from Monsters (Based on Character Level)"},
 	240: {Bits: []uint{6}, Name: "X% Better Chance of Getting Magic Items (Based on Character Level)"},
 	241: {Bits: []uint{6}, Name: "Heal Stamina Plus X% (Based on Character Level)"},
@@ -1208,7 +1212,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// As in the previous property, the value of the data field is a frequency in terms of the number
 	// replenished over a period of 100 seconds. For example if the value is 4, then this property
 	// replenishes 1 item in 100 / 4 = 25 seconds.
-	253: {Bits: []uint{5}, Name: "Replenishes Quantity"},
+	253: {Bits: []uint{6}, Name: "Replenishes Quantity"},
 
 	// Number of additional items beyond the base limit, for example if the base
 	// is 50 and additional is 30, then the total is 50 + 30.
@@ -1245,11 +1249,14 @@ var setListMap = map[uint64]uint64{
 // when they exist, or we'll ruin the rest of the bit offsets for the item.
 var quantityMap = map[string]bool{
 	"tbk": true,
+	"ibk": true,
 	"key": true,
+	"ama": true,
 }
 
 // Items that are tombs contain 5 extra bits, so we need to keep track of what
 // items are tombs, and read the bits accordingly.
 var tombMap = map[string]bool{
 	"tbk": true,
+	"ibk": true,
 }

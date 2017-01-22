@@ -288,8 +288,13 @@ func parseItems(bfr io.ByteReader, char *character) error {
 
 	ibr := bitReader{r: bfr}
 
-	//for i := 0; i < int(itemHeaderData.Count); i++ {
-	for i := 0; i < 37; i++ {
+	// We'll start this number at items count, but the thing is, if an item
+	// has items socketed on it, they will follow the item they're socketed in,
+	// so every time we find an item with socketed items, we'll increment this
+	// list in order to read them as well.
+	numberOfItemsToRead := int(itemHeaderData.Count)
+
+	for i := 0; i < 30; i++ {
 		var readBits int
 		item := Item{}
 
@@ -363,9 +368,7 @@ func parseItems(bfr io.ByteReader, char *character) error {
 				readBits += 12
 
 			case rare, crafted:
-				fmt.Printf("Read bits until rare / crafted list: %d \n", readBits)
 				rBits, _ := parseRareOrCraftedBits(&ibr, &item)
-
 				readBits += rBits
 
 			case unique:
@@ -416,7 +419,6 @@ func parseItems(bfr io.ByteReader, char *character) error {
 			}
 
 			if typeID == armor || typeID == weapon {
-				fmt.Printf("Bits read before durability: %d \n", readBits)
 				item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 				readBits += 8
 				item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
@@ -425,9 +427,6 @@ func parseItems(bfr io.ByteReader, char *character) error {
 				// Seems to be a random bit here.
 				reverseBits(ibr.ReadBits64(1, true), 1)
 				readBits++
-
-				fmt.Printf("Max durability: %d \n", item.MaxDurability)
-				fmt.Printf("Current durability: %d \n", item.CurrentDurability)
 			}
 
 			if quantityMap[item.Type] {
@@ -494,6 +493,14 @@ func parseItems(bfr io.ByteReader, char *character) error {
 			char.items[last].SocketedItems = append(char.items[last].SocketedItems, item)
 			fmt.Printf("Found socketed item: %+v\n\n", item)
 		} else {
+			// Ok, so this item it self is not in a socket, but it might have socketed
+			// items in it, if it does, we'll need to increment the number of total
+			// items we read in this loop, since the items glued into this item sockets,
+			// will follow directly after this item.
+			if item.NrOfItemsInSockets > 0 {
+				numberOfItemsToRead += int(item.NrOfItemsInSockets)
+				fmt.Println(numberOfItemsToRead)
+			}
 			char.items = append(char.items, item)
 		}
 
