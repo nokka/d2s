@@ -28,27 +28,42 @@ type Item struct {
 	ClassSpecific      uint64
 	LowQualityID       uint64
 	Timestamp          uint64
-	DefenseRating      uint64
-	MaxDurability      uint64
-	CurrentDurability  uint64
-	TotalNrOfSockets   uint64
-	Quantity           uint64
+
+	// Defense can range from -10, so we have to account for negative
+	// values and hence this type is int64.
+	DefenseRating int64
+
+	MaxDurability     uint64
+	CurrentDurability uint64
+	TotalNrOfSockets  uint64
+	Quantity          uint64
 
 	// Magical Item properties
 	MagicPrefix uint64
 	MagicSuffix uint64
+
+	// Runeword properties
+	RunewordID         uint64
+	RunewordAttributes []magicAttribute
+
+	// Set item properties
+	SetID         uint64
+	SetListCount  uint64
+	SetAttributes [][]magicAttribute
 
 	// Rare or Crafted data
 	RareName       string
 	RareName2      string
 	MagicalNameIDs [6]uint64
 
-	// Set item properties
-	SetID        uint64
-	SetItemLists uint64
+	// Unique item properties
+	UniqueID uint64
 
 	// All item types >= magicallyEnhanced
 	MagicAttributes []magicAttribute
+
+	// Items socketed in the item
+	SocketedItems []Item
 }
 
 func (i Item) getTypeID() uint64 {
@@ -76,8 +91,8 @@ const (
 	stored   = 0x00
 	equipped = 0x01
 	belt     = 0x02
-	cursor   = 0x03
-	socketed = 0x04
+	cursor   = 0x04
+	socketed = 0x06
 )
 
 // Rarity IDs.
@@ -954,10 +969,12 @@ var rareNames = map[uint64]string{
 	201: "Corruption",
 }
 
+// Note the values array is of the type int64, this is because some properties
+// contain negative values, such as - % requirements.
 type magicAttribute struct {
 	ID     uint64
 	Name   string
-	Values []uint64
+	Values []int64
 }
 
 type magicalProperty struct {
@@ -978,15 +995,13 @@ var magicalProperties = map[uint64]magicalProperty{
 	17: {Bits: []uint{9, 9}, Name: "+X% Enhanced Damage"},
 	19: {Bits: []uint{10}, Name: "+X to Attack rating"},
 	20: {Bits: []uint{6}, Name: "+X% Increased chance of blocking"},
-	21: {Bits: []uint{6}, Name: "+X to Minimum damage"},
-	22: {Bits: []uint{7}, Name: "+X to Maximum damage"},
-	// Possible duplicate of id: 21, usually seen together
-	23: {Bits: []uint{6}, Name: "+X to Minimum damage"},
-	// Possible duplicate of id: 22, usually seen together
-	24: {Bits: []uint{7}, Name: "+X to Maximum damage"},
+	21: {Bits: []uint{6}, Name: "+X to Minimum 1-handed damage"},
+	22: {Bits: []uint{7}, Name: "+X to Maximum 1-handed damage"},
+	23: {Bits: []uint{6}, Name: "+X to Minimum 2-handed damage"},
+	24: {Bits: []uint{7}, Name: "+X to Maximum 2-handed damage"},
 	27: {Bits: []uint{8}, Name: "Regenerate Mana X%"},
 	28: {Bits: []uint{8}, Name: "Heal Stamina X%"},
-	31: {Bits: []uint{10}, Bias: 10, Name: "+X Defense"},
+	31: {Bits: []uint{11}, Bias: 10, Name: "+X Defense"},
 	32: {Bits: []uint{10}, Bias: 10, Name: "+X vs. Missile"},
 	33: {Bits: []uint{10}, Bias: 10, Name: "+X vs. Melee"},
 	34: {Bits: []uint{6}, Name: "Damage Reduced by X"},
@@ -1002,10 +1017,10 @@ var magicalProperties = map[uint64]magicalProperty{
 	44: {Bits: []uint{5}, Name: "+X% to Maximum Cold Resist"},
 	45: {Bits: []uint{8}, Bias: 50, Name: "Poison Resist +X%"},
 	46: {Bits: []uint{5}, Name: "+X% to Maximum Poison Resist"},
-	48: {Bits: []uint{8, 8}, Name: "Adds X-Y Fire Damage"},
-	50: {Bits: []uint{6, 9}, Name: "Adds X-Y Lightning Damage"},
+	48: {Bits: []uint{8, 9}, Name: "Adds X-Y Fire Damage"},
+	50: {Bits: []uint{6, 10}, Name: "Adds X-Y Lightning Damage"},
 	52: {Bits: []uint{6, 7}, Name: "Adds X-Y Magic Damage"},
-	54: {Bits: []uint{6, 8, 8}, Name: "Adds X-Y Cold Damage"},
+	54: {Bits: []uint{8, 9, 8}, Name: "Adds X-Y Cold Damage"},
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds X-Y Poison Damage over Z Seconds"},
 	60: {Bits: []uint{7}, Name: "X% Life stolen per hit"},
 	73: {Bits: []uint{8}, Bias: 30, Name: "+X Maximum Durability"},
@@ -1017,11 +1032,16 @@ var magicalProperties = map[uint64]magicalProperty{
 	79: {Bits: []uint{9}, Bias: 100, Name: "X% Extra Gold from Monsters"},
 	80: {Bits: []uint{8}, Bias: 100, Name: "X% Better Chance of Getting Magic Items"},
 	81: {Bits: []uint{7}, Name: "Knockback"},
-	83: {Bits: []uint{3}, Name: "+X to Amazon Skill Levels"},
-	84: {Bits: []uint{3}, Name: "+X to Paladin Skill Levels"},
-	85: {Bits: []uint{3}, Name: "+X to Necromancer Skill Levels"},
-	86: {Bits: []uint{3}, Name: "+X to Sorceress Skill Levels"},
-	87: {Bits: []uint{3}, Name: "+X to Barbarian Skill Levels"},
+
+	// First value is class, second is skill level, but they're printed in reverse
+	// e.g. "+3 To Sorceress Skill Levels"
+	83: {Bits: []uint{3, 3}, Name: "+{2} to {1} Skill Levels"},
+	84: {Bits: []uint{3, 3}, Name: "+{2} to {1} Skill Levels"},
+
+	// TODO: Check if experience gained really have a bias of 50.
+	85: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Experience Gained"},
+	86: {Bits: []uint{3, 3}, Name: "+{2} to {1} Skill Levels"},
+	87: {Bits: []uint{7}, Name: "Reduces Prices {0}%"},
 	89: {Bits: []uint{4}, Bias: 4, Name: "+X to Light Radius"},
 	// This property is not displayed on the item, but its effect is to alter
 	// the color of the ambient light.
@@ -1088,61 +1108,61 @@ var magicalProperties = map[uint64]magicalProperty{
 	149: {Bits: []uint{7}, Name: "X Cold Absorb"},
 	150: {Bits: []uint{7}, Name: "Slows Target by X%"},
 	151: {Bits: []uint{7}, Name: "Blessed Aim"},
-	152: {Bits: []uint{7}, Name: "Defiance"},
+	152: {Bits: []uint{1}, Name: "Indestructible"},
 	153: {Bits: []uint{1}, Name: "Cannot Be Frozen"},
 	154: {Bits: []uint{7}, Name: "X% Slower Stamina Drain"},
 	155: {Bits: []uint{7}, Name: "X% Chance to Reanimate Target"},
 	156: {Bits: []uint{7}, Name: "Piercing Attack"},
 	157: {Bits: []uint{7}, Name: "Fires Magic Arrows"},
 	158: {Bits: []uint{7}, Name: "Fires Explosive Arrows or Bolts"},
-	// Never seen this by itself, always accompanied by properties 21 and 23
-	159: {Bits: []uint{6}, Name: "+X to Minimum Damage"},
-	// Never seen this by itself, always accompanied by properties 22 and 24
-	160: {Bits: []uint{7}, Name: "+X to Maximum Damage"},
+	159: {Bits: []uint{6}, Name: "+X to Minimum Throw Damage"},
+	160: {Bits: []uint{7}, Name: "+X to Maximum Throw Damage"},
 	179: {Bits: []uint{3}, Name: "+X to Druid Skill Levels"},
 	180: {Bits: []uint{3}, Name: "+X to Assassin Skill Levels"},
 
 	// A skill set is a class specific skill tree id, e.g bow and crossbow skills,
 	// traps or war cries. ID's are described below.
-	188: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
-	189: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
-	190: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
-	191: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
-	192: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
-	193: {Bits: []uint{5, 5}, Name: "+Y to skill_set Skills (char_class Only)"},
+	// TODO: Can't figure these out
+	188: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	189: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	190: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	191: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	192: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	193: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
 
 	194: {Bits: []uint{4}, Name: "Adds X extra sockets to the item"},
 
-	// First order is spell id, % chance and level.
-	195: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on attack"},
-	196: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on attack"},
-	197: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on attack"},
+	// First value is the level, second is spell id, and third is % chance
+	195: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
+	196: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
+	197: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
 
 	// First order is spell id, % chance and level.
-	198: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on striking"},
-	199: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on striking"},
-	200: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id on striking"},
+	198: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
+	199: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
+	200: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
 
 	// First order is spell id, % chance and level.
-	201: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
-	202: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
-	203: {Bits: []uint{9, 5, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
+	201: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
+	202: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
+	203: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
 
 	// First value selects the spell id, second value is level, third is remaining charges
 	// and the last is the total number of charges.
-	204: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	205: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	206: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	207: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	208: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	209: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	210: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	211: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	212: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
-	213: {Bits: []uint{9, 5, 8, 8}, Name: "Level X spell_id (Y/Z Charges)"},
+	204: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	205: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	206: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	207: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	208: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	209: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	210: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	211: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	212: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
+	213: {Bits: []uint{6, 10, 8, 8}, Name: "Level {0} {1} ({2}/{3} Charges)"},
 
 	// All values based on character level are stored in eights, so take
 	// the number divide by 8 and multiply by the character level and round down.
+	// Or, just do (value * 0.125)% per level.
 	214: {Bits: []uint{6}, Name: "+X to Defense (Based on Character Level)"},
 	215: {Bits: []uint{6}, Name: "X% Enhanced Defense (Based on Character Level)"},
 	216: {Bits: []uint{6}, Name: "+X to Life (Based on Character Level)"},
@@ -1194,8 +1214,8 @@ var magicalProperties = map[uint64]magicalProperty{
 	// is 50 and additional is 30, then the total is 50 + 30.
 	254: {Bits: []uint{8}, Name: "Increased Stack Size"},
 
-	// These are some weird values, no idea if they are used in game or not.
-	// But these values change depending on the time of day in the game.
+	// These are some weird values that were never used in the actual game.
+	// These values change depending on the time of day in the game.
 	// The format of the bit fields are the same in all cases, the first 2 bits
 	// specifies the the of time when the value is at its maximum.
 	//
@@ -1203,9 +1223,33 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The maximum value at the time specified and the minimum at the opposite.
 
 	// TODO: Add ids 268 - 303 if they prove to exist.
+
+	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
+	334: {Bits: []uint{8}, Name: "{0}% To Enemy Lightning Resistance"},
+}
+
+// Each set item has 5 bits of data containing the number of set lists follow
+// the magical attributes list, this map tells us how many lists to read
+// depending on the value given from the 5 bits. A number of 0-5 set lists.
+var setListMap = map[uint64]uint64{
+	0:  0,
+	1:  1,
+	3:  2,
+	7:  3,
+	15: 4,
+	31: 5,
 }
 
 // All item types that contain the quantity bits will exist in here,
 // we'll use this when reading items to make sure we only read quantity bits
 // when they exist, or we'll ruin the rest of the bit offsets for the item.
-var quantityMap = map[string]bool{}
+var quantityMap = map[string]bool{
+	"tbk": true,
+	"key": true,
+}
+
+// Items that are tombs contain 5 extra bits, so we need to keep track of what
+// items are tombs, and read the bits accordingly.
+var tombMap = map[string]bool{
+	"tbk": true,
+}
