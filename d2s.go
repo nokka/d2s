@@ -92,6 +92,12 @@ type itemData struct {
 	Count  uint16
 }
 
+type corpseData struct {
+	Header  [2]byte
+	Count   uint16
+	Unknown [12]byte
+}
+
 // Parse will read the data from a d2s character file and return a normalized struct.
 func Parse(file io.Reader) (Char, error) {
 
@@ -102,25 +108,31 @@ func Parse(file io.Reader) (Char, error) {
 	char := character{}
 
 	err := parseHeader(bfr, &char)
-
 	if err != nil {
 		return Char{}, err
 	}
 
 	err = parseAttributes(bfr, &char)
-
 	if err != nil {
 		return Char{}, err
 	}
 
 	err = parseSkills(bfr, &char)
-
 	if err != nil {
 		return Char{}, err
 	}
 
 	err = parseItems(bfr, &char)
+	if err != nil {
+		return Char{}, err
+	}
 
+	err = parseCorpse(bfr, &char)
+	if err != nil {
+		return Char{}, err
+	}
+
+	err = parseMercItems(bfr, &char)
 	if err != nil {
 		return Char{}, err
 	}
@@ -514,6 +526,58 @@ func parseItems(bfr io.ByteReader, char *character) error {
 			bitsToAlign := uint(8 - remainder)
 			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
+	}
+
+	return nil
+}
+
+// Parses corpse data, if it exists, otherwise just reads the item header.
+// If the item count of the header is 1, this means the character is dead and
+// will have a corpse at its feet when loading into the game. The 12 bytes
+// following is the corpse data, which we don't really care about.
+func parseCorpse(bfr io.ByteReader, char *character) error {
+
+	// Make a buffer that can hold 16 bytes, which can hold the corpse data.
+	buf := make([]byte, 16)
+
+	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
+	if err != nil {
+		return err
+	}
+
+	corpseHeaderData := corpseData{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &corpseHeaderData)
+
+	if err != nil {
+		return err
+	}
+
+	if string(corpseHeaderData.Header[:]) != "JM" {
+		return errors.New("Failed to find the corpse items header")
+	}
+
+	fmt.Printf("Corpse data: %+v\n\n", corpseHeaderData)
+	return nil
+}
+
+// Parses all items on the merc, if it exists, otherwise just reads the header.
+func parseMercItems(bfr io.ByteReader, char *character) error {
+
+	ibr := bitReader{r: bfr}
+
+	// offset: 0 "j"
+	j := ibr.ReadBits64(8, false)
+
+	// offset: 8, "f"
+	f := ibr.ReadBits64(8, false)
+
+	if string(j) != "j" || string(f) != "f" {
+		return errors.New("Failed to find merc header jf")
+	}
+
+	// If you have a merc, we'll read the item list of the merc here.
+	if char.MercID != 0 {
+
 	}
 
 	return nil
