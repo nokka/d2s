@@ -1002,7 +1002,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	27: {Bits: []uint{8}, Name: "Regenerate Mana X%"},
 	28: {Bits: []uint{8}, Name: "Heal Stamina X%"},
 	31: {Bits: []uint{11}, Bias: 10, Name: "+X Defense"},
-	32: {Bits: []uint{9}, Bias: 10, Name: "+X vs. Missile"},
+	32: {Bits: []uint{9}, Name: "+X vs. Missile"},
 	33: {Bits: []uint{10}, Bias: 10, Name: "+X vs. Melee"},
 	34: {Bits: []uint{6}, Name: "Damage Reduced by X"},
 	35: {Bits: []uint{6}, Name: "Magic Damage Reduced by X"},
@@ -1136,20 +1136,20 @@ var magicalProperties = map[uint64]magicalProperty{
 
 	194: {Bits: []uint{4}, Name: "Adds X extra sockets to the item"},
 
-	// First value is the level, second is spell id, and third is % chance
+	// Order is spell id, level, % chance.
 	195: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
 	196: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
 	197: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
 
-	// First order is spell id, % chance and level.
+	// Order is spell id, level, % chance.
 	198: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
 	199: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
 	200: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
 
-	// First order is spell id, % chance and level.
-	201: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
-	202: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
-	203: {Bits: []uint{6, 10, 7}, Name: "Z% Chance to Cast Level Y skill_id when struck"},
+	// Order is spell id, level, % chance.
+	201: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When Struck"},
+	202: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When Struck"},
+	203: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When Struck"},
 
 	// First value selects the spell id, second value is level, third is remaining charges
 	// and the last is the total number of charges.
@@ -1229,6 +1229,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// TODO: Add ids 268 - 303 if they prove to exist.
 
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
+	332: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Poison Skill Damage"},
 	334: {Bits: []uint{8}, Name: "{0}% To Enemy Lightning Resistance"},
 }
 
