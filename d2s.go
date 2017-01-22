@@ -400,10 +400,10 @@ func parseItems(bfr io.ByteReader, char *character) error {
 
 			// MARK: Structure - all items have this part.
 
-			// If the item is a tomb, it will contain 5 extra bits, we're not
+			// If the item is a tome, it will contain 5 extra bits, we're not
 			// interested in these bits, they value is usually 1, but not sure
 			// what it is.
-			if tombMap[item.Type] {
+			if tomeMap[item.Type] {
 				reverseBits(ibr.ReadBits64(5, true), 5)
 				readBits += 5
 			}
