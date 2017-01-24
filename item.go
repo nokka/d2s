@@ -1023,7 +1023,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	54: {Bits: []uint{8, 9, 8}, Name: "Adds X-Y Cold Damage"},
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds X-Y Poison Damage over Z Seconds"},
 	60: {Bits: []uint{7}, Name: "X% Life stolen per hit"},
-	73: {Bits: []uint{8}, Bias: 30, Name: "+X Maximum Durability"},
+	73: {Bits: []uint{8}, Name: "+X Maximum Durability"},
 	74: {Bits: []uint{6}, Bias: 30, Name: "Replenish Life +X"},
 	75: {Bits: []uint{7}, Bias: 20, Name: "Increase Maximum Durability X%"},
 	76: {Bits: []uint{6}, Bias: 10, Name: "Increase Maximum Life X%"},
@@ -1060,7 +1060,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// These properties usually applied to class specific items,
 	// first value selects the skill, the second determines how many
 	// additional skill points are given.
-	107: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
+	107: {Bits: []uint{9, 3}, Name: "+Y to spell X (char_class Only)"},
 	108: {Bits: []uint{1}, Name: "Rest In Peace"},
 	109: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
 	181: {Bits: []uint{9, 5}, Name: "+Y to spell X (char_class Only)"},
@@ -1113,7 +1113,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	151: {Bits: []uint{7}, Name: "Blessed Aim"},
 	152: {Bits: []uint{1}, Name: "Indestructible"},
 	153: {Bits: []uint{1}, Name: "Cannot Be Frozen"},
-	154: {Bits: []uint{7}, Name: "X% Slower Stamina Drain"},
+	154: {Bits: []uint{7}, Bias: 20, Name: "X% Slower Stamina Drain"},
 	155: {Bits: []uint{7}, Name: "X% Chance to Reanimate Target"},
 	156: {Bits: []uint{7}, Name: "Piercing Attack"},
 	157: {Bits: []uint{7}, Name: "Fires Magic Arrows"},
@@ -1123,11 +1123,28 @@ var magicalProperties = map[uint64]magicalProperty{
 	179: {Bits: []uint{3}, Name: "+X to Druid Skill Levels"},
 	180: {Bits: []uint{3}, Name: "+X to Assassin Skill Levels"},
 
-	// A skill set is a class specific skill tree id, e.g bow and crossbow skills,
-	// traps or war cries. ID's are described below. The second value is number
-	// of levels, but divided by 64 it seems, e.g. a second value of 128 is
-	// 128 / 64 = 2 + to the skill tree.
-	188: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
+	// Ok so get this, this is quite complicated, the id 188 is for items with
+	// + x to a certain skill tree, e.g. 1 + to defensive auras (paladin).
+	//
+	// So here's how it works, the field is 19 bits long, here's the bits for
+	// the defensive auras skiller.
+	//
+	// 001             0000000000             011              010
+	//  ^                  ^                   ^                ^
+	// levels        unknown padding        class id       skill tree offset
+	//
+	// So in the above example, the first 3 bits 001 are the + levels (1), we'll
+	// ignore the padding, the second interesting set of 3 bits is the class id.
+	// Refer to the class.go for class ids, but paladin is 011 (3), and the
+	// last 3 bits 010 (2) is the offset from the start of the class skill tree.
+	// Refer to skills.go to find the different tree offsets. Paladin offset is
+	// 9. So remember the last 3 bits 010 (2), that means the skill tree is
+	// 9 + 2 = 11, aka the defensive auras tree.
+	//
+	// When reading the values, remember the bits are read from the right,
+	// so the values will be [2 3 1], offset 2, class id 3, 1 + to skills.
+	188: {Bits: []uint{3, 13, 3}, Name: "+{2} to {0} Skills ({1})"},
+
 	189: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
 	190: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
 	191: {Bits: []uint{10, 9}, Name: "+Y to skill_set Skills (char_class Only)"},
@@ -1227,10 +1244,14 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The maximum value at the time specified and the minimum at the opposite.
 
 	// TODO: Add ids 268 - 303 if they prove to exist.
-
+	329: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Fire Skill Damage"},
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
+	331: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Cold Skill Damage"},
 	332: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Poison Skill Damage"},
+	333: {Bits: []uint{8}, Name: "{0}% To Enemy Fire Resistance"},
 	334: {Bits: []uint{8}, Name: "{0}% To Enemy Lightning Resistance"},
+	335: {Bits: []uint{8}, Name: "{0}% To Enemy Cold Resistance"},
+	336: {Bits: []uint{8}, Name: "{0}% To Enemy Poison Resistance"},
 }
 
 // Each set item has 5 bits of data containing the number of set lists follow
@@ -1256,7 +1277,7 @@ var quantityMap = map[string]bool{
 }
 
 // Items that are tomes contain 5 extra bits, so we need to keep track of what
-// items are tome, and read the bits accordingly.
+// items are tomes, and read the bits accordingly.
 var tomeMap = map[string]bool{
 	"tbk": true,
 	"ibk": true,

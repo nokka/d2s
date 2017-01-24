@@ -16,6 +16,16 @@ var skillOffsetMap = map[uint]int{
 	Assassin:    251,
 }
 
+var skillTreeOffsetMap = map[uint]int{
+	Amazon:      0,
+	Sorceress:   3,
+	Necromancer: 6,
+	Paladin:     9,
+	Barbarian:   12,
+	Druid:       15,
+	Assassin:    18,
+}
+
 var skillMap = [357]string{
 	"attack",
 	"kick",

@@ -127,7 +127,7 @@ func Parse(file io.Reader) (Char, error) {
 		return Char{}, err
 	}
 
-	err = parseCorpse(bfr, &char)
+	/*err = parseCorpse(bfr, &char)
 	if err != nil {
 		return Char{}, err
 	}
@@ -135,7 +135,7 @@ func Parse(file io.Reader) (Char, error) {
 	err = parseMercItems(bfr, &char)
 	if err != nil {
 		return Char{}, err
-	}
+	}*/
 
 	/*for _, item := range char.items {
 		fmt.Printf("\n%+v\n\n\n", item)
@@ -306,7 +306,7 @@ func parseItems(bfr io.ByteReader, char *character) error {
 	// list in order to read them as well.
 	numberOfItemsToRead := int(itemHeaderData.Count)
 
-	for i := 0; i < numberOfItemsToRead; i++ {
+	for i := 0; i < 15; i++ {
 		var readBits int
 		item := Item{}
 
