@@ -306,7 +306,7 @@ func parseItems(bfr io.ByteReader, char *character) error {
 	// list in order to read them as well.
 	numberOfItemsToRead := int(itemHeaderData.Count)
 
-	for i := 0; i < 15; i++ {
+	for i := 0; i < numberOfItemsToRead; i++ {
 		var readBits int
 		item := Item{}
 
