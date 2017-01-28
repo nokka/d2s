@@ -83,6 +83,27 @@ func (i Item) getTypeID() uint64 {
 	return other
 }
 
+// Attributes that only exists on a player ear.
+type earAttributes struct {
+	class uint64
+	level uint64
+	name  string
+}
+
+// Note the values array is of the type int64, this is because some properties
+// contain negative values, such as - % requirements.
+type magicAttribute struct {
+	ID     uint64
+	Name   string
+	Values []int64
+}
+
+type magicalProperty struct {
+	Bits []uint
+	Bias uint64
+	Name string
+}
+
 // Item types.
 const (
 	armor  = 0x01
@@ -971,26 +992,6 @@ var rareNames = map[uint64]string{
 	199: "Warp",
 	200: "Rift",
 	201: "Corruption",
-}
-
-type earAttributes struct {
-	class uint64
-	level uint64
-	name  string
-}
-
-// Note the values array is of the type int64, this is because some properties
-// contain negative values, such as - % requirements.
-type magicAttribute struct {
-	ID     uint64
-	Name   string
-	Values []int64
-}
-
-type magicalProperty struct {
-	Bits []uint
-	Bias uint64
-	Name string
 }
 
 var magicalProperties = map[uint64]magicalProperty{

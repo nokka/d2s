@@ -4,107 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 )
 
 // Char is the public type of the character.
 type Char struct{}
-
-// Character represents all the d2s character data.
-type character struct {
-	header
-	attributes
-	skills      []skill
-	items       []Item
-	corpseItems []Item
-	mercItems   []Item
-	golemItem   Item
-}
-
-// Header determines the header data of a d2s file.
-type header struct {
-	Identifier        uint32
-	Version           uint32
-	FileSize          uint32
-	CheckSum          uint32
-	ActiveArms        uint32
-	Name              name
-	Status            byte
-	Progression       byte
-	_                 [2]byte
-	Class             class
-	_                 [2]byte
-	Level             byte
-	_                 [4]byte
-	LastPlayed        uint32
-	_                 [4]byte
-	AssignedSkills    [16]uint32
-	LeftSkill         uint32
-	RightSkill        uint32
-	LeftSwapSkill     uint32
-	RightSwapSkill    uint32
-	_                 [32]byte
-	CurrentDifficulty difficulty
-	MapID             uint32
-	_                 [2]byte
-	DeadMerc          uint16
-	MercID            uint32
-	MercNameID        uint16
-	MercType          uint16
-	MercExp           uint32
-	_                 [144]byte
-	QuestHeader       [4]byte
-	_                 [6]byte
-	QuestsNormal      [96]byte
-	QuestsNm          [96]byte
-	QuestsHell        [96]byte
-	WaypointHeader    [2]byte
-	_                 [6]byte
-	WaypointsNormal   [24]byte
-	WaypointsNm       [24]byte
-	WaypointsHell     [24]byte
-	WaypointTrailer   byte
-	NPCHeader         [2]byte
-	_                 byte
-	NPCIntroNormal    [5]byte
-	_                 [3]byte
-	NPCIntroNm        [5]byte
-	_                 [3]byte
-	NPCIntroHell      [5]byte
-	_                 [3]byte
-	NPCReturnNorm     [4]byte
-	_                 [4]byte
-	NPCReturnNm       [4]byte
-	_                 [4]byte
-	NPCReturnHell     [4]byte
-	_                 [4]byte
-	StatHeader        [2]byte
-}
-
-type skillData struct {
-	Header [2]byte
-	List   [30]byte
-}
-
-type itemData struct {
-	Header [2]byte
-	Count  uint16
-}
-
-type corpseData struct {
-	Header  [2]byte
-	Count   uint16
-	Unknown [12]byte
-}
-
-type golemData struct {
-	Header   [2]byte
-	HasGolem byte
-}
 
 // Parse will read the data from a d2s character file and return a normalized struct.
 func Parse(file io.Reader) (Char, error) {
@@ -135,7 +45,7 @@ func Parse(file io.Reader) (Char, error) {
 		return Char{}, err
 	}
 
-	/*err = parseCorpse(bfr, &char)
+	err = parseCorpse(bfr, &char)
 	if err != nil {
 		return Char{}, err
 	}
@@ -150,13 +60,13 @@ func Parse(file io.Reader) (Char, error) {
 		if err != nil {
 			return Char{}, err
 		}
-	}*/
+	}
 
-	/*fmt.Printf("%+v\n\n", char.header)
-	fmt.Printf("%+v\n\n", char.attributes)
-	fmt.Printf("%+v\n\n", char.skills)
-	fmt.Printf("%+v\n\n", char.items)
-	fmt.Printf("%+v\n\n", char.mercItems)*/
+	derp := json.NewEncoder(os.Stdout).Encode(
+		&char,
+	)
+
+	fmt.Println(derp)
 
 	return Char{}, nil
 }
