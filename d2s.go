@@ -18,8 +18,10 @@ type Char struct{}
 type character struct {
 	header
 	attributes
-	skills []skill
-	items  []Item
+	skills    []skill
+	items     []Item
+	mercItems []Item
+	golemItem Item
 }
 
 // Header determines the header data of a d2s file.
@@ -98,6 +100,11 @@ type corpseData struct {
 	Unknown [12]byte
 }
 
+type golemData struct {
+	Header   [2]byte
+	HasGolem byte
+}
+
 // Parse will read the data from a d2s character file and return a normalized struct.
 func Parse(file io.Reader) (Char, error) {
 
@@ -127,7 +134,7 @@ func Parse(file io.Reader) (Char, error) {
 		return Char{}, err
 	}
 
-	/*err = parseCorpse(bfr, &char)
+	err = parseCorpse(bfr, &char)
 	if err != nil {
 		return Char{}, err
 	}
@@ -135,11 +142,20 @@ func Parse(file io.Reader) (Char, error) {
 	err = parseMercItems(bfr, &char)
 	if err != nil {
 		return Char{}, err
-	}*/
+	}
 
-	/*for _, item := range char.items {
-		fmt.Printf("\n%+v\n\n\n", item)
-	}*/
+	if char.Class == Necromancer {
+		err = parseIronGolem(bfr, &char)
+		if err != nil {
+			return Char{}, err
+		}
+	}
+
+	/*fmt.Printf("%+v\n\n", char.header)
+	fmt.Printf("%+v\n\n", char.attributes)
+	fmt.Printf("%+v\n\n", char.skills)
+	fmt.Printf("%+v\n\n", char.items)
+	fmt.Printf("%+v\n\n", char.mercItems)*/
 
 	return Char{}, nil
 }
@@ -246,14 +262,14 @@ func parseSkills(bfr io.Reader, char *character) error {
 		return err
 	}
 
-	rawSkills := skillData{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &rawSkills)
+	skillHeaderData := skillData{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &skillHeaderData)
 
 	if err != nil {
 		return err
 	}
 
-	if string(rawSkills.Header[:]) != "if" {
+	if string(skillHeaderData.Header[:]) != "if" {
 		return errors.New("Failed to find skill header")
 	}
 
@@ -262,7 +278,7 @@ func parseSkills(bfr io.Reader, char *character) error {
 		return fmt.Errorf("Unknown skill offset for class %d", char.header.Class)
 	}
 
-	for i, allocatedPoints := range rawSkills.List {
+	for i, allocatedPoints := range skillHeaderData.List {
 		id := (i + skillOffset)
 		s := skill{
 			id:     id,
@@ -298,27 +314,161 @@ func parseItems(bfr io.ByteReader, char *character) error {
 		return errors.New("Failed to find the items header")
 	}
 
+	items, err := parseItemList(bfr, int(itemHeaderData.Count))
+	if err != nil {
+		return err
+	}
+
+	char.items = items
+
+	return nil
+}
+
+// Parses corpse data, if it exists, otherwise just reads the item header.
+// If the item count of the header is 1, this means the character is dead and
+// will have a corpse at its feet when loading into the game. The 12 bytes
+// following is the corpse data, which we don't really care about.
+func parseCorpse(bfr io.ByteReader, char *character) error {
+
+	// Make a buffer that can hold 16 bytes, which can hold the corpse data.
+	buf := make([]byte, 16)
+
+	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
+	if err != nil {
+		return err
+	}
+
+	corpseHeaderData := corpseData{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &corpseHeaderData)
+
+	if err != nil {
+		return err
+	}
+
+	if string(corpseHeaderData.Header[:]) != "JM" {
+		return errors.New("Failed to find the corpse items header")
+	}
+
+	// TODO if the count here is 1, that means your character is currently dead
+	// and will have the corpse item list here.
+	if corpseHeaderData.Count == 1 {
+		// read corpse data
+	}
+	//fmt.Printf("Corpse data: %+v\n\n", corpseHeaderData)
+	return nil
+}
+
+// Parses all items on the merc, if it exists, otherwise just reads the header.
+func parseMercItems(bfr io.ByteReader, char *character) error {
+	fmt.Println("Read merc data")
+	ibr := bitReader{r: bfr}
+
+	// offset: 0 "j"
+	j := ibr.ReadBits64(8, false)
+
+	// offset: 8, "f"
+	f := ibr.ReadBits64(8, false)
+
+	if string(j) != "j" || string(f) != "f" {
+		return errors.New("Failed to find merc header jf")
+	}
+
+	// If you have a merc, we'll read the item list of the merc here.
+	if char.MercID != 0 {
+
+		fmt.Println("MERC ITEMS START HERE")
+		// Make a buffer that can hold 4 bytes, which can hold the items header.
+		buf := make([]byte, 4)
+
+		_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
+		if err != nil {
+			return err
+		}
+
+		itemHeaderData := itemData{}
+		err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData)
+
+		if err != nil {
+			return err
+		}
+
+		if string(itemHeaderData.Header[:]) != "JM" {
+			return errors.New("Failed to find the merc items header")
+		}
+
+		items, err := parseItemList(bfr, int(itemHeaderData.Count))
+		if err != nil {
+			return err
+		}
+
+		char.mercItems = items
+	}
+
+	return nil
+}
+
+// If the character has a golem, we'll read the item list for the golem,
+// since an iron golem is made from an item, the properties of that item is stored.
+func parseIronGolem(bfr io.ByteReader, char *character) error {
+
+	// Make a buffer that can hold 4 bytes, which can hold the items header.
+	buf := make([]byte, 3)
+
+	_, err := io.ReadFull(bfr.(io.Reader), buf[:3])
+	if err != nil {
+		return err
+	}
+
+	golemHeaderData := golemData{}
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &golemHeaderData)
+
+	if err != nil {
+		return err
+	}
+
+	if string(golemHeaderData.Header[:]) != "kf" {
+		return errors.New("Failed to find the golem header")
+	}
+
+	fmt.Println("Has golem")
+	if golemHeaderData.HasGolem == 1 {
+		item, err := parseItemList(bfr, 1)
+		if err != nil {
+			return err
+		}
+
+		char.golemItem = item[0]
+	}
+
+	return nil
+}
+
+func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
+
+	var itemList []Item
+
 	ibr := bitReader{r: bfr}
 
 	// We'll start this number at items count, but the thing is, if an item
 	// has items socketed on it, they will follow the item they're socketed in,
 	// so every time we find an item with socketed items, we'll increment this
 	// list in order to read them as well.
-	numberOfItemsToRead := int(itemHeaderData.Count)
+	numberOfItemsToRead := itemCount
 
 	for i := 0; i < numberOfItemsToRead; i++ {
 		var readBits int
 		item := Item{}
 
 		// Read the 111 bit basic item structure, all items have this structure.
-		err = parseSimpleBits(&ibr, &item)
+		err := parseSimpleBits(&ibr, &item)
 		readBits += 111
 
 		if err != nil {
-			return err
+			return []Item{}, err
 		}
 
 		if item.SimpleItem == 0 {
+
 			// offset 111, item id is 8 chars, each 4 bit
 			item.ID = reverseBits(ibr.ReadBits64(32, true), 32)
 			readBits += 32
@@ -389,19 +539,32 @@ func parseItems(bfr io.ByteReader, char *character) error {
 			}
 
 			// MARK: Runeword data
-			// Parse 16 bits here if the item has been given a runeword.
 			if item.GivenRuneword == 1 {
 				parseRunewordBits(&ibr, &item)
 				readBits += 16
 			}
 
 			// MARK: Personalization data
-			// TODO: Parse Personalization data here if the item is personalized.
+
+			if item.Personalized == 1 {
+				var name string
+				for {
+					c := reverseBits(ibr.ReadBits64(7, true), 7)
+
+					if c == 0 {
+						break
+					}
+
+					name += string(c)
+				}
+
+				item.PersonalizedName = name
+			}
 
 			// MARK: Structure - all items have this part.
 
 			// If the item is a tome, it will contain 5 extra bits, we're not
-			// interested in these bits, they value is usually 1, but not sure
+			// interested in these bits, the value is usually 1, but not sure
 			// what it is.
 			if tomeMap[item.Type] {
 				reverseBits(ibr.ReadBits64(5, true), 5)
@@ -418,7 +581,6 @@ func parseItems(bfr io.ByteReader, char *character) error {
 
 			if typeID == armor {
 				fmt.Printf("Bits read before armor: %d \n", readBits)
-				// TODO: Figure out which items have 11 bits of defense rating data.
 				// If the item is an armor, it will have this field of defense data.
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
 
@@ -464,7 +626,7 @@ func parseItems(bfr io.ByteReader, char *character) error {
 
 				listCount, ok := setListMap[setListValue]
 				if !ok {
-					return fmt.Errorf("Unknown set list number %d", setListValue)
+					return []Item{}, fmt.Errorf("Unknown set list number %d", setListValue)
 				}
 
 				item.SetListCount = listCount
@@ -501,9 +663,8 @@ func parseItems(bfr io.ByteReader, char *character) error {
 		}
 
 		if item.LocationID == socketed {
-			last := len(char.items) - 1
-			char.items[last].SocketedItems = append(char.items[last].SocketedItems, item)
-			fmt.Printf("Found socketed item: %+v\n\n", item)
+			last := len(itemList) - 1
+			itemList[last].SocketedItems = append(itemList[last].SocketedItems, item)
 		} else {
 			// Ok, so this item it self is not in a socket, but it might have socketed
 			// items in it, if it does, we'll need to increment the number of total
@@ -511,9 +672,9 @@ func parseItems(bfr io.ByteReader, char *character) error {
 			// will follow directly after this item.
 			if item.NrOfItemsInSockets > 0 {
 				numberOfItemsToRead += int(item.NrOfItemsInSockets)
-				fmt.Println(numberOfItemsToRead)
 			}
-			char.items = append(char.items, item)
+
+			itemList = append(itemList, item)
 		}
 
 		fmt.Printf("%+v\n\n", item)
@@ -528,153 +689,169 @@ func parseItems(bfr io.ByteReader, char *character) error {
 		}
 	}
 
-	return nil
-}
-
-// Parses corpse data, if it exists, otherwise just reads the item header.
-// If the item count of the header is 1, this means the character is dead and
-// will have a corpse at its feet when loading into the game. The 12 bytes
-// following is the corpse data, which we don't really care about.
-func parseCorpse(bfr io.ByteReader, char *character) error {
-
-	// Make a buffer that can hold 16 bytes, which can hold the corpse data.
-	buf := make([]byte, 16)
-
-	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
-	if err != nil {
-		return err
-	}
-
-	corpseHeaderData := corpseData{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &corpseHeaderData)
-
-	if err != nil {
-		return err
-	}
-
-	if string(corpseHeaderData.Header[:]) != "JM" {
-		return errors.New("Failed to find the corpse items header")
-	}
-
-	fmt.Printf("Corpse data: %+v\n\n", corpseHeaderData)
-	return nil
-}
-
-// Parses all items on the merc, if it exists, otherwise just reads the header.
-func parseMercItems(bfr io.ByteReader, char *character) error {
-
-	ibr := bitReader{r: bfr}
-
-	// offset: 0 "j"
-	j := ibr.ReadBits64(8, false)
-
-	// offset: 8, "f"
-	f := ibr.ReadBits64(8, false)
-
-	if string(j) != "j" || string(f) != "f" {
-		return errors.New("Failed to find merc header jf")
-	}
-
-	// If you have a merc, we'll read the item list of the merc here.
-	if char.MercID != 0 {
-
-	}
-
-	return nil
+	return itemList, nil
 }
 
 // Parses the 108 bits of data all items have, both simple items and extended items.
 func parseSimpleBits(ibr *bitReader, item *Item) error {
 
+	var readBits int
 	// offset: 0 "J"
 	j := ibr.ReadBits64(8, false)
+	readBits += 8
 
 	// offset: 8, "M"
 	m := ibr.ReadBits64(8, false)
+	readBits += 8
 
 	if string(j) != "J" || string(m) != "M" {
 		return errors.New("Failed to find item header JM")
 	}
 
+	// offset: 16, unknown
 	ibr.ReadBits64(4, true)
+	readBits += 4
 
 	// offset: 20
 	item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset: 21, unknown
 	ibr.ReadBits64(6, true)
+	readBits += 6
 
 	// offset: 27
 	item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 28, unknown
 	ibr.ReadBits64(1, true)
+	readBits++
 
 	// offset 29
 	item.New = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 30, unknown
 	reverseBits(ibr.ReadBits64(2, true), 2)
+	readBits += 2
 
 	// offset 32
 	item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 33
 	item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 34, unknown
 	reverseBits(ibr.ReadBits64(3, true), 3)
+	readBits += 3
 
 	// offset 37, if it's a simple item, it only contains 111 bits data
 	item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 38
 	item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 39, unknown
 	reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 40
 	item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 41, unknown
 	reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 42
 	item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 43, unknown
 	reverseBits(ibr.ReadBits64(15, true), 15)
+	readBits += 15
 
 	// offset 58
 	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
+	readBits += 3
 
 	// offset 61
 	item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
+	readBits += 4
 
 	// offset 65
 	item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
+	readBits += 4
 
 	// offset 69
 	item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
+	readBits += 3
 
 	// offset 72
 	reverseBits(ibr.ReadBits64(1, true), 1)
+	readBits++
 
 	// offset 73, if item is neither equipped or in the belt, this tells us where it is.
 	item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
+	readBits += 3
 
-	// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
-	var itemType string
-	for j := 0; j < 4; j++ {
-		itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+	if item.IsEar == 0 {
+		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
+		var itemType string
+		for j := 0; j < 4; j++ {
+			itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+		}
+
+		item.Type = strings.Trim(itemType, " ")
+
+		// offset 108
+		// If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
+		item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
+	} else {
+		fmt.Printf("Starting on ear: %d \n", readBits)
+
+		// offset 76, the item is an ear, we need to read the ear data.
+		earClass := reverseBits(ibr.ReadBits64(3, true), 3)
+		readBits += 3
+
+		earLevel := reverseBits(ibr.ReadBits64(7, true), 7)
+		readBits += 7
+
+		var name string
+		for {
+			c := reverseBits(ibr.ReadBits64(7, true), 7)
+
+			if c == 0 {
+				fmt.Println("found 0, breaking out")
+				break
+			}
+			readBits += 7
+			name += string(c)
+		}
+
+		fmt.Printf("Done with ear on: %d \n", readBits)
+
+		item.EarAttributes = earAttributes{
+			class: earClass,
+			level: earLevel,
+			name:  name,
+		}
+
+		// If the ear is not byte aligned, we'll have to byte align it before
+		// reading the next property, so we'll simply queue the reader at the next
+		// byte boundry by calculating the remainder.
+		remainder := readBits % 8
+		if remainder > 0 {
+			bitsToAlign := uint(8 - remainder)
+			fmt.Printf("Bits to align: %d \n", bitsToAlign)
+			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
+		}
 	}
-
-	item.Type = strings.Trim(itemType, " ")
-
-	// offset 108
-	// If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
-	item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
 
 	return nil
 }
@@ -729,8 +906,8 @@ func parseRunewordBits(ibr *bitReader, item *Item) error {
 	return nil
 }
 
-// Parses the upcoming magical property list in the byte queue,
-// and return a list of properties.
+// Parses the magical property list in the byte queue that belongs to an item
+// and returns the list of properties.
 func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 
 	var magicAttributes []magicAttribute
@@ -747,7 +924,6 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 		// If all 9 bits are set, we've hit the end of the stats section
 		//  at 0x1ff and exit the loop.
 		if id == 0x1ff {
-			fmt.Println("breaking out at 511")
 			break
 		}
 

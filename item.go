@@ -11,6 +11,7 @@ type Item struct {
 	SimpleItem         uint64
 	Ethereal           uint64
 	Personalized       uint64
+	PersonalizedName   string
 	GivenRuneword      uint64
 	LocationID         uint64
 	EquippedID         uint64
@@ -28,6 +29,9 @@ type Item struct {
 	ClassSpecific      uint64
 	LowQualityID       uint64
 	Timestamp          uint64
+
+	// Ear data, if the item is a player ear, we'll save the properties of it.
+	EarAttributes earAttributes
 
 	// Defense can range from -10, so we have to account for negative
 	// values and hence this type is int64.
@@ -969,6 +973,12 @@ var rareNames = map[uint64]string{
 	201: "Corruption",
 }
 
+type earAttributes struct {
+	class uint64
+	level uint64
+	name  string
+}
+
 // Note the values array is of the type int64, this is because some properties
 // contain negative values, such as - % requirements.
 type magicAttribute struct {
@@ -1250,10 +1260,10 @@ var magicalProperties = map[uint64]magicalProperty{
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
 	331: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Cold Skill Damage"},
 	332: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Poison Skill Damage"},
-	333: {Bits: []uint{8}, Name: "{0}% To Enemy Fire Resistance"},
-	334: {Bits: []uint{8}, Name: "{0}% To Enemy Lightning Resistance"},
-	335: {Bits: []uint{8}, Name: "{0}% To Enemy Cold Resistance"},
-	336: {Bits: []uint{8}, Name: "{0}% To Enemy Poison Resistance"},
+	333: {Bits: []uint{8}, Name: "-{0}% To Enemy Fire Resistance"},
+	334: {Bits: []uint{8}, Name: "-{0}% To Enemy Lightning Resistance"},
+	335: {Bits: []uint{8}, Name: "-{0}% To Enemy Cold Resistance"},
+	336: {Bits: []uint{8}, Name: "-{0}% To Enemy Poison Resistance"},
 }
 
 // Each set item has 5 bits of data containing the number of set lists follow
