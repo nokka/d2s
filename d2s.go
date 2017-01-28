@@ -18,70 +18,71 @@ type Char struct{}
 type character struct {
 	header
 	attributes
-	skills    []skill
-	items     []Item
-	mercItems []Item
-	golemItem Item
+	skills      []skill
+	items       []Item
+	corpseItems []Item
+	mercItems   []Item
+	golemItem   Item
 }
 
 // Header determines the header data of a d2s file.
 type header struct {
-	Identifier        uint32     // : 0 4 bytes
-	Version           uint32     // : 4 4 bytes
-	FileSize          uint32     // : 8 4 bytes
-	CheckSum          uint32     // : 12 4 bytes
-	ActiveArms        uint32     // : 16 4 bytes
-	Name              name       // : 20 16 bytes
-	Status            byte       // : 36 4 bytes
-	Progression       byte       // : 37 1 bytes
-	_                 [2]byte    // : 38 2 bytes
-	Class             class      // : 40 1 bytes
-	_                 [2]byte    // : 41 2 bytes
-	Level             byte       // : 43 1 bytes
-	_                 [4]byte    // : 44 4 bytes
-	LastPlayed        uint32     // : 48 4 bytes
-	_                 [4]byte    // : 52 4 bytes
-	AssignedSkills    [16]uint32 // : 56 64 bytes
-	LeftSkill         uint32     // : 120 4 bytes
-	RightSkill        uint32     // : 124 4 bytes
-	LeftSwapSkill     uint32     // : 128 4 bytes
-	RightSwapSkill    uint32     // : 132 4 bytes
-	_                 [32]byte   // : 136 32 bytes
-	CurrentDifficulty difficulty // : 168 3 bytes
-	MapID             uint32     // : 171 4 bytes
-	_                 [2]byte    // : 175 2 bytes
-	DeadMerc          uint16     // : 177 2 bytes
-	MercID            uint32     // : 179 4 bytes
-	MercNameID        uint16     // : 183 2 bytes
-	MercType          uint16     // : 185 2 bytes
-	MercExp           uint32     // : 187 4 bytes
-	_                 [144]byte  // : 191 144 bytes
-	QuestHeader       [4]byte    // : 335 4 bytes
-	_                 [6]byte    // : 339 6 bytes
-	QuestsNormal      [96]byte   // : 345 96 bytes
-	QuestsNm          [96]byte   // : 441 96 bytes
-	QuestsHell        [96]byte   // : 537 96 bytes
-	WaypointHeader    [2]byte    // : 633 2 bytes
-	_                 [6]byte    // : 635 6 bytes
-	WaypointsNormal   [24]byte   // : 641 24 bytes
-	WaypointsNm       [24]byte   // : 665 24 bytes
-	WaypointsHell     [24]byte   // : 689 24 bytes
-	WaypointTrailer   byte       // : 713 1 byte
-	NPCHeader         [2]byte    // : 714 2 byte
-	_                 byte       // : 716 1 byte
-	NPCIntroNormal    [5]byte    // : 717 5 byte
-	_                 [3]byte    // : 722 3 byte
-	NPCIntroNm        [5]byte    // : 725 5 byte
-	_                 [3]byte    // : 730 3 byte
-	NPCIntroHell      [5]byte    // : 733 5 byte
-	_                 [3]byte    // : 738 3 byte
-	NPCReturnNorm     [4]byte    // : 741 4 byte
-	_                 [4]byte    // : 745 4 byte
-	NPCReturnNm       [4]byte    // : 749 4 byte
-	_                 [4]byte    // : 753 4 byte
-	NPCReturnHell     [4]byte    // : 757 4 byte
-	_                 [4]byte    // : 761 4 byte
-	StatHeader        [2]byte    // : 765 2 byte
+	Identifier        uint32
+	Version           uint32
+	FileSize          uint32
+	CheckSum          uint32
+	ActiveArms        uint32
+	Name              name
+	Status            byte
+	Progression       byte
+	_                 [2]byte
+	Class             class
+	_                 [2]byte
+	Level             byte
+	_                 [4]byte
+	LastPlayed        uint32
+	_                 [4]byte
+	AssignedSkills    [16]uint32
+	LeftSkill         uint32
+	RightSkill        uint32
+	LeftSwapSkill     uint32
+	RightSwapSkill    uint32
+	_                 [32]byte
+	CurrentDifficulty difficulty
+	MapID             uint32
+	_                 [2]byte
+	DeadMerc          uint16
+	MercID            uint32
+	MercNameID        uint16
+	MercType          uint16
+	MercExp           uint32
+	_                 [144]byte
+	QuestHeader       [4]byte
+	_                 [6]byte
+	QuestsNormal      [96]byte
+	QuestsNm          [96]byte
+	QuestsHell        [96]byte
+	WaypointHeader    [2]byte
+	_                 [6]byte
+	WaypointsNormal   [24]byte
+	WaypointsNm       [24]byte
+	WaypointsHell     [24]byte
+	WaypointTrailer   byte
+	NPCHeader         [2]byte
+	_                 byte
+	NPCIntroNormal    [5]byte
+	_                 [3]byte
+	NPCIntroNm        [5]byte
+	_                 [3]byte
+	NPCIntroHell      [5]byte
+	_                 [3]byte
+	NPCReturnNorm     [4]byte
+	_                 [4]byte
+	NPCReturnNm       [4]byte
+	_                 [4]byte
+	NPCReturnHell     [4]byte
+	_                 [4]byte
+	StatHeader        [2]byte
 }
 
 type skillData struct {
@@ -134,7 +135,7 @@ func Parse(file io.Reader) (Char, error) {
 		return Char{}, err
 	}
 
-	err = parseCorpse(bfr, &char)
+	/*err = parseCorpse(bfr, &char)
 	if err != nil {
 		return Char{}, err
 	}
@@ -149,7 +150,7 @@ func Parse(file io.Reader) (Char, error) {
 		if err != nil {
 			return Char{}, err
 		}
-	}
+	}*/
 
 	/*fmt.Printf("%+v\n\n", char.header)
 	fmt.Printf("%+v\n\n", char.attributes)
@@ -333,6 +334,8 @@ func parseCorpse(bfr io.ByteReader, char *character) error {
 	// Make a buffer that can hold 16 bytes, which can hold the corpse data.
 	buf := make([]byte, 16)
 
+	// Read the first 4 bytes that contain the header string and if the char
+	// is dead or not.
 	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
 	if err != nil {
 		return err
@@ -349,18 +352,45 @@ func parseCorpse(bfr io.ByteReader, char *character) error {
 		return errors.New("Failed to find the corpse items header")
 	}
 
-	// TODO if the count here is 1, that means your character is currently dead
-	// and will have the corpse item list here.
+	// The character is currently dead and will have the corpse item list here.
 	if corpseHeaderData.Count == 1 {
-		// read corpse data
+
+		// 12 Unknown bytes.
+		_, err := io.ReadFull(bfr.(io.Reader), buf[:12])
+		if err != nil {
+			return err
+		}
+
+		_, err = io.ReadFull(bfr.(io.Reader), buf[:4])
+		if err != nil {
+			return err
+		}
+
+		itemHeaderData := itemData{}
+		err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData)
+
+		if err != nil {
+			return err
+		}
+
+		if string(itemHeaderData.Header[:]) != "JM" {
+			return errors.New("Failed to find the merc items header")
+		}
+
+		corpseItems, err := parseItemList(bfr, int(itemHeaderData.Count))
+		if err != nil {
+			return err
+		}
+
+		char.corpseItems = corpseItems
 	}
-	//fmt.Printf("Corpse data: %+v\n\n", corpseHeaderData)
+
 	return nil
 }
 
 // Parses all items on the merc, if it exists, otherwise just reads the header.
 func parseMercItems(bfr io.ByteReader, char *character) error {
-	fmt.Println("Read merc data")
+
 	ibr := bitReader{r: bfr}
 
 	// offset: 0 "j"
@@ -376,7 +406,6 @@ func parseMercItems(bfr io.ByteReader, char *character) error {
 	// If you have a merc, we'll read the item list of the merc here.
 	if char.MercID != 0 {
 
-		fmt.Println("MERC ITEMS START HERE")
 		// Make a buffer that can hold 4 bytes, which can hold the items header.
 		buf := make([]byte, 4)
 
@@ -430,7 +459,6 @@ func parseIronGolem(bfr io.ByteReader, char *character) error {
 		return errors.New("Failed to find the golem header")
 	}
 
-	fmt.Println("Has golem")
 	if golemHeaderData.HasGolem == 1 {
 		item, err := parseItemList(bfr, 1)
 		if err != nil {
@@ -504,8 +532,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 				readBits += 11
 			}
 
-			// MARK: Quality based data.
-
 			switch item.Quality {
 
 			case lowQuality:
@@ -544,12 +570,11 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 				readBits += 16
 			}
 
-			// MARK: Personalization data
-
 			if item.Personalized == 1 {
 				var name string
 				for {
 					c := reverseBits(ibr.ReadBits64(7, true), 7)
+					readBits += 7
 
 					if c == 0 {
 						break
@@ -573,34 +598,28 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 
 			// All items have this field between the personalization (if it exists)
 			// and the item specific data
-			fmt.Printf("Bits read before timestamp: %d \n", readBits)
 			item.Timestamp = reverseBits(ibr.ReadBits64(1, true), 1)
 			readBits++
 
 			typeID := item.getTypeID()
 
 			if typeID == armor {
-				fmt.Printf("Bits read before armor: %d \n", readBits)
 				// If the item is an armor, it will have this field of defense data.
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
+				readBits += 11
 
 				// We need to substract 10 defense rating from all armors for
 				// some reason, I'm not sure why.
 				item.DefenseRating = int64((defRating - 10))
-
-				fmt.Printf("Defense rating: %d \n", item.DefenseRating)
-				readBits += 11
 			}
 
 			if typeID == armor || typeID == weapon {
 				item.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-				readBits += 8
 				item.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-				readBits += 8
 
 				// Seems to be a random bit here.
 				reverseBits(ibr.ReadBits64(1, true), 1)
-				readBits++
+				readBits += 17
 			}
 
 			if quantityMap[item.Type] {

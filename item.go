@@ -1029,7 +1029,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	46: {Bits: []uint{5}, Name: "+X% to Maximum Poison Resist"},
 	48: {Bits: []uint{8, 9}, Name: "Adds X-Y Fire Damage"},
 	50: {Bits: []uint{6, 10}, Name: "Adds X-Y Lightning Damage"},
-	52: {Bits: []uint{6, 7}, Name: "Adds X-Y Magic Damage"},
+	52: {Bits: []uint{8, 9}, Name: "Adds X-Y Magic Damage"},
 	54: {Bits: []uint{8, 9, 8}, Name: "Adds X-Y Cold Damage"},
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds X-Y Poison Damage over Z Seconds"},
 	60: {Bits: []uint{7}, Name: "{0}% Life stolen per hit"},
