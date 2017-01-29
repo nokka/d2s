@@ -1,76 +1,55 @@
 package d2s
 
-// Item represents a base 111 bit item.
-// Item represents an actual item
-type Item struct {
-	Identified         uint64 `json:"identified"`
-	Socketed           uint64 `json:"socketed"`
-	New                uint64 `json:"new"`
-	IsEar              uint64 `json:"is_ear"`
-	StarterItem        uint64 `json:"starter_item"`
-	SimpleItem         uint64 `json:"simple_item"`
-	Ethereal           uint64 `json:"ethereal"`
-	Personalized       uint64 `json:"personalized"`
-	PersonalizedName   string
-	GivenRuneword      uint64
-	LocationID         uint64
-	EquippedID         uint64
-	PositionY          uint64
-	PositionX          uint64
-	AltPositionID      uint64
-	Type               string
-	TypeID             uint64
-	NrOfItemsInSockets uint64
-	ID                 uint64
-	Level              uint64
-	Quality            uint64
-	MultiplePictures   uint64
-	PictureID          uint64
-	ClassSpecific      uint64
-	LowQualityID       uint64
-	Timestamp          uint64
-
-	// Ear data, if the item is a player ear, we'll save the properties of it.
-	EarAttributes earAttributes
-
-	// Defense can range from -10, so we have to account for negative
-	// values and hence this type is int64.
-	DefenseRating int64
-
-	MaxDurability     uint64
-	CurrentDurability uint64
-	TotalNrOfSockets  uint64
-	Quantity          uint64
-
-	// Magical Item properties
-	MagicPrefix uint64
-	MagicSuffix uint64
-
-	// Runeword properties
-	RunewordID         uint64
-	RunewordAttributes []magicAttribute
-
-	// Set item properties
-	SetID         uint64
-	SetListCount  uint64
-	SetAttributes [][]magicAttribute
-
-	// Rare or Crafted data
-	RareName       string
-	RareName2      string
-	MagicalNameIDs [6]uint64
-
-	// Unique item properties
-	UniqueID uint64
-
-	// All item types >= magicallyEnhanced
-	MagicAttributes []magicAttribute
-
-	// Items socketed in the item
-	SocketedItems []Item
+type item struct {
+	Identified         uint64             `json:"identified"`
+	Socketed           uint64             `json:"socketed"`
+	New                uint64             `json:"new"`
+	IsEar              uint64             `json:"is_ear"`
+	StarterItem        uint64             `json:"starter_item"`
+	SimpleItem         uint64             `json:"simple_item"`
+	Ethereal           uint64             `json:"ethereal"`
+	Personalized       uint64             `json:"personalized"`
+	PersonalizedName   string             `json:"personalized_name"`
+	GivenRuneword      uint64             `json:"given_runeword"`
+	LocationID         uint64             `json:"location_id"`
+	EquippedID         uint64             `json:"equipped_id"`
+	PositionY          uint64             `json:"position_y"`
+	PositionX          uint64             `json:"position_x"`
+	AltPositionID      uint64             `json:"alt_position_id"`
+	Type               string             `json:"type"`
+	TypeID             uint64             `json:"type_id"`
+	NrOfItemsInSockets uint64             `json:"nr_of_items_in_sockets"`
+	ID                 uint64             `json:"id"`
+	Level              uint64             `json:"level"`
+	Quality            uint64             `json:"quality"`
+	MultiplePictures   uint64             `json:"multiple_pictures"`
+	PictureID          uint64             `json:"picture_id"`
+	ClassSpecific      uint64             `json:"class_specific"`
+	LowQualityID       uint64             `json:"low_quality_id"`
+	Timestamp          uint64             `json:"timestamp"`
+	EarAttributes      earAttributes      `json:"ear_attributes"`
+	DefenseRating      int64              `json:"defense_rating"`
+	MaxDurability      uint64             `json:"max_durability"`
+	CurrentDurability  uint64             `json:"current_durability"`
+	TotalNrOfSockets   uint64             `json:"total_nr_of_sockets"`
+	Quantity           uint64             `json:"quantity"`
+	MagicPrefix        uint64             `json:"magic_prefix"`
+	MagicSuffix        uint64             `json:"magic_suffix"`
+	RunewordID         uint64             `json:"runeword_id"`
+	RunewordAttributes []magicAttribute   `json:"runeword_attributes"`
+	SetID              uint64             `json:"set_id"`
+	SetListCount       uint64             `json:"set_list_count"`
+	SetAttributes      [][]magicAttribute `json:"set_attributes"`
+	RareName           string             `json:"rare_name"`
+	RareName2          string             `json:"rare_name2"`
+	MagicalNameIDs     []uint64           `json:"magical_name_ids, omitempty"`
+	UniqueID           uint64             `json:"unique_id, omitempty"`
+	UniqueName         string             `json:"unique_name, omitempty"`
+	MagicAttributes    []magicAttribute   `json:"magic_attributes"`
+	SocketedItems      []item             `json:"socketed_items"`
 }
 
-func (i Item) getTypeID() uint64 {
+func (i item) getTypeID() uint64 {
 
 	if _, ok := armorCodes[i.Type]; ok {
 		return armor
@@ -85,17 +64,17 @@ func (i Item) getTypeID() uint64 {
 
 // Attributes that only exists on a player ear.
 type earAttributes struct {
-	class uint64
-	level uint64
-	name  string
+	Class uint64 `json:"class"`
+	Level uint64 `json:"level"`
+	Name  string `json:"name"`
 }
 
 // Note the values array is of the type int64, this is because some properties
 // contain negative values, such as - % requirements.
 type magicAttribute struct {
-	ID     uint64
-	Name   string
-	Values []int64
+	ID     uint64  `json:"id"`
+	Name   string  `json:"name"`
+	Values []int64 `json:"values"`
 }
 
 type magicalProperty struct {
@@ -994,6 +973,410 @@ var rareNames = map[uint64]string{
 	201: "Corruption",
 }
 
+var uniqueNames = map[uint64]string{
+	0:   "The Gnasher",
+	1:   "Deathspade",
+	2:   "Bladebone",
+	3:   "Skull splitter",
+	4:   "Rakescar",
+	5:   "Axe of Fechmar",
+	6:   "Goreshovel",
+	7:   "The Chiefthan",
+	8:   "Brainhew",
+	9:   "Humongous",
+	10:  "Torch of Iros",
+	11:  "Maelstorm",
+	12:  "Gravenspine",
+	13:  "Umes Lament",
+	14:  "Felloak",
+	15:  "Knell Striker",
+	16:  "Rusthandle",
+	17:  "Stormeye",
+	18:  "Stoutnail",
+	19:  "Crushflange",
+	20:  "Bloodrise",
+	21:  "The Generals Tan Do Li Ga",
+	22:  "Ironstone",
+	23:  "Bonesnap",
+	24:  "Steeldriver",
+	25:  "Rixot's Keen",
+	26:  "Blood Crescent",
+	27:  "Skewer of Krintiz",
+	28:  "Gleamscythe",
+	29:  "Azurewrath",
+	30:  "Griswold's Edge",
+	31:  "Hellplague",
+	32:  "Culwens Point",
+	33:  "Shadowfang",
+	34:  "Soulflay",
+	35:  "Kinemils Awl",
+	36:  "Blacktongue",
+	37:  "Ripsaw",
+	38:  "The Patriarch",
+	39:  "Gull",
+	40:  "The Diggler",
+	41:  "The Jade Tan Do",
+	42:  "Spectral Shard",
+	43:  "The Dragon Chang",
+	44:  "Razortine",
+	45:  "Bloodthief",
+	46:  "Lance of Yaggai",
+	47:  "The Tannr Gorerod",
+	48:  "Dimoaks Hew",
+	49:  "Steelgoad",
+	50:  "Soul Harvest",
+	51:  "The Battlebranch",
+	52:  "Woestave",
+	53:  "The Grim Reaper",
+	54:  "Bane Ash",
+	55:  "Serpent Lord",
+	56:  "Spire of Lazarus",
+	57:  "The Salamander",
+	58:  "The Iron Jang Bong",
+	59:  "Pluckeye",
+	60:  "Witherstring",
+	61:  "Raven Claw",
+	62:  "Rogue's Bow",
+	63:  "Stormstrike",
+	64:  "Wizendraw",
+	65:  "Hellclap",
+	66:  "Blastbark",
+	67:  "Leadcrow",
+	68:  "Ichorsting",
+	69:  "Hellcast",
+	70:  "Doomslayer",
+	71:  "Biggin's Bonnet",
+	72:  "Tarnhelm",
+	73:  "Coif of Glory",
+	74:  "Duskdeep",
+	75:  "Wormskull",
+	76:  "Howltusk",
+	77:  "Undead Crown",
+	78:  "The Face of Horror",
+	79:  "Greyform",
+	80:  "Blinkbat's Form",
+	81:  "The Centurion",
+	82:  "Twitchthroe",
+	83:  "Darkglow",
+	84:  "Hawkmail",
+	85:  "Sparking Mail",
+	86:  "Venom Ward",
+	87:  "Iceblink",
+	88:  "Boneflesh",
+	89:  "Rockfleece",
+	90:  "Rattlecage",
+	91:  "Goldskin",
+	92:  "Victors Silk",
+	93:  "Heavenly Garb",
+	94:  "Pelta Lunata",
+	95:  "Umbral Disk",
+	96:  "Stormguild",
+	97:  "Wall of the Eyeless",
+	98:  "Swordback Hold",
+	99:  "Steelclash",
+	100: "Bverrit Keep",
+	101: "The Ward",
+	102: "The Hand of Broc",
+	103: "Bloodfist",
+	104: "Chance Guards",
+	105: "Magefist",
+	106: "Frostburn",
+	107: "Hotspur",
+	108: "Gorefoot",
+	109: "Treads of Cthon",
+	110: "Goblin Toe",
+	111: "Tearhaunch",
+	112: "Lenymo",
+	113: "Snakecord",
+	114: "Nightsmoke",
+	115: "Goldwrap",
+	116: "Bladebuckle",
+	117: "Nokozan Relic",
+	118: "The Eye of Etlich",
+	119: "The Mahim-Oak Curio",
+	120: "Nagelring",
+	121: "Manald Heal",
+	122: "The Stone of Jordan",
+	123: "Amulet of the Viper",
+	124: "Staff of Kings",
+	125: "Horadric Staff",
+	126: "Hell Forge Hammer",
+	127: "Khalim's Flail",
+	128: "Super Khalim's Flail",
+	129: "Coldkill",
+	130: "Butcher's Pupil",
+	131: "Islestrike",
+	132: "Pompe's Wrath",
+	133: "Guardian Naga",
+	134: "Warlord's Trust",
+	135: "Spellsteel",
+	136: "Stormrider",
+	137: "Boneslayer Blade",
+	138: "The Minataur",
+	139: "Suicide Branch",
+	140: "Carin Shard",
+	141: "Arm of King Leoric",
+	142: "Blackhand Key",
+	143: "Dark Clan Crusher",
+	144: "Zakarum's Hand",
+	145: "The Fetid Sprinkler",
+	146: "Hand of Blessed Light",
+	147: "Fleshrender",
+	148: "Sureshrill Frost",
+	149: "Moonfall",
+	150: "Baezil's Vortex",
+	151: "Earthshaker",
+	152: "Bloodtree Stump",
+	153: "The Gavel of Pain",
+	154: "Bloodletter",
+	155: "Coldsteel Eye",
+	156: "Hexfire",
+	157: "Blade of Ali Baba",
+	158: "Ginther's Rift",
+	159: "Headstriker",
+	160: "Plague Bearer",
+	161: "The Atlantian",
+	162: "Crainte Vomir",
+	163: "Bing Sz Wang",
+	164: "The Vile Husk",
+	165: "Cloudcrack",
+	166: "Todesfaelle Flamme",
+	167: "Swordguard",
+	168: "Spineripper",
+	169: "Heart Carver",
+	170: "Blackbog's Sharp",
+	171: "Stormspike",
+	172: "The Impaler",
+	173: "Kelpie Snare",
+	174: "Soulfeast Tine",
+	175: "Hone Sundan",
+	176: "Spire of Honor",
+	177: "The Meat Scraper",
+	178: "Blackleach Blade",
+	179: "Athena's Wrath",
+	180: "Pierre Tombale Couant",
+	181: "Husoldal Evo",
+	182: "Grim's Burning Dead",
+	183: "Razorswitch",
+	184: "Ribcracker",
+	185: "Chromatic Ire",
+	186: "Warpspear",
+	187: "Skullcollector",
+	188: "Skystrike",
+	189: "Riphook",
+	190: "Kuko Shakaku",
+	191: "Endlesshail",
+	192: "Whichwild String",
+	193: "Cliffkiller",
+	194: "Magewrath",
+	195: "Godstrike Arch",
+	196: "Langer Briser",
+	197: "Pus Spiter",
+	198: "Buriza-Do Kyanon",
+	199: "Demon Machine",
+	200: "Armor (Unknown)",
+	201: "Peasent Crown",
+	202: "Rockstopper",
+	203: "Stealskull",
+	204: "Darksight Helm",
+	205: "Valkyrie Wing",
+	206: "Crown of Thieves",
+	207: "Blckhorn's Face",
+	208: "Vampire Gaze",
+	209: "The Spirit Shroud",
+	210: "Skin of the Vipermagi",
+	211: "Skin of the Flayed One",
+	212: "Ironpelt",
+	213: "Spiritforge",
+	214: "Crow Caw",
+	215: "Shaftstop",
+	216: "Duriel's Shell",
+	217: "Skullder's Ire",
+	218: "Guardian Angel",
+	219: "Toothrow",
+	220: "Atma's Wail",
+	221: "Black Hades",
+	222: "Corpsemourn",
+	223: "Que-Hegan's Wisdom",
+	224: "Visceratuant",
+	225: "Mosers Blessed Circle",
+	226: "Stormchaser",
+	227: "Tiamat's Rebuke",
+	228: "Kerke's Sanctuary",
+	229: "Radimant's Sphere",
+	230: "Lidless Wall",
+	231: "Lance Guard",
+	232: "Venom Grip",
+	233: "Gravepalm",
+	234: "Ghoulhide",
+	235: "Lavagout",
+	236: "Hellmouth",
+	237: "Infernostride",
+	238: "Waterwalk",
+	239: "Silkweave",
+	240: "Wartraveler",
+	241: "Gorerider",
+	242: "String of Ears",
+	243: "Razortail",
+	244: "Gloomstrap",
+	245: "Snowclash",
+	246: "Thundergod's Vigor",
+	247: "Elite unique",
+	248: "Harlequin Crest",
+	249: "Veil of Steel",
+	250: "The Gladiator's Bane",
+	251: "Arkaine's Valor",
+	252: "Blackoak Shield",
+	253: "Stormshield",
+	254: "Hellslayer",
+	255: "Messerschmidt's Reaver",
+	256: "Baranar's Star",
+	257: "Schaefer's Hammer",
+	258: "The Cranium Basher",
+	259: "Lightsabre",
+	260: "Doombringer",
+	261: "The Grandfather",
+	262: "Wizardspike",
+	263: "Constricting Ring",
+	264: "Stormspire",
+	265: "Eaglehorn",
+	266: "Windforce",
+	267: "Ring",
+	268: "Bul Katho's Wedding Band",
+	269: "The Cat's Eye",
+	270: "The Rising Sun",
+	271: "Crescent Moon",
+	272: "Mara's Kaleidoscope",
+	273: "Atma's Scarab",
+	274: "Dwarf Star",
+	275: "Raven Frost",
+	276: "Highlord's Wrath",
+	277: "Saracen's Chance",
+	278: "Class specific",
+	279: "Arreat's Face",
+	280: "Homunculus",
+	281: "Titan's Revenge",
+	282: "Lycander's Aim",
+	283: "Lycander's Flank",
+	284: "The Oculus",
+	285: "Herald of Zakarum",
+	286: "Cutthroat",
+	287: "Jalal's Mane",
+	288: "The Scalper",
+	289: "Bloodmoon",
+	290: "Djinnslayer",
+	291: "Deathbit",
+	292: "Warshrike",
+	293: "Gutsiphon",
+	294: "Razoredge",
+	295: "Gore Ripper",
+	296: "Demonlimb",
+	297: "Steelshade",
+	298: "Tomb Reaver",
+	299: "Death's Web",
+	300: "Nature's Peace",
+	301: "Azurewrath",
+	302: "Seraph's Hymn",
+	303: "Zakarum's Salvation",
+	304: "Fleshripper",
+	305: "Odium",
+	306: "Horizon's Tornado",
+	307: "Stone Crusher",
+	308: "Jadetalon",
+	309: "Shadowdancer",
+	310: "Cerebus",
+	311: "Tyrael's Might",
+	312: "Souldrain",
+	313: "Runemaster",
+	314: "Deathcleaver",
+	315: "Executioner's Justice",
+	316: "Stoneraven",
+	317: "Leviathan",
+	318: "Larzuk's Champion",
+	319: "Wisp",
+	320: "Gargoyle's Bite",
+	321: "Lacerator",
+	322: "Mang Song's Lesson",
+	323: "Viperfork",
+	324: "Ethereal Edge",
+	325: "Demonhorn's Edge",
+	326: "The Reaper's Toll",
+	327: "Spiritkeeper",
+	328: "Hellrack",
+	329: "Alma Negra",
+	330: "Darkforge Spawn",
+	331: "Widowmaker",
+	332: "Bloodraven's Charge",
+	333: "Ghostflame",
+	334: "Shadowkiller",
+	335: "Gimmershred",
+	336: "Griffon's Eye",
+	337: "Windhammer",
+	338: "Thunderstroke",
+	339: "Giant Maimer",
+	340: "Demon's Arch",
+	341: "Boneflame",
+	342: "Steelpillar",
+	343: "Nightwing's Veil",
+	344: "Crown of Ages",
+	345: "Andariel's Visage",
+	346: "Darkfear",
+	347: "Dragonscale",
+	348: "Steel Carapice",
+	349: "Medusa's Gaze",
+	350: "Ravenlore",
+	351: "Boneshade",
+	352: "Nethercrow",
+	353: "Flamebellow",
+	354: "Fathom",
+	355: "Wolfhowl",
+	356: "Spirit Ward",
+	357: "Kira's Guardian",
+	358: "Ormus Robes",
+	359: "Gheed's Fortune",
+	360: "Stormlash",
+	361: "Halaberd's Reign",
+	362: "Warriv's Warder",
+	363: "Spike Thorn",
+	364: "Dracul's Grasp",
+	365: "Frostwind",
+	366: "Templar's Might",
+	367: "Eschuta's Temper",
+	368: "Firelizard's Talons",
+	369: "Sandstorm Trek",
+	370: "Marrowwalk",
+	371: "Heaven's Light",
+	372: "Merman's Speed",
+	373: "Arachnid Mesh",
+	374: "Nosferatu's Coil",
+	375: "Metalgrid",
+	376: "Verdugo's Hearty Cord",
+	377: "Sigurd's Staunch",
+	378: "Carrion Wind",
+	379: "Giantskull",
+	380: "Ironward",
+	381: "Annihilus",
+	382: "Arioc's Needle",
+	383: "Cranebeak",
+	384: "Nord's Tenderizer",
+	385: "Earthshifter",
+	386: "Wraithflight",
+	387: "Bonehew",
+	388: "Ondal's Wisdom",
+	389: "The Reedeemer",
+	390: "Headhunter's Glory",
+	391: "Steelrend",
+	392: "Rainbow Facet",
+	393: "Rainbow Facet",
+	394: "Rainbow Facet",
+	395: "Rainbow Facet",
+	396: "Rainbow Facet",
+	397: "Rainbow Facet",
+	398: "Rainbow Facet",
+	399: "Rainbow Facet",
+	400: "Hellfire Torch",
+}
+
 var magicalProperties = map[uint64]magicalProperty{
 	0:  {Bits: []uint{8}, Bias: 32, Name: "+X to Strength"},
 	1:  {Bits: []uint{7}, Bias: 32, Name: "+X to Energy"},
@@ -1248,7 +1631,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// is 50 and additional is 30, then the total is 50 + 30.
 	254: {Bits: []uint{8}, Name: "Increased Stack Size"},
 
-	// These are some weird values that were never used in the actual game.
+	// IDs 268 - 303 are some weird values that were never used in the actual game.
 	// These values change depending on the time of day in the game.
 	// The format of the bit fields are the same in all cases, the first 2 bits
 	// specifies the the of time when the value is at its maximum.
@@ -1256,7 +1639,6 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The second and third are respectively the minimum and maximum values of the property.
 	// The maximum value at the time specified and the minimum at the opposite.
 
-	// TODO: Add ids 268 - 303 if they prove to exist.
 	329: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Fire Skill Damage"},
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
 	331: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Cold Skill Damage"},

@@ -7,14 +7,14 @@ import (
 )
 
 // Character represents all the d2s character data.
-type character struct {
+type Character struct {
 	Header      header     `json:"header"`
 	Attributes  attributes `json:"attributes"`
 	Skills      []skill    `json:"skills"`
-	Items       []Item
-	corpseItems []Item
-	mercItems   []Item
-	golemItem   Item
+	Items       []item     `json:"items"`
+	CorpseItems []item     `json:"corpse_items,omitempty"`
+	MercItems   []item     `json:"merc_items,omitempty"`
+	GolemItem   item       `json:"golem_item,omitempty"`
 }
 
 func (h *header) MarshalJSON() ([]byte, error) {

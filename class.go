@@ -14,12 +14,13 @@ const (
 )
 
 var classMap = map[class]string{
-	Amazon:    "Amazon",
-	Sorceress: "Sorceress",
-	Paladin:   "Paladin",
-	Barbarian: "Barbarian",
-	Druid:     "Druid",
-	Assassin:  "Assassin",
+	Amazon:      "Amazon",
+	Sorceress:   "Sorceress",
+	Necromancer: "Necromancer",
+	Paladin:     "Paladin",
+	Barbarian:   "Barbarian",
+	Druid:       "Druid",
+	Assassin:    "Assassin",
 }
 
 // class struct will represent the characters in game class.

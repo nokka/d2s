@@ -20,7 +20,6 @@ const (
 	stashedGold    = 15
 )
 
-// Attributes Represents a characters allocated attributes.
 type attributes struct {
 	Strength          uint64 `json:"strength"`
 	Energy            uint64 `json:"energy"`
