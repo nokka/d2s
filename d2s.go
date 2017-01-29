@@ -55,7 +55,7 @@ func Parse(file io.Reader) (Char, error) {
 		return Char{}, err
 	}
 
-	if char.Class == Necromancer {
+	if char.Header.Class == Necromancer {
 		err = parseIronGolem(bfr, &char)
 		if err != nil {
 			return Char{}, err
@@ -82,7 +82,7 @@ func parseHeader(bfr io.Reader, char *character) error {
 		return err
 	}
 
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &char.header)
+	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &char.Header)
 	if err != nil {
 		return err
 	}
@@ -123,37 +123,37 @@ func parseAttributes(bfr io.ByteReader, char *character) error {
 
 		switch id {
 		case strength:
-			char.attributes.Strength = attr
+			char.Attributes.Strength = attr
 		case energy:
-			char.attributes.Energy = attr
+			char.Attributes.Energy = attr
 		case dexterity:
-			char.attributes.Dexterity = attr
+			char.Attributes.Dexterity = attr
 		case vitality:
-			char.attributes.Vitality = attr
+			char.Attributes.Vitality = attr
 		case unusedStats:
-			char.attributes.UnusedStats = attr
+			char.Attributes.UnusedStats = attr
 		case unusedSkills:
-			char.attributes.UnusedSkillPoints = attr
+			char.Attributes.UnusedSkillPoints = attr
 		case currentHP:
-			char.attributes.CurrentHP = attr / 256
+			char.Attributes.CurrentHP = attr / 256
 		case maxHP:
-			char.attributes.MaxHP = attr / 256
+			char.Attributes.MaxHP = attr / 256
 		case currentMana:
-			char.attributes.CurrentMana = attr / 256
+			char.Attributes.CurrentMana = attr / 256
 		case maxMana:
-			char.attributes.MaxMana = attr / 256
+			char.Attributes.MaxMana = attr / 256
 		case currentStamina:
-			char.attributes.CurrentStamina = attr / 256
+			char.Attributes.CurrentStamina = attr / 256
 		case maxStamina:
-			char.attributes.MaxStamina = attr / 256
+			char.Attributes.MaxStamina = attr / 256
 		case level:
-			char.attributes.Level = attr
+			char.Attributes.Level = attr
 		case experience:
-			char.attributes.Experience = attr
+			char.Attributes.Experience = attr
 		case gold:
-			char.attributes.Gold = attr
+			char.Attributes.Gold = attr
 		case stashedGold:
-			char.attributes.StashedGold = attr
+			char.Attributes.StashedGold = attr
 		}
 	}
 
@@ -184,19 +184,24 @@ func parseSkills(bfr io.Reader, char *character) error {
 		return errors.New("Failed to find skill header")
 	}
 
-	skillOffset, ok := skillOffsetMap[uint(char.header.Class)]
+	skillOffset, ok := skillOffsetMap[uint(char.Header.Class)]
 	if !ok {
-		return fmt.Errorf("Unknown skill offset for class %d", char.header.Class)
+		return fmt.Errorf("Unknown skill offset for class %d", char.Header.Class)
 	}
 
 	for i, allocatedPoints := range skillHeaderData.List {
 		id := (i + skillOffset)
-		s := skill{
-			id:     id,
-			points: int(allocatedPoints),
-			name:   skillMap[id],
+
+		skillName, ok := skillMap[id]
+		if !ok {
+			return fmt.Errorf("Unknown skill id %d", id)
 		}
-		char.skills = append(char.skills, s)
+		s := skill{
+			ID:     id,
+			Points: int(allocatedPoints),
+			Name:   skillName,
+		}
+		char.Skills = append(char.Skills, s)
 	}
 
 	return nil
@@ -230,7 +235,7 @@ func parseItems(bfr io.ByteReader, char *character) error {
 		return err
 	}
 
-	char.items = items
+	char.Items = items
 
 	return nil
 }
@@ -314,7 +319,7 @@ func parseMercItems(bfr io.ByteReader, char *character) error {
 	}
 
 	// If you have a merc, we'll read the item list of the merc here.
-	if char.MercID != 0 {
+	if char.Header.MercID != 0 {
 
 		// Make a buffer that can hold 4 bytes, which can hold the items header.
 		buf := make([]byte, 4)

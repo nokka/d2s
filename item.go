@@ -3,14 +3,14 @@ package d2s
 // Item represents a base 111 bit item.
 // Item represents an actual item
 type Item struct {
-	Identified         uint64
-	Socketed           uint64
-	New                uint64
-	IsEar              uint64
-	StarterItem        uint64
-	SimpleItem         uint64
-	Ethereal           uint64
-	Personalized       uint64
+	Identified         uint64 `json:"identified"`
+	Socketed           uint64 `json:"socketed"`
+	New                uint64 `json:"new"`
+	IsEar              uint64 `json:"is_ear"`
+	StarterItem        uint64 `json:"starter_item"`
+	SimpleItem         uint64 `json:"simple_item"`
+	Ethereal           uint64 `json:"ethereal"`
+	Personalized       uint64 `json:"personalized"`
 	PersonalizedName   string
 	GivenRuneword      uint64
 	LocationID         uint64

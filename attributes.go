@@ -20,24 +20,24 @@ const (
 	stashedGold    = 15
 )
 
-// Represents a characters allocated attributes.
+// Attributes Represents a characters allocated attributes.
 type attributes struct {
-	Strength          uint64
-	Energy            uint64
-	Dexterity         uint64
-	Vitality          uint64
-	UnusedStats       uint64
-	UnusedSkillPoints uint64
-	CurrentHP         uint64
-	MaxHP             uint64
-	CurrentMana       uint64
-	MaxMana           uint64
-	CurrentStamina    uint64
-	MaxStamina        uint64
-	Level             uint64
-	Experience        uint64
-	Gold              uint64
-	StashedGold       uint64
+	Strength          uint64 `json:"strength"`
+	Energy            uint64 `json:"energy"`
+	Dexterity         uint64 `json:"dexterity"`
+	Vitality          uint64 `json:"vitality"`
+	UnusedStats       uint64 `json:"unused_stats"`
+	UnusedSkillPoints uint64 `json:"unused_skill_points"`
+	CurrentHP         uint64 `json:"current_hp"`
+	MaxHP             uint64 `json:"max_hp"`
+	CurrentMana       uint64 `json:"current_mana"`
+	MaxMana           uint64 `json:"max_mana"`
+	CurrentStamina    uint64 `json:"current_stamina"`
+	MaxStamina        uint64 `json:"max_stamina"`
+	Level             uint64 `json:"level"`
+	Experience        uint64 `json:"experience"`
+	Gold              uint64 `json:"gold"`
+	StashedGold       uint64 `json:"stashed_gold"`
 }
 
 // Holds all the references to bit sizes of all attributes.
