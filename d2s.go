@@ -457,6 +457,12 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			case partOfSet:
 				parsed.SetID = reverseBits(ibr.ReadBits64(12, true), 12)
+
+				setName, ok := setNames[parsed.SetID]
+				if ok {
+					parsed.SetName = setName
+				}
+
 				readBits += 12
 
 			case rare, crafted:
@@ -509,9 +515,27 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			parsed.Timestamp = reverseBits(ibr.ReadBits64(1, true), 1)
 			readBits++
 
-			typeID := parsed.getTypeID()
+			parsed.TypeID = parsed.getTypeID()
 
-			if typeID == armor {
+			switch parsed.TypeID {
+			case armor:
+				typeName, ok := armorCodes[parsed.Type]
+				if ok {
+					parsed.TypeName = typeName
+				}
+			case weapon:
+				typeName, ok := weaponCodes[parsed.Type]
+				if ok {
+					parsed.TypeName = typeName
+				}
+			case other:
+				typeName, ok := miscCodes[parsed.Type]
+				if ok {
+					parsed.TypeName = typeName
+				}
+			}
+
+			if parsed.TypeID == armor {
 				// If the item is an armor, it will have this field of defense data.
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
 				readBits += 11
@@ -521,7 +545,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				parsed.DefenseRating = int64((defRating - 10))
 			}
 
-			if typeID == armor || typeID == weapon {
+			if parsed.TypeID == armor || parsed.TypeID == weapon {
 				parsed.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 				parsed.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 
@@ -603,8 +627,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			itemList = append(itemList, parsed)
 		}
-
-		fmt.Printf("%+v\n\n", parsed)
 
 		// If the item is not byte aligned, we'll have to byte align it before
 		// reading the next item, so we'll simply queue the reader at the next
@@ -826,6 +848,11 @@ func parseRareOrCraftedBits(ibr *bitReader, item *item) (int, error) {
 func parseRunewordBits(ibr *bitReader, item *item) error {
 	runewordID := reverseBits(ibr.ReadBits64(12, true), 12)
 	item.RunewordID = runewordID
+
+	runewordName, ok := runewordNames[runewordID]
+	if ok {
+		item.RunewordName = runewordName
+	}
 
 	// Unknown 4 bits, seems to be 5 all the time.
 	reverseBits(ibr.ReadBits64(4, true), 4)
