@@ -615,7 +615,22 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 		if parsed.LocationID == socketed {
 			last := len(itemList) - 1
+
+			// Add item to the socket list
 			itemList[last].SocketedItems = append(itemList[last].SocketedItems, parsed)
+
+			// Add the properties this socketed item provides into the socketed
+			// magic property array.
+			fmt.Println(parsed.Type)
+			attrList, ok := socketablesArmor[parsed.Type]
+			if ok {
+				for _, attr := range attrList {
+					itemList[last].SocketedAttributes = append(itemList[last].SocketedAttributes, attr)
+				}
+			}
+
+			fmt.Printf("\n%+v\n", itemList[last])
+
 		} else {
 			// Ok, so this item it self is not in a socket, but it might have socketed
 			// items in it, if it does, we'll need to increment the number of total
@@ -636,6 +651,8 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			bitsToAlign := uint(8 - remainder)
 			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
+
+		fmt.Printf("\n%+v\n\n\n", parsed)
 	}
 
 	return itemList, nil
@@ -776,7 +793,6 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 			c := reverseBits(ibr.ReadBits64(7, true), 7)
 
 			if c == 0 {
-				fmt.Println("found 0, breaking out")
 				break
 			}
 			readBits += 7

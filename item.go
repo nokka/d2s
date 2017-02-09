@@ -50,6 +50,7 @@ type item struct {
 	UniqueName         string             `json:"unique_name,omitempty"`
 	MagicAttributes    []magicAttribute   `json:"magic_attributes"`
 	SocketedItems      []item             `json:"socketed_items"`
+	SocketedAttributes []magicAttribute   `json:"socketed_attributes"`
 }
 
 func (i *item) getTypeID() uint64 {
@@ -1612,9 +1613,9 @@ var magicalProperties = map[uint64]magicalProperty{
 	31: {Bits: []uint{11}, Bias: 10, Name: "+{0} Defense"},
 	32: {Bits: []uint{9}, Name: "+{0} vs. Missile"},
 	33: {Bits: []uint{10}, Bias: 10, Name: "+{0} vs. Melee"},
-	34: {Bits: []uint{6}, Name: "Damage Reduced by {0}"},
+	34: {Bits: []uint{6}, Name: "Damage Reduced by {0}%"},
 	35: {Bits: []uint{6}, Name: "Magic Damage Reduced by {0}"},
-	36: {Bits: []uint{8}, Name: "Damage Reduced by {0}%"},
+	36: {Bits: []uint{8}, Name: "Damage Reduced by {0}"},
 	37: {Bits: []uint{8}, Name: "Magic Resist +{0}%"},
 	38: {Bits: []uint{8}, Name: "+{0}% to Maximum Magic Resist"},
 	39: {Bits: []uint{8}, Bias: 50, Name: "Fire Resist +{0}%"},
@@ -1630,8 +1631,8 @@ var magicalProperties = map[uint64]magicalProperty{
 	52: {Bits: []uint{8, 9}, Name: "Adds {0}-{1} Magic Damage"},
 	54: {Bits: []uint{8, 9, 8}, Name: "Adds {0}-{1} Cold Damage"},
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds {0}-{1} Poison Damage over {2} Seconds"},
-	60: {Bits: []uint{7}, Name: "{0}% Life stolen per hit"},
-	62: {Bits: []uint{7}, Name: "{0}% Mana stolen per hit"},
+	60: {Bits: []uint{7}, Name: "{0}% Life Stolen Per Hit"},
+	62: {Bits: []uint{7}, Name: "{0}% Mana Stolen Per Hit"},
 	73: {Bits: []uint{8}, Name: "+{0} Maximum Durability"},
 	74: {Bits: []uint{6}, Bias: 30, Name: "Replenish Life +{0}"},
 	75: {Bits: []uint{7}, Bias: 20, Name: "Increase Maximum Durability {0}%"},
@@ -1656,13 +1657,13 @@ var magicalProperties = map[uint64]magicalProperty{
 	// the color of the ambient light.
 	90: {Bits: []uint{5}, Name: "Ambient light"},
 	// After subtracting the bias, this is usually a negative number.
-	91: {Bits: []uint{8}, Bias: 100, Name: "Requirements -{0}%"},
+	91: {Bits: []uint{8}, Bias: 100, Name: "Requirements {0}%"},
 	92: {Bits: []uint{7}, Name: "Level requirements +{0} (Invisible)"},
 	93: {Bits: []uint{7}, Bias: 20, Name: "{0}% Increased Attack Speed"},
 	96: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Run/Walk"},
 
 	// Number of levels to a certain skill, e.g. +1 To Teleport.
-	97:  {Bits: []uint{9, 6}, Name: "+{0} To {1}"},
+	97:  {Bits: []uint{9, 6}, Name: "+{1} To {0}"},
 	99:  {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Hit Recovery"},
 	102: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Block Rate"},
 	105: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Cast Rate"},
@@ -1670,7 +1671,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// These properties usually applied to class specific items,
 	// first value selects the skill, the second determines how many
 	// additional skill points are given.
-	107: {Bits: []uint{9, 3}, Name: "+{1} to spell {0} (char_class Only)"},
+	107: {Bits: []uint{9, 3}, Name: "+{1} To {0}"},
 	108: {Bits: []uint{1}, Name: "Rest In Peace"},
 	109: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
 	181: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
@@ -1682,12 +1683,12 @@ var magicalProperties = map[uint64]magicalProperty{
 	187: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
 
 	110: {Bits: []uint{8}, Bias: 20, Name: "Poison Length Reduced by {0}%"},
-	111: {Bits: []uint{7}, Bias: 20, Name: "Damage +{0}"},
+	111: {Bits: []uint{9}, Bias: 20, Name: "Damage +{0}"},
 	112: {Bits: []uint{7}, Name: "Hit Causes Monsters to Flee {0}%"},
 	113: {Bits: []uint{7}, Name: "Hit Blinds Target +{0}"},
 	114: {Bits: []uint{6}, Name: "{0}% Damage Taken Goes to Mana"},
-	115: {Bits: []uint{1}, Name: "Ignore Target Defense"},
 	// The value of the data field is always 1.
+	115: {Bits: []uint{1}, Name: "Ignore Target Defense"},
 	116: {Bits: []uint{7}, Name: "{0}% Target Defense"},
 	// The value of the data field is always 1.
 	117: {Bits: []uint{7}, Name: "Prevent Monster Heal"},
@@ -1712,13 +1713,13 @@ var magicalProperties = map[uint64]magicalProperty{
 	140: {Bits: []uint{7}, Name: "Unknown"},
 	141: {Bits: []uint{7}, Name: "{0}% Deadly Strike"},
 	142: {Bits: []uint{7}, Name: "Fire Absorb {0}%"},
-	143: {Bits: []uint{7}, Name: "{0} Fire Absorb"},
+	143: {Bits: []uint{7}, Name: "+{0} Fire Absorb"},
 	144: {Bits: []uint{7}, Name: "Lightning Absorb {0}%"},
-	145: {Bits: []uint{7}, Name: "{0} Lightning Absorb"},
+	145: {Bits: []uint{7}, Name: "+{0} Lightning Absorb"},
 	146: {Bits: []uint{7}, Name: "Magic Absorb {0}%"},
-	147: {Bits: []uint{7}, Name: "{0} Magic Absorb"},
+	147: {Bits: []uint{7}, Name: "+{0} Magic Absorb"},
 	148: {Bits: []uint{7}, Name: "Cold Absorb {0}%"},
-	149: {Bits: []uint{7}, Name: "{0} Cold Absorb"},
+	149: {Bits: []uint{7}, Name: "+{0} Cold Absorb"},
 	150: {Bits: []uint{7}, Name: "Slows Target by {0}%"},
 	151: {Bits: []uint{9, 5}, Name: "Level +{0} {1} When Equipped"},
 	152: {Bits: []uint{1}, Name: "Indestructible"},
@@ -1753,7 +1754,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	//
 	// When reading the values, remember the bits are read from the right,
 	// so the values will be [2 3 1], offset 2, class id 3, 1 + to skills.
-	188: {Bits: []uint{3, 13, 3}, Name: "+{2} to {0} Skills ({1})"},
+	188: {Bits: []uint{3, 13, 3}, Name: "+{2} to {0} Skills ({1} only)"},
 
 	189: {Bits: []uint{10, 9}, Name: "+{0} to {1} Skills (char_class Only)"},
 	190: {Bits: []uint{10, 9}, Name: "+{0} to {1} Skills (char_class Only)"},
@@ -1764,14 +1765,14 @@ var magicalProperties = map[uint64]magicalProperty{
 	194: {Bits: []uint{4}, Name: "Adds {0} extra sockets to the item"},
 
 	// Order is spell id, level, % chance.
-	195: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
-	196: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
-	197: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} When you die"},
+	195: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When you die"},
+	196: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When you die"},
+	197: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When you die"},
 
 	// Order is spell id, level, % chance.
-	198: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
-	199: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
-	200: {Bits: []uint{6, 10, 7}, Name: "{2} Chance to Cast Level {0} {1} on striking"},
+	198: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} On Striking"},
+	199: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} On Striking"},
+	200: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} On Striking"},
 
 	// Order is spell id, level, % chance.
 	201: {Bits: []uint{6, 10, 7}, Name: "{2}% Chance to Cast Level {0} {1} When Struck"},
@@ -1883,6 +1884,7 @@ var quantityMap = map[string]bool{
 	"ibk": true,
 	"key": true,
 	"ama": true,
+	"tsp": true,
 }
 
 // Items that are tomes contain 5 extra bits, so we need to keep track of what
