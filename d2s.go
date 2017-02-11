@@ -443,7 +443,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				readBits += 3
 
 			case normal:
-				// No extra data present
+			// No extra data present
 
 			case highQuality:
 				// TODO: Figure out what these 3 bits are on a high quality item
@@ -523,6 +523,11 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				if ok {
 					parsed.TypeName = typeName
 				}
+			case shield:
+				typeName, ok := shieldCodes[parsed.Type]
+				if ok {
+					parsed.TypeName = typeName
+				}
 			case weapon:
 				typeName, ok := weaponCodes[parsed.Type]
 				if ok {
@@ -535,7 +540,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				}
 			}
 
-			if parsed.TypeID == armor {
+			if parsed.TypeID == armor || parsed.TypeID == shield {
 				// If the item is an armor, it will have this field of defense data.
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
 				readBits += 11
@@ -545,7 +550,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				parsed.DefenseRating = int64((defRating - 10))
 			}
 
-			if parsed.TypeID == armor || parsed.TypeID == weapon {
+			if parsed.TypeID == armor || parsed.TypeID == weapon || parsed.TypeID == shield {
 				parsed.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 				parsed.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
 
@@ -616,20 +621,31 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 		if parsed.LocationID == socketed {
 			last := len(itemList) - 1
 
-			// Add item to the socket list
-			itemList[last].SocketedItems = append(itemList[last].SocketedItems, parsed)
-
-			// Add the properties this socketed item provides into the socketed
-			// magic property array.
-			fmt.Println(parsed.Type)
-			attrList, ok := socketablesArmor[parsed.Type]
-			if ok {
-				for _, attr := range attrList {
-					itemList[last].SocketedAttributes = append(itemList[last].SocketedAttributes, attr)
+			// The socketed item is a weapon, so we'll read the socketed properties
+			// from the weapons map.
+			if itemList[last].TypeID == weapon {
+				attrList, ok := socketablesWeapons[parsed.Type]
+				if ok {
+					parsed.MagicAttributes = attrList
 				}
 			}
 
-			fmt.Printf("\n%+v\n", itemList[last])
+			if itemList[last].TypeID == armor {
+				attrList, ok := socketablesArmor[parsed.Type]
+				if ok {
+					parsed.MagicAttributes = attrList
+				}
+			}
+
+			if itemList[last].TypeID == shield {
+				attrList, ok := socketablesShields[parsed.Type]
+				if ok {
+					parsed.MagicAttributes = attrList
+				}
+			}
+
+			// Add item to the socket list
+			itemList[last].SocketedItems = append(itemList[last].SocketedItems, parsed)
 
 		} else {
 			// Ok, so this item it self is not in a socket, but it might have socketed

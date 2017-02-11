@@ -3,7 +3,7 @@ package d2s
 type skill struct {
 	ID     int    `json:"id"`
 	Points int    `json:"points"`
-	Name   string `json:"Name"`
+	Name   string `json:"name"`
 }
 
 var skillOffsetMap = map[uint]int{
