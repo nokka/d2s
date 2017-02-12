@@ -258,6 +258,9 @@ func parseCorpse(bfr io.ByteReader, char *Character) error {
 	// The character is currently dead and will have the corpse item list here.
 	if corpseHeaderData.Count == 1 {
 
+		// Character is dead, so we'll save the state.
+		char.IsDead = 1
+
 		// 12 Unknown bytes.
 		_, err := io.ReadFull(bfr.(io.Reader), buf[:12])
 		if err != nil {
@@ -451,7 +454,16 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			case magicallyEnhanced:
 				parsed.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
+				prefixName, ok := magicalPrefixes[parsed.MagicPrefix]
+				if ok {
+					parsed.MagicPrefixName = prefixName
+				}
+
 				parsed.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
+				suffixName, ok := magicalSuffixes[parsed.MagicSuffix]
+				if ok {
+					parsed.MagicSuffixName = suffixName
+				}
 				readBits += 22
 
 			case partOfSet:

@@ -15,6 +15,7 @@ type Character struct {
 	CorpseItems []item     `json:"corpse_items,omitempty"`
 	MercItems   []item     `json:"merc_items,omitempty"`
 	GolemItem   item       `json:"golem_item,omitempty"`
+	IsDead      uint16     `json:"is_dead"`
 }
 
 func (h *header) MarshalJSON() ([]byte, error) {
