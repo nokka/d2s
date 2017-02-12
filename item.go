@@ -1848,7 +1848,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The value of the data field is not actually a time period, but a frequency in terms
 	// of the number of times durability is repaired over a period of 100 seconds.
 	// For example, if the value is 5, then this property repairs 1 durability in 100 / 5 = 20 seconds.
-	252: {Bits: []uint{5}, Name: "Repairs 1 Durability in {0} Seconds"},
+	252: {Bits: []uint{6}, Name: "Repairs 1 Durability in {0} Seconds"},
 
 	// As in the previous property, the value of the data field is a frequency in terms of the number
 	// replenished over a period of 100 seconds. For example if the value is 4, then this property
@@ -1897,6 +1897,7 @@ var quantityMap = map[string]bool{
 	"ibk": true,
 	"key": true,
 	"ama": true,
+	"amf": true,
 	"tsp": true,
 }
 

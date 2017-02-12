@@ -589,6 +589,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			// MARK: Time to parse 9 bit magical property ids followed by their n bit
 			// length values, but only if the item is magical or above.
+			//fmt.Printf("Bits read before magic list: %d\n", readBits)
 			magicAttrList, rb, err := parseMagicalList(&ibr)
 			readBits += rb
 
@@ -667,6 +668,8 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			}
 
 			itemList = append(itemList, parsed)
+
+			//fmt.Printf("\n%+v\n", parsed)
 		}
 
 		// If the item is not byte aligned, we'll have to byte align it before
@@ -677,6 +680,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			bitsToAlign := uint(8 - remainder)
 			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
+
 	}
 
 	return itemList, nil
