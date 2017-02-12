@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 )
 
@@ -22,38 +21,38 @@ func Parse(file io.Reader) (Character, error) {
 
 	err := parseHeader(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to pare header on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseAttributes(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to parse attributes on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseSkills(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to parse skills on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseItems(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to parse items on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseCorpse(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to parse corpse on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseMercItems(bfr, &char)
 	if err != nil {
-		return Character{}, err
+		return Character{}, fmt.Errorf("Failed to parse merc items on char %s, error that occured: %s", char.Header.Name, err.Error())
 	}
 
 	if char.Header.Class == Necromancer {
 		err = parseIronGolem(bfr, &char)
 		if err != nil {
-			return Character{}, err
+			return Character{}, fmt.Errorf("Failed to parse golem item on char %s, error that occured: %s", char.Header.Name, err.Error())
 		}
 	}
 
@@ -170,7 +169,7 @@ func parseSkills(bfr io.Reader, char *Character) error {
 	}
 
 	if string(skillHeaderData.Header[:]) != "if" {
-		return errors.New("Failed to find skill header")
+		return fmt.Errorf("Failed to find skill header")
 	}
 
 	skillOffset, ok := skillOffsetMap[uint(char.Header.Class)]
@@ -588,32 +587,39 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				parsed.SetListCount = listCount
 			}
 
-			fmt.Printf("Read bits until magic list: %d \n", readBits)
-
 			// MARK: Time to parse 9 bit magical property ids followed by their n bit
 			// length values, but only if the item is magical or above.
-			magicAttrList, rb := parseMagicalList(&ibr)
+			magicAttrList, rb, err := parseMagicalList(&ibr)
 			readBits += rb
 
-			parsed.MagicAttributes = magicAttrList
+			if err != nil {
+				return itemList, err
+			}
 
-			fmt.Printf("Read bits after magic list: %d \n", readBits)
+			parsed.MagicAttributes = magicAttrList
 
 			// Item has more magical property lists due to being a set item.
 			if parsed.SetListCount > 0 {
 				for i := 0; i < int(parsed.SetListCount); i++ {
-					setAttrList, rb := parseMagicalList(&ibr)
+					setAttrList, rb, err := parseMagicalList(&ibr)
 					readBits += rb
 
+					if err != nil {
+						return itemList, err
+					}
+
 					parsed.SetAttributes = append(parsed.SetAttributes, setAttrList)
-					fmt.Printf("Read bits after set list: %d \n", readBits)
 				}
 			}
 
 			if parsed.GivenRuneword == 1 {
-				fmt.Printf("Read bits before runeword list: %d \n", readBits)
-				runewordAttrList, rb := parseMagicalList(&ibr)
+				runewordAttrList, rb, err := parseMagicalList(&ibr)
 				readBits += rb
+
+				if err != nil {
+					return itemList, err
+				}
+
 				parsed.RunewordAttributes = runewordAttrList
 			}
 		}
@@ -630,6 +636,8 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				}
 			}
 
+			// The socketed item is an armor piece, so we'll read the socketed properties
+			// from the armor map.
 			if itemList[last].TypeID == armor {
 				attrList, ok := socketablesArmor[parsed.Type]
 				if ok {
@@ -637,6 +645,8 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				}
 			}
 
+			// The socketed item is a shield, so we'll read the socketed properties
+			// from the shield map.
 			if itemList[last].TypeID == shield {
 				attrList, ok := socketablesShields[parsed.Type]
 				if ok {
@@ -667,8 +677,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			bitsToAlign := uint(8 - remainder)
 			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
-
-		fmt.Printf("\n%+v\n\n\n", parsed)
 	}
 
 	return itemList, nil
@@ -795,7 +803,6 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 		// If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
 		item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
 	} else {
-		fmt.Printf("Starting on ear: %d \n", readBits)
 
 		// offset 76, the item is an ear, we need to read the ear data.
 		earClass := reverseBits(ibr.ReadBits64(3, true), 3)
@@ -815,8 +822,6 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 			name += string(c)
 		}
 
-		fmt.Printf("Done with ear on: %d \n", readBits)
-
 		item.EarAttributes = earAttributes{
 			Class: earClass,
 			Level: earLevel,
@@ -829,7 +834,6 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 		remainder := readBits % 8
 		if remainder > 0 {
 			bitsToAlign := uint(8 - remainder)
-			fmt.Printf("Bits to align: %d \n", bitsToAlign)
 			reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
 	}
@@ -844,20 +848,22 @@ func parseRareOrCraftedBits(ibr *bitReader, item *item) (int, error) {
 	var readBits int
 
 	nameID1 := reverseBits(ibr.ReadBits64(8, true), 8)
+	readBits += 8
+
 	name1, ok := rareNames[nameID1]
 	if !ok {
-		log.Fatalf("Unknown rare name id: %d", nameID1)
+		return readBits, fmt.Errorf("Unknown rare name id: %d", nameID1)
 	}
-	readBits += 8
 
 	item.RareName = name1
 
 	nameID2 := reverseBits(ibr.ReadBits64(8, true), 8)
+	readBits += 8
+
 	name2, ok := rareNames[nameID2]
 	if !ok {
-		log.Fatalf("Unknown rare name id: %d", nameID2)
+		return readBits, fmt.Errorf("Unknown rare name id: %d", nameID2)
 	}
-	readBits += 8
 
 	item.RareName2 = name2
 
@@ -894,7 +900,7 @@ func parseRunewordBits(ibr *bitReader, item *item) error {
 
 // Parses the magical property list in the byte queue that belongs to an item
 // and returns the list of properties.
-func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
+func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 
 	var magicAttributes []magicAttribute
 	var readBits int
@@ -904,7 +910,7 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 		readBits += 9
 
 		if ibr.Err() != nil {
-			fmt.Println(ibr.Err())
+			return magicAttributes, readBits, ibr.Err()
 		}
 
 		// If all 9 bits are set, we've hit the end of the stats section
@@ -915,7 +921,7 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 
 		prop, ok := magicalProperties[id]
 		if !ok {
-			log.Fatalf("Unknown magical property: %d", id)
+			return magicAttributes, readBits, fmt.Errorf("Unknown magical property: %d", id)
 		}
 
 		var values []int64
@@ -923,7 +929,7 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 
 			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
 			readBits += int(bitLength)
-			fmt.Printf("found id: %d, reading bit size field: %d:, value is: %d\n", id, bitLength, val)
+			//fmt.Printf("found id: %d, reading bit size field: %d:, value is: %d\n", id, bitLength, val)
 
 			if prop.Bias != 0 {
 				val = val - prop.Bias
@@ -939,8 +945,8 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int) {
 		}
 
 		magicAttributes = append(magicAttributes, attr)
-		fmt.Printf("bits read after property id %d: %d \n", id, readBits)
+		//fmt.Printf("bits read after property id %d: %d \n", id, readBits)
 	}
 
-	return magicAttributes, readBits
+	return magicAttributes, readBits, nil
 }

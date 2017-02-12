@@ -1601,6 +1601,10 @@ var uniqueNames = map[uint64]string{
 	400: "Hellfire Torch",
 }
 
+/*var magicalNames = map[uint64]string{
+	0:   "",
+}*/
+
 var magicalProperties = map[uint64]magicalProperty{
 	0:  {Bits: []uint{8}, Bias: 32, Name: "+{0} to Strength"},
 	1:  {Bits: []uint{7}, Bias: 32, Name: "+{0} to Energy"},
