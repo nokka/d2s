@@ -371,7 +371,7 @@ func parseIronGolem(bfr io.ByteReader, char *Character) error {
 			return err
 		}
 
-		char.GolemItem = item[0]
+		char.GolemItem = &item[0]
 	}
 
 	return nil
