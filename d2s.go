@@ -526,31 +526,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			parsed.Timestamp = reverseBits(ibr.ReadBits64(1, true), 1)
 			readBits++
 
-			parsed.TypeID = parsed.getTypeID()
-
-			switch parsed.TypeID {
-			case armor:
-				typeName, ok := armorCodes[parsed.Type]
-				if ok {
-					parsed.TypeName = typeName
-				}
-			case shield:
-				typeName, ok := shieldCodes[parsed.Type]
-				if ok {
-					parsed.TypeName = typeName
-				}
-			case weapon:
-				typeName, ok := weaponCodes[parsed.Type]
-				if ok {
-					parsed.TypeName = typeName
-				}
-			case other:
-				typeName, ok := miscCodes[parsed.Type]
-				if ok {
-					parsed.TypeName = typeName
-				}
-			}
-
 			if parsed.TypeID == armor || parsed.TypeID == shield {
 				// If the item is an armor, it will have this field of defense data.
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
@@ -563,11 +538,18 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			if parsed.TypeID == armor || parsed.TypeID == weapon || parsed.TypeID == shield {
 				parsed.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-				parsed.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+				readBits += 8
 
-				// Seems to be a random bit here.
-				reverseBits(ibr.ReadBits64(1, true), 1)
-				readBits += 17
+				// Some weapons like phase blades don't have durability, so we'll
+				// check if the item has max durability, then we can safely assume
+				// it has current durability too.
+				if parsed.MaxDurability > 0 {
+					parsed.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
+					// Seems to be a random bit here.
+					reverseBits(ibr.ReadBits64(1, true), 1)
+
+					readBits += 9
+				}
 			}
 
 			if quantityMap[parsed.Type] {
@@ -601,7 +583,10 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			// MARK: Time to parse 9 bit magical property ids followed by their n bit
 			// length values, but only if the item is magical or above.
+
+			// DEBUG: Print bits before magic list.
 			//fmt.Printf("Bits read before magic list: %d\n", readBits)
+
 			magicAttrList, rb, err := parseMagicalList(&ibr)
 			readBits += rb
 
@@ -681,6 +666,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			itemList = append(itemList, parsed)
 
+			// DEBUG: Print item.
 			//fmt.Printf("\n%+v\n", parsed)
 		}
 
@@ -791,11 +777,11 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 	readBits += 4
 
 	// offset 65
-	item.PositionY = reverseBits(ibr.ReadBits64(4, true), 4)
+	item.PositionX = reverseBits(ibr.ReadBits64(4, true), 4)
 	readBits += 4
 
 	// offset 69
-	item.PositionX = reverseBits(ibr.ReadBits64(3, true), 3)
+	item.PositionY = reverseBits(ibr.ReadBits64(3, true), 3)
 	readBits += 3
 
 	// offset 72
@@ -814,6 +800,32 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 		}
 
 		item.Type = strings.Trim(itemType, " ")
+
+		// new
+		item.TypeID = item.getTypeID()
+
+		switch item.TypeID {
+		case armor:
+			typeName, ok := armorCodes[item.Type]
+			if ok {
+				item.TypeName = typeName
+			}
+		case shield:
+			typeName, ok := shieldCodes[item.Type]
+			if ok {
+				item.TypeName = typeName
+			}
+		case weapon:
+			typeName, ok := weaponCodes[item.Type]
+			if ok {
+				item.TypeName = typeName
+			}
+		case other:
+			typeName, ok := miscCodes[item.Type]
+			if ok {
+				item.TypeName = typeName
+			}
+		}
 
 		// offset 108
 		// If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
@@ -945,6 +957,8 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 
 			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
 			readBits += int(bitLength)
+
+			// DEBUG: Print the bit lengths of items.
 			//fmt.Printf("found id: %d, reading bit size field: %d:, value is: %d\n", id, bitLength, val)
 
 			if prop.Bias != 0 {
@@ -961,6 +975,8 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 		}
 
 		magicAttributes = append(magicAttributes, attr)
+
+		// DEBUG: Print property read after the magical attribute.
 		//fmt.Printf("bits read after property id %d: %d \n", id, readBits)
 	}
 
