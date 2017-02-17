@@ -132,6 +132,7 @@ var setListMap = map[uint64]uint64{
 	4:  1,
 	7:  3,
 	10: 2,
+	12: 2,
 	15: 4,
 	31: 5,
 }
@@ -215,7 +216,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	28: {Bits: []uint{8}, Name: "Heal Stamina {0}%"},
 	31: {Bits: []uint{11}, Bias: 10, Name: "+{0} Defense"},
 	32: {Bits: []uint{9}, Name: "+{0} vs. Missile"},
-	33: {Bits: []uint{10}, Bias: 10, Name: "+{0} vs. Melee"},
+	33: {Bits: []uint{8}, Bias: 10, Name: "+{0} vs. Melee"},
 	34: {Bits: []uint{6}, Name: "Damage Reduced by {0}"},
 	35: {Bits: []uint{6}, Name: "Magic Damage Reduced by {0}"},
 	36: {Bits: []uint{8}, Name: "Damage Reduced by {0}%"},
@@ -467,6 +468,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	334: {Bits: []uint{8}, Name: "-{0}% To Enemy Lightning Resistance"},
 	335: {Bits: []uint{8}, Name: "-{0}% To Enemy Cold Resistance"},
 	336: {Bits: []uint{8}, Name: "-{0}% To Enemy Poison Resistance"},
+	356: {Bits: []uint{2}, Name: "Quest Item Difficulty +{0} (Invisible)"},
 }
 
 // Shield codes
@@ -580,6 +582,7 @@ var armorCodes = map[string]string{
 	"ba2": "Fanged Helm",
 	"fld": "Field Plate",
 	"fhl": "Full Helm",
+	"plt": "Plate Mail",
 	"ful": "Full Plate Mail",
 	"bac": "Fury Visor",
 	"hgl": "Gauntlets",
@@ -2591,7 +2594,6 @@ var magicalPrefixes = map[uint64]string{
 }
 
 var magicalSuffixes = map[uint64]string{
-	0:   "(nothing?)",
 	1:   "Health",
 	2:   "Protection",
 	3:   "Absorption",

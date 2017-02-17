@@ -390,6 +390,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 	numberOfItemsToRead := itemCount
 
 	for i := 0; i < numberOfItemsToRead; i++ {
+
 		var readBits int
 		parsed := item{}
 
@@ -660,7 +661,11 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			// items in it, if it does, we'll need to increment the number of total
 			// items we read in this loop, since the items glued into this item sockets,
 			// will follow directly after this item.
-			if parsed.NrOfItemsInSockets > 0 {
+			//
+			// We'll also make sure the item isn't a simple item, because apparently
+			// some quest items like Mephisto's Soul Stone has 2 sockets, but
+			// no items in it.
+			if parsed.NrOfItemsInSockets > 0 && parsed.SimpleItem == 0 {
 				numberOfItemsToRead += int(parsed.NrOfItemsInSockets)
 			}
 
