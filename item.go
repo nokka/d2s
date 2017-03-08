@@ -462,6 +462,10 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The second and third are respectively the minimum and maximum values of the property.
 	// The maximum value at the time specified and the minimum at the opposite.
 
+	305: {Bits: []uint{8}, Name: "{0} Pierce Cold"},
+	306: {Bits: []uint{8}, Name: "{0} Pierce Fire"},
+	307: {Bits: []uint{8}, Name: "{0} Pierce Lightning"},
+
 	329: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Fire Skill Damage"},
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
 	331: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Cold Skill Damage"},
