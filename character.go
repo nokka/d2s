@@ -50,22 +50,24 @@ func (h *header) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&struct {
-		Identifier     string   `json:"identifier"`
-		CheckSum       string   `json:"checksum"`
-		Name           string   `json:"name"`
-		Class          string   `json:"class"`
-		LastPlayed     string   `json:"last_played"`
-		LeftSkill      string   `json:"left_skill"`
-		RightSkill     string   `json:"right_skill"`
-		LeftSwapSkill  string   `json:"left_swap_skill"`
-		RightSwapSkill string   `json:"right_swap_skill"`
-		MercID         string   `json:"merc_id"`
-		AssignedSkills []string `json:"assigned_skills"`
+		Identifier     string         `json:"identifier"`
+		CheckSum       string         `json:"checksum"`
+		Name           string         `json:"name"`
+		Status         readableStatus `json:"status"`
+		Class          string         `json:"class"`
+		LastPlayed     string         `json:"last_played"`
+		LeftSkill      string         `json:"left_skill"`
+		RightSkill     string         `json:"right_skill"`
+		LeftSwapSkill  string         `json:"left_swap_skill"`
+		RightSwapSkill string         `json:"right_swap_skill"`
+		MercID         string         `json:"merc_id"`
+		AssignedSkills []string       `json:"assigned_skills"`
 		*Alias
 	}{
 		Identifier:     fmt.Sprintf("%x", h.Identifier),
 		CheckSum:       fmt.Sprintf("%x", h.CheckSum),
 		Name:           h.Name.String(),
+		Status:         h.Status.Readable(),
 		Class:          h.Class.String(),
 		LastPlayed:     time.Unix(int64(h.LastPlayed), 0).String(),
 		AssignedSkills: assignedSkills,
@@ -86,7 +88,7 @@ type header struct {
 	CheckSum          uint32 `json:"checksum"`
 	ActiveArms        uint32 `json:"active_arms"`
 	Name              name   `json:"name"`
-	Status            byte   `json:"status"`
+	Status            status `json:"status"`
 	Progression       byte   `json:"progression"`
 	_                 [2]byte
 	Class             class `json:"class"`
