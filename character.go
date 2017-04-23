@@ -62,6 +62,9 @@ func (h *header) MarshalJSON() ([]byte, error) {
 		RightSwapSkill string         `json:"right_swap_skill"`
 		MercID         string         `json:"merc_id"`
 		AssignedSkills []string       `json:"assigned_skills"`
+		QuestsNormal   quests         `json:"quests_normal"`
+		QuestsNm       quests         `json:"quests_nm"`
+		QuestsHell     quests         `json:"quests_hell"`
 		*Alias
 	}{
 		Identifier:     fmt.Sprintf("%x", h.Identifier),
@@ -70,26 +73,29 @@ func (h *header) MarshalJSON() ([]byte, error) {
 		Status:         h.Status.Readable(),
 		Class:          h.Class.String(),
 		LastPlayed:     time.Unix(int64(h.LastPlayed), 0).String(),
-		AssignedSkills: assignedSkills,
 		LeftSkill:      leftSkill,
 		RightSkill:     rightSkill,
 		LeftSwapSkill:  leftSwapSkill,
 		RightSwapSkill: rightSwapSkill,
 		MercID:         fmt.Sprintf("%x", h.MercID),
+		AssignedSkills: assignedSkills,
+		QuestsNormal:   h.QuestsNormal,
+		QuestsNm:       h.QuestsNm,
+		QuestsHell:     h.QuestsHell,
 		Alias:          (*Alias)(h),
 	})
 }
 
 // Header determines the header data of a d2s file.
 type header struct {
-	Identifier        uint32 `json:"identifier"`
-	Version           uint32 `json:"version"`
-	FileSize          uint32 `json:"filesize"`
-	CheckSum          uint32 `json:"checksum"`
-	ActiveArms        uint32 `json:"active_arms"`
-	Name              name   `json:"name"`
-	Status            status `json:"status"`
-	Progression       byte   `json:"progression"`
+	Identifier        uint32      `json:"identifier"`
+	Version           uint32      `json:"version"`
+	FileSize          uint32      `json:"filesize"`
+	CheckSum          uint32      `json:"checksum"`
+	ActiveArms        uint32      `json:"active_arms"`
+	Name              name        `json:"name"`
+	Status            status      `json:"status"`
+	Progression       progression `json:"progression"`
 	_                 [2]byte
 	Class             class `json:"class"`
 	_                 [2]byte
@@ -114,10 +120,10 @@ type header struct {
 	_                 [144]byte
 	QuestHeader       [4]byte `json:"-"`
 	_                 [6]byte
-	QuestsNormal      [96]byte `json:"-"`
-	QuestsNm          [96]byte `json:"-"`
-	QuestsHell        [96]byte `json:"-"`
-	WaypointHeader    [2]byte  `json:"-"`
+	QuestsNormal      quests  `json:"quests_normal"`
+	QuestsNm          quests  `json:"quests_nm"`
+	QuestsHell        quests  `json:"quests_hell"`
+	WaypointHeader    [2]byte `json:"-"`
 	_                 [6]byte
 	WaypointsNormal   [24]byte `json:"-"`
 	WaypointsNm       [24]byte `json:"-"`

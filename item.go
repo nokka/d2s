@@ -483,7 +483,7 @@ var shieldCodes = map[string]string{
 	"pa4": "Aerin Shield",
 	"pa7": "Akaran Rondache",
 	"pa6": "Akaran Targe",
-	"pad": "Ancient Shield",
+	"pad": "Kurast Shield",
 	"xts": "Ancient Shield",
 	"xpk": "Barbed Shield",
 	"upk": "Blade Barrier",
