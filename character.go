@@ -3,7 +3,6 @@ package d2s
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 // Character represents all the d2s character data.
@@ -55,7 +54,7 @@ func (h *header) MarshalJSON() ([]byte, error) {
 		Name           string         `json:"name"`
 		Status         readableStatus `json:"status"`
 		Class          string         `json:"class"`
-		LastPlayed     string         `json:"last_played"`
+		LastPlayed     uint32         `json:"last_played"`
 		LeftSkill      string         `json:"left_skill"`
 		RightSkill     string         `json:"right_skill"`
 		LeftSwapSkill  string         `json:"left_swap_skill"`
@@ -72,7 +71,7 @@ func (h *header) MarshalJSON() ([]byte, error) {
 		Name:           h.Name.String(),
 		Status:         h.Status.Readable(),
 		Class:          h.Class.String(),
-		LastPlayed:     time.Unix(int64(h.LastPlayed), 0).String(),
+		LastPlayed:     h.LastPlayed * 1000,
 		LeftSkill:      leftSkill,
 		RightSkill:     rightSkill,
 		LeftSwapSkill:  leftSwapSkill,
