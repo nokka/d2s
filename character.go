@@ -71,7 +71,7 @@ func (h *header) MarshalJSON() ([]byte, error) {
 		Name:           h.Name.String(),
 		Status:         h.Status.Readable(),
 		Class:          h.Class.String(),
-		LastPlayed:     h.LastPlayed * 1000,
+		LastPlayed:     h.LastPlayed,
 		LeftSkill:      leftSkill,
 		RightSkill:     rightSkill,
 		LeftSwapSkill:  leftSwapSkill,
