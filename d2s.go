@@ -810,8 +810,6 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 		}
 
 		item.Type = strings.Trim(itemType, " ")
-
-		// new
 		item.TypeID = item.getTypeID()
 
 		switch item.TypeID {
@@ -830,6 +828,25 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 			if ok {
 				item.TypeName = typeName
 			}
+
+			// Weapons have base damage, so we'll check our
+			// map for the base damage of this weapon type.
+			baseDamage, ok := weaponDamageMap[item.Type]
+			if ok {
+
+				// If the item is ethereal we need to add 50% enhanced
+				// damage to the base damage.
+				if item.Ethereal == 1 {
+					baseDamage.Min = int((float64(baseDamage.Min) * 1.5))
+					baseDamage.Max = int((float64(baseDamage.Max) * 1.5))
+					baseDamage.TwoMin = int((float64(baseDamage.TwoMin) * 1.5))
+					baseDamage.TwoMax = int((float64(baseDamage.TwoMax) * 1.5))
+				}
+
+				item.BaseDamage = &baseDamage
+
+			}
+
 		case other:
 			typeName, ok := miscCodes[item.Type]
 			if ok {
