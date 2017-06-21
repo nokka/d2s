@@ -666,7 +666,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	148: {Bits: []uint{7}, Name: "Cold Absorb {0}%"},
 	149: {Bits: []uint{7}, Name: "+{0} Cold Absorb"},
 	150: {Bits: []uint{7}, Name: "Slows Target by {0}%"},
-	151: {Bits: []uint{9, 5}, Name: "Level +{0} {1} When Equipped"},
+	151: {Bits: []uint{9, 5}, Name: "Level +{1} {0} When Equipped"},
 	152: {Bits: []uint{1}, Name: "Indestructible"},
 	153: {Bits: []uint{1}, Name: "Cannot Be Frozen"},
 	154: {Bits: []uint{7}, Bias: 20, Name: "{0}% Slower Stamina Drain"},
