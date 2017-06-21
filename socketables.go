@@ -47,7 +47,7 @@ var socketablesWeapons = map[string][]magicAttribute{
 	"r24": []magicAttribute{magicAttribute{ID: 80, Name: "{0}% Better Chance of Getting Magic Items", Values: []int64{30}}},
 	"r25": []magicAttribute{magicAttribute{ID: 119, Name: "{0}% Bonus to Attack Rating", Values: []int64{20}}},
 	"r26": []magicAttribute{magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{7}}},
-	"r27": []magicAttribute{magicAttribute{ID: 17, Name: "+{0}% Enhanced Damage", Values: []int64{50}}},
+	"r27": []magicAttribute{magicAttribute{ID: 17, Name: "+{0}% Enhanced Damage", Values: []int64{50, 50}}},
 	"r28": []magicAttribute{magicAttribute{ID: 141, Name: "{0}% Deadly Strike", Values: []int64{20}}},
 	"r29": []magicAttribute{magicAttribute{ID: 113, Name: "Hit Blinds Target +{0}", Values: []int64{20}}},
 	"r30": []magicAttribute{magicAttribute{ID: 136, Name: "{0}% Chance of Crushing Blow", Values: []int64{20}}},
