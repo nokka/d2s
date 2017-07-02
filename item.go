@@ -607,7 +607,13 @@ var magicalProperties = map[uint64]magicalProperty{
 	96: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Run/Walk"},
 
 	// Number of levels to a certain skill, e.g. +1 To Teleport.
-	97:  {Bits: []uint{9, 6}, Name: "+{1} To {0}"},
+	97: {Bits: []uint{9, 6}, Name: "+{1} To {0}"},
+
+	// NVSTATE Charm attributes. ID 98 only occurs on charms of a special
+	// type, called NV state charms, they're basically for visual effects.
+	// They're imported charms and does not occur naturally in the game.
+	98: {Bits: []uint{8, 1}, Name: "{1}+ to {0} (Visual effect only)"},
+
 	99:  {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Hit Recovery"},
 	102: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Block Rate"},
 	105: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Cast Rate"},

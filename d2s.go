@@ -20,6 +20,7 @@ func Parse(file io.Reader) (Character, error) {
 	char := Character{}
 
 	err := parseHeader(bfr, &char)
+
 	if err != nil {
 		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
 	}
