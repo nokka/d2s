@@ -352,7 +352,7 @@ func parseMercItems(bfr io.ByteReader, char *Character) error {
 // since an iron golem is made from an item, the properties of that item is stored.
 func parseIronGolem(bfr io.ByteReader, char *Character) error {
 
-	// Make a buffer that can hold 4 bytes, which can hold the items header.
+	// Make a buffer that can hold 3 bytes, which can hold the items header.
 	buf := make([]byte, 3)
 
 	_, err := io.ReadFull(bfr.(io.Reader), buf[:3])
@@ -590,10 +590,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			// MARK: Time to parse 9 bit magical property ids followed by their n bit
 			// length values, but only if the item is magical or above.
-
-			// DEBUG: Print bits before magic list.
-			//fmt.Printf("Bits read before magic list: %d\n", readBits)
-
 			magicAttrList, rb, err := parseMagicalList(&ibr)
 			readBits += rb
 
@@ -676,9 +672,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 			}
 
 			itemList = append(itemList, parsed)
-
-			// DEBUG: Print item.
-			//fmt.Printf("\n%+v\n", parsed)
 		}
 
 		// If the item is not byte aligned, we'll have to byte align it before
@@ -986,9 +979,6 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
 			readBits += int(bitLength)
 
-			// DEBUG: Print the bit lengths of items.
-			//fmt.Printf("found id: %d, reading bit size field: %d:, value is: %d\n", id, bitLength, val)
-
 			if prop.Bias != 0 {
 				val = val - prop.Bias
 			}
@@ -1003,9 +993,6 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 		}
 
 		magicAttributes = append(magicAttributes, attr)
-
-		// DEBUG: Print property read after the magical attribute.
-		//fmt.Printf("bits read after property id %d: %d \n", id, readBits)
 	}
 
 	return magicAttributes, readBits, nil
