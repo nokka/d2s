@@ -538,7 +538,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
 				readBits += 11
 
-				// We need to substract 10 defense rating from all armors for
+				// We need to subtract 10 defense rating from all armors for
 				// some reason, I'm not sure why.
 				parsed.DefenseRating = int64((defRating - 10))
 			}
@@ -676,7 +676,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 		// If the item is not byte aligned, we'll have to byte align it before
 		// reading the next item, so we'll simply queue the reader at the next
-		// byte boundry by calculating the remainder.
+		// byte boundary by calculating the remainder.
 		remainder := readBits % 8
 		if remainder > 0 {
 			bitsToAlign := uint(8 - remainder)
