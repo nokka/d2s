@@ -22,27 +22,27 @@ func Parse(file io.Reader) (Character, error) {
 	err := parseHeader(bfr, &char)
 
 	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseAttributes(bfr, &char)
 	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseSkills(bfr, &char)
 	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseItems(bfr, &char)
 	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	err = parseCorpse(bfr, &char)
 	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	// Normalize the character status, that is being stored as a byte.
@@ -51,14 +51,14 @@ func Parse(file io.Reader) (Character, error) {
 	if status.Expansion {
 		err = parseMercItems(bfr, &char)
 		if err != nil {
-			return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+			return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 		}
 	}
 
 	if char.Header.Class == Necromancer && status.Expansion {
 		err = parseIronGolem(bfr, &char)
 		if err != nil {
-			return Character{}, fmt.Errorf("Char name: %s, error that occured: %s", char.Header.Name, err.Error())
+			return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 		}
 	}
 
