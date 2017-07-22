@@ -6,6 +6,9 @@ D2s is a binary parser written in Go that's used to parse `.d2s` files. This is 
 ## Motivation
 This package was built for a private server of Diablo II called [Slashgaming](https://reddit.com/r/slashgaming) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's my sorceress for example [Nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped) .
 
+## Examples
+The examples folder contains a [JSON](examples/nokkasorc.json) example of an unmarshalled character struct, the amount of data that is received from a binary is quite immense.
+
 ## Install
 
 ```bash
