@@ -879,7 +879,7 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 
 		// If the ear is not byte aligned, we'll have to byte align it before
 		// reading the next property, so we'll simply queue the reader at the next
-		// byte boundry by calculating the remainder.
+		// byte boundary by calculating the remainder.
 		remainder := readBits % 8
 		if remainder > 0 {
 			bitsToAlign := uint(8 - remainder)
