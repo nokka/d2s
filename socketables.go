@@ -1,9 +1,7 @@
 package d2s
 
 var socketablesWeapons = map[string][]magicAttribute{
-
 	// Runes
-
 	"r01": []magicAttribute{magicAttribute{ID: 19, Name: "+{0} to Attack rating", Values: []int64{50}}, magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}}},
 	"r02": []magicAttribute{magicAttribute{ID: 122, Name: "+{0}% Damage to Undead", Values: []int64{75}}, magicAttribute{ID: 124, Name: "+{0} to Attack Rating against Undead", Values: []int64{50}}},
 	"r03": []magicAttribute{magicAttribute{ID: 138, Name: "+{0} to Mana After Each Kill", Values: []int64{2}}},
