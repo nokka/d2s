@@ -45,9 +45,7 @@ func main() {
 	// Prints character name and class.
 	fmt.Println(char.Header.Name)
 	fmt.Println(char.Header.Class)
-
 }
-
 
 ```
 
