@@ -4,32 +4,18 @@ var socketablesWeapons = map[string][]magicAttribute{
 
 	// Runes
 
-	"r01": []magicAttribute{
-		magicAttribute{ID: 19, Name: "+{0} to Attack rating", Values: []int64{50}},
-		magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}},
-	},
-
-	"r02": []magicAttribute{
-		magicAttribute{ID: 122, Name: "+{0}% Damage to Undead", Values: []int64{75}},
-		magicAttribute{ID: 124, Name: "+{0} to Attack Rating against Undead", Values: []int64{50}},
-	},
+	"r01": []magicAttribute{magicAttribute{ID: 19, Name: "+{0} to Attack rating", Values: []int64{50}}, magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}}},
+	"r02": []magicAttribute{magicAttribute{ID: 122, Name: "+{0}% Damage to Undead", Values: []int64{75}}, magicAttribute{ID: 124, Name: "+{0} to Attack Rating against Undead", Values: []int64{50}}},
 	"r03": []magicAttribute{magicAttribute{ID: 138, Name: "+{0} to Mana After Each Kill", Values: []int64{2}}},
 	"r04": []magicAttribute{magicAttribute{ID: 81, Name: "Knockback", Values: []int64{1}}},
 	"r05": []magicAttribute{magicAttribute{ID: 116, Name: "{0}% Target Defense", Values: []int64{-25}}},
-
-	"r06": []magicAttribute{
-		magicAttribute{ID: 22, Name: "+{0} to Maximum 1-handed damage", Values: []int64{9}},
-		magicAttribute{ID: 24, Name: "+{0} to Maximum 2-handed damage", Values: []int64{9}},
-	},
+	"r06": []magicAttribute{magicAttribute{ID: 22, Name: "+{0} to Maximum 1-handed damage", Values: []int64{9}}, magicAttribute{ID: 24, Name: "+{0} to Maximum 2-handed damage", Values: []int64{9}}},
 	"r07": []magicAttribute{magicAttribute{ID: 57, Name: "Adds {0}-{1} Poison Damage over {2} Seconds", Values: []int64{154, 154, 125}}},
 	"r08": []magicAttribute{magicAttribute{ID: 48, Name: "Adds {0}-{1} Fire Damage", Values: []int64{5, 30}}},
 	"r09": []magicAttribute{magicAttribute{ID: 50, Name: "Adds {0}-{1} Lightning Damage", Values: []int64{1, 50}}},
 	"r10": []magicAttribute{magicAttribute{ID: 54, Name: "Adds {0}-{1} Cold Damage", Values: []int64{3, 14, 75}}},
 	"r11": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life stolen per hit", Values: []int64{7}}},
-	"r12": []magicAttribute{
-		magicAttribute{ID: 21, Name: "+{0} to Minimum 1-handed damage", Values: []int64{9}},
-		magicAttribute{ID: 23, Name: "+{0} to Minimum 2-handed damage", Values: []int64{9}},
-	},
+	"r12": []magicAttribute{magicAttribute{ID: 21, Name: "+{0} to Minimum 1-handed damage", Values: []int64{9}}, magicAttribute{ID: 23, Name: "+{0} to Minimum 2-handed damage", Values: []int64{9}}},
 	"r13": []magicAttribute{magicAttribute{ID: 93, Name: "{0}% Increased Attack Speed", Values: []int64{20}}},
 	"r14": []magicAttribute{magicAttribute{ID: 112, Name: "Hit Causes Monsters to Flee {0}%", Values: []int64{25}}},
 	"r15": []magicAttribute{magicAttribute{ID: 91, Name: "Requirements {0}%", Values: []int64{-20}}},
@@ -38,10 +24,7 @@ var socketablesWeapons = map[string][]magicAttribute{
 	"r18": []magicAttribute{magicAttribute{ID: 2, Name: "+{0} to Dexterity", Values: []int64{10}}},
 	"r19": []magicAttribute{magicAttribute{ID: 0, Name: "+{0} to Strength", Values: []int64{10}}},
 	"r20": []magicAttribute{magicAttribute{ID: 79, Name: "{0}% Extra Gold from Monsters", Values: []int64{75}}},
-	"r21": []magicAttribute{
-		magicAttribute{ID: 121, Name: "+{0}% Damage to Demons", Values: []int64{75}},
-		magicAttribute{ID: 123, Name: "+{0} to Attack Rating against Demons", Values: []int64{100}},
-	},
+	"r21": []magicAttribute{magicAttribute{ID: 121, Name: "+{0}% Damage to Demons", Values: []int64{75}}, magicAttribute{ID: 123, Name: "+{0} to Attack Rating against Demons", Values: []int64{100}}},
 	"r22": []magicAttribute{magicAttribute{ID: 135, Name: "{0}% Chance of Open Wounds", Values: []int64{25}}},
 	"r23": []magicAttribute{magicAttribute{ID: 117, Name: "Prevent Monster Heal", Values: []int64{1}}},
 	"r24": []magicAttribute{magicAttribute{ID: 80, Name: "{0}% Better Chance of Getting Magic Items", Values: []int64{30}}},
@@ -91,30 +74,11 @@ var socketablesWeapons = map[string][]magicAttribute{
 	"gpb": []magicAttribute{magicAttribute{ID: 54, Name: "Adds {0}-{1} Cold Damage", Values: []int64{10, 14}}},
 
 	// Skull
-	"skc": []magicAttribute{
-		magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{2}},
-		magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{1}},
-	},
-
-	"skf": []magicAttribute{
-		magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{2}},
-		magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{2}},
-	},
-
-	"sku": []magicAttribute{
-		magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{3}},
-		magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{2}},
-	},
-
-	"skl": []magicAttribute{
-		magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{3}},
-		magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{3}},
-	},
-
-	"skz": []magicAttribute{
-		magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{4}},
-		magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{3}},
-	},
+	"skc": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{2}}, magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{1}}},
+	"skf": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{2}}, magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{2}}},
+	"sku": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{3}}, magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{2}}},
+	"skl": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{3}}, magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{3}}},
+	"skz": []magicAttribute{magicAttribute{ID: 60, Name: "{0}% Life Stolen Per Hit", Values: []int64{4}}, magicAttribute{ID: 62, Name: "{0}% Mana Stolen Per Hit", Values: []int64{3}}},
 
 	// Topaz
 	"gcy": []magicAttribute{magicAttribute{ID: 50, Name: "Adds {0}-{1} Lightning Damage", Values: []int64{1, 8}}},
@@ -125,10 +89,7 @@ var socketablesWeapons = map[string][]magicAttribute{
 }
 
 var socketablesArmor = map[string][]magicAttribute{
-	"r01": []magicAttribute{
-		magicAttribute{ID: 31, Name: "+{0} Defense", Values: []int64{15}},
-		magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}},
-	},
+	"r01": []magicAttribute{magicAttribute{ID: 31, Name: "+{0} Defense", Values: []int64{15}}, magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}}},
 	"r02": []magicAttribute{magicAttribute{ID: 154, Name: "{0}% Slower Stamina Drain", Values: []int64{15}}},
 	"r03": []magicAttribute{magicAttribute{ID: 138, Name: "+{0} to Mana After Each Kill", Values: []int64{2}}},
 	"r04": []magicAttribute{magicAttribute{ID: 32, Name: "+{0} vs. Missile", Values: []int64{30}}},
@@ -149,12 +110,7 @@ var socketablesArmor = map[string][]magicAttribute{
 	"r19": []magicAttribute{magicAttribute{ID: 0, Name: "+{0} to Strength", Values: []int64{10}}},
 	"r20": []magicAttribute{magicAttribute{ID: 79, Name: "{0}% Extra Gold from Monsters", Values: []int64{50}}},
 	"r21": []magicAttribute{magicAttribute{ID: 16, Name: "+{0}% Enhanced Defense", Values: []int64{30}}},
-	"r22": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{15}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{15}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{15}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{15}},
-	},
+	"r22": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{15}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{15}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{15}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{15}}},
 	"r23": []magicAttribute{magicAttribute{ID: 35, Name: "Magic Damage Reduced by {0}", Values: []int64{7}}},
 	"r24": []magicAttribute{magicAttribute{ID: 80, Name: "{0}% Better Chance of Getting Magic Items", Values: []int64{25}}},
 	"r25": []magicAttribute{magicAttribute{ID: 46, Name: "+{0}% to Maximum Poison Resist", Values: []int64{5}}},
@@ -203,30 +159,11 @@ var socketablesArmor = map[string][]magicAttribute{
 	"gpb": []magicAttribute{magicAttribute{ID: 9, Name: "+{0} to Mana", Values: []int64{38}}},
 
 	// Skull
-	"skc": []magicAttribute{
-		magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{2}},
-		magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{8}},
-	},
-
-	"skf": []magicAttribute{
-		magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{3}},
-		magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{8}},
-	},
-
-	"sku": []magicAttribute{
-		magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{3}},
-		magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{12}},
-	},
-
-	"skl": []magicAttribute{
-		magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{4}},
-		magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{12}},
-	},
-
-	"skz": []magicAttribute{
-		magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{5}},
-		magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{19}},
-	},
+	"skc": []magicAttribute{magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{2}}, magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{8}}},
+	"skf": []magicAttribute{magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{3}}, magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{8}}},
+	"sku": []magicAttribute{magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{3}}, magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{12}}},
+	"skl": []magicAttribute{magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{4}}, magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{12}}},
+	"skz": []magicAttribute{magicAttribute{ID: 74, Name: "Replenish Life +{0}", Values: []int64{5}}, magicAttribute{ID: 27, Name: "Regenerate Mana {0}%", Values: []int64{19}}},
 
 	// Topaz
 	"gcy": []magicAttribute{magicAttribute{ID: 80, Name: "{0}% Better Chance of Getting Magic Items", Values: []int64{9}}},
@@ -237,10 +174,7 @@ var socketablesArmor = map[string][]magicAttribute{
 }
 
 var socketablesShields = map[string][]magicAttribute{
-	"r01": []magicAttribute{
-		magicAttribute{ID: 31, Name: "+{0} Defense", Values: []int64{15}},
-		magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}},
-	},
+	"r01": []magicAttribute{magicAttribute{ID: 31, Name: "+{0} Defense", Values: []int64{15}}, magicAttribute{ID: 89, Name: "+{0} to Light Radius", Values: []int64{1}}},
 	"r02": []magicAttribute{magicAttribute{ID: 20, Name: "+{0}% Increased chance of blocking", Values: []int64{7}}},
 	"r03": []magicAttribute{magicAttribute{ID: 138, Name: "+{0} to Mana After Each Kill", Values: []int64{2}}},
 	"r04": []magicAttribute{magicAttribute{ID: 32, Name: "+{0} vs. Missile", Values: []int64{30}}},
@@ -261,12 +195,7 @@ var socketablesShields = map[string][]magicAttribute{
 	"r19": []magicAttribute{magicAttribute{ID: 0, Name: "+{0} to Strength", Values: []int64{10}}},
 	"r20": []magicAttribute{magicAttribute{ID: 79, Name: "{0}% Extra Gold from Monsters", Values: []int64{50}}},
 	"r21": []magicAttribute{magicAttribute{ID: 16, Name: "+{0}% Enhanced Defense", Values: []int64{30}}},
-	"r22": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{22}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{22}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{22}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{22}},
-	},
+	"r22": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{22}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{22}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{22}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{22}}},
 	"r23": []magicAttribute{magicAttribute{ID: 35, Name: "Magic Damage Reduced by {0}", Values: []int64{7}}},
 	"r24": []magicAttribute{magicAttribute{ID: 80, Name: "{0}% Better Chance of Getting Magic Items", Values: []int64{25}}},
 	"r25": []magicAttribute{magicAttribute{ID: 46, Name: "+{0}% to Maximum Poison Resist", Values: []int64{5}}},
@@ -288,40 +217,11 @@ var socketablesShields = map[string][]magicAttribute{
 
 	// Diamond
 
-	"gcw": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{6}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{6}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{6}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{6}},
-	},
-
-	"gfw": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{8}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{8}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{8}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{8}},
-	},
-
-	"gsw": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{11}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{11}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{11}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{11}},
-	},
-
-	"glw": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{14}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{14}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{14}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{14}},
-	},
-
-	"gpw": []magicAttribute{
-		magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{19}},
-		magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{19}},
-		magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{19}},
-		magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{19}},
-	},
+	"gcw": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{6}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{6}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{6}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{6}}},
+	"gfw": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{8}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{8}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{8}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{8}}},
+	"gsw": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{11}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{11}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{11}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{11}}},
+	"glw": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{14}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{14}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{14}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{14}}},
+	"gpw": []magicAttribute{magicAttribute{ID: 39, Name: "Fire Resist +{0}%", Values: []int64{19}}, magicAttribute{ID: 41, Name: "Lightning Resist +{0}%", Values: []int64{19}}, magicAttribute{ID: 43, Name: "Cold Resist +{0}%", Values: []int64{19}}, magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{19}}},
 
 	// Emerald
 	"gcg": []magicAttribute{magicAttribute{ID: 45, Name: "Poison Resist +{0}%", Values: []int64{12}}},
