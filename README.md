@@ -100,8 +100,8 @@ Character status is a `byte` where different bits will be set, depending on the 
 
 ##### Bit position
 
-| 0 | 1 |        2 | 3    | 4 | 5         | 6 | 7 |
-|---|:-:|---------:|------|---|-----------|---|---|
+| 0 | 1 |     2    |   3  | 4 |     5     | 6 | 7 |
+|:-:|:-:|:--------:|:----:|:-:|:---------:|:-:|:-:|
 | ? | ? | Hardcore | Died | ? | Expansion | ? | ? |
 
 
