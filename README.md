@@ -42,9 +42,7 @@ func main() {
 	// Prints character name and class.
 	fmt.Println(char.Header.Name)
 	fmt.Println(char.Header.Class)
-
 }
-
 
 ```
 
@@ -101,9 +99,10 @@ Character names are storted as a `[16]byte` which will contain the name, one let
 Character status is a `byte` where different bits will be set, depending on the status of the character. Still haven't figured them all out, but here's the most important ones.
 
 ##### Bit position
-0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 
-::|:-:|:--------:|:--------:|:-:|:---------:|:-:|:-:|
-? | ? | Hardcore | Has died | ? | Expansion | ? | ? |
+
+| 0 | 1 |        2 | 3    | 4 | 5         | 6 | 7 |
+|---|:-:|---------:|------|---|-----------|---|---|
+| ? | ? | Hardcore | Died | ? | Expansion | ? | ? |
 
 
 
