@@ -6,9 +6,6 @@ D2s is a binary parser written in Go that's used to parse `.d2s` files. This is 
 ## Motivation
 This package was built for a private server of Diablo II called [Slashgaming](https://reddit.com/r/slashgaming) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's my sorceress for example [Nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped) .
 
-## Examples
-The examples folder contains a [JSON](examples/nokkasorc.json) example of an unmarshalled character struct, the amount of data that is received from a binary is quite immense.
-
 ## Install
 
 ```bash
@@ -45,9 +42,69 @@ func main() {
 	// Prints character name and class.
 	fmt.Println(char.Header.Name)
 	fmt.Println(char.Header.Class)
+
 }
 
+
 ```
+
+## Binary layout
+
+### Header
+
+Offset | Bytes | Description
+-----|-------- |------------
+0    | 4       | Identifier
+4    | 4       | Version ID
+8    | 4       | File size
+12   | 4       | Checksum
+16   | 4       | Active weapon
+20   | 16      | [Character Name](#character-name)
+36   | 1       | [Character Status](#character-status)
+37   | 1       | Character progression
+38   | 2       | Unknown
+40   | 1       | Character Class
+41   | 2       | Unknown
+43   | 1       | Character Level
+44   | 4       | Unknown
+48   | 4       | Last played
+52   | 4       | Unknown
+56   | 64      | Assigned skills
+120   | 4      | Left mouse button
+124   | 4      | Right mouse button
+128   | 4      | Left swap mouse button
+132   | 4      | Right swap mouse button
+136   | 32      | Character menu appearance
+168   | 3      | Difficulty
+171   | 4      | Map ID
+175   | 2      | Unknown
+177   | 2      | Mercenary dead
+179   | 4      | Mercenary ID
+183   | 2      | Mercenary Name ID
+185   | 2      | Mercenary type
+187   | 4      | Mercenary experience
+191   | 144      | Unknown
+335   | 298      | Quests
+633   | 81      | Waypoints
+714   | 51      | NPC Introductions
+765   |  -     | Attributes
+
+#### Character name
+
+Character names are storted as a `[16]byte` which will contain the name, one letter per `byte`. The name can be 16 characters long, and a name that's shorter will have padded `0x00`'s behind the name until we reach `16 bytes`.
+
+ * Must be 2-15 in length
+ * Must begin with a letter
+ * May contain up to one `-` or `_`.
+
+#### Character status
+Character status is a `byte` where different bits will be set, depending on the status of the character. Still haven't figured them all out, but here's the most important ones.
+
+##### Bit position
+0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 
+::|:-:|:--------:|:--------:|:-:|:---------:|:-:|:-:|
+? | ? | Hardcore | Has died | ? | Expansion | ? | ? |
+
 
 
 ## Sections
@@ -101,7 +158,7 @@ This is the magical property with id `83` which contains 2 bit fields each `3` b
 83: {Bits: []uint{3, 3}, Name: "+{1} to {0} Skill Levels"},
 ```
 
-All magical properties are mapped in the [item.go](item.go) file.
+All magical properties are mapped in the [items.go](items.go) file.
 
 ### 5. Corpse data
 If your character is currently dead, and a corpse is on the ground when you enter a game, your equipped items will be in this item struct. It's a corpse header `16 bytes` containing the header `JM` followed by an item count similar to the item list.
