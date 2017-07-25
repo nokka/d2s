@@ -1,5 +1,6 @@
 # Diablo II character file parser
 [![Go Report Card](https://goreportcard.com/badge/github.com/nokka/d2s)](https://goreportcard.com/report/github.com/nokka/d2s)
+[![GoDoc](https://godoc.org/github.com/nokka/d2s?status.svg)](https://godoc.org/github.com/nokka/d2s)
 
 D2s is a binary parser written in Go that's used to parse `.d2s` files. This is the binary format that the game [Diablo II](http://eu.blizzard.com/en-gb/games/d2/) uses to save all information about a certain character. 
 
