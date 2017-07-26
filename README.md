@@ -5,7 +5,7 @@
 D2s is a binary parser written in Go that's used to parse `.d2s` files. This is the binary format that the game [Diablo II](http://eu.blizzard.com/en-gb/games/d2/) uses to save all information about a certain character. 
 
 ## Motivation
-This package was built for a private server of Diablo II called [Slashdiablo](https://reddit.com/r/slashdiablo) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's my sorceress for example [Nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped) .
+This package was built for a private server of Diablo II called [Slashgaming](https://reddit.com/r/slashgaming) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's my sorceress for example [Nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped) .
 
 ## Install
 
@@ -62,18 +62,18 @@ Offset | Bytes | Description
 36   | 1       | [Character Status](#character-status)
 37   | 1       | Character progression
 38   | 2       | Unknown
-40   | 1       | Character Class
+40   | 1       | [Character Class](#character-class)
 41   | 2       | Unknown
 43   | 1       | Character Level
 44   | 4       | Unknown
-48   | 4       | Last played
+48   | 4       | [Last played](#last-played)
 52   | 4       | Unknown
-56   | 64      | Assigned skills
+56   | 64      | [Assigned skills](#assigned-skills)
 120   | 4      | Left mouse button
 124   | 4      | Right mouse button
 128   | 4      | Left swap mouse button
 132   | 4      | Right swap mouse button
-136   | 32      | Character menu appearance
+136   | 32     | Character menu appearance
 168   | 3      | Difficulty
 171   | 4      | Map ID
 175   | 2      | Unknown
@@ -101,10 +101,45 @@ Character status is a `byte` where different bits will be set, depending on the 
 
 ##### Bit position
 
-| 0 | 1 |     2    |   3  | 4 |     5     | 6 | 7 |
-|:-:|:-:|:--------:|:----:|:-:|:---------:|:-:|:-:|
+| 0 | 1 |        2 | 3    | 4 | 5         | 6 | 7 |
+|---|:-:|---------:|------|---|-----------|---|---|
 | ? | ? | Hardcore | Died | ? | Expansion | ? | ? |
 
+#### Character class
+Character class is a `byte` where different values represent a class.
+
+|    Class    |  Value |
+|:-----------:|:------:|
+| Amazon      | `0x00` |
+| Sorceress   | `0x01` |
+| Necromancer | `0x02` |
+| Paladin     | `0x03` |
+| Barbarian   | `0x04` |
+| Druid       | `0x05` |
+| Assassin    | `0x06` |
+
+#### Last played
+Last played is saved as a `unit32` [unix timestamp](https://en.wikipedia.org/wiki/Unix_time) e.g `1495882861`.
+
+#### Assigned skills
+Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
+
+##### Layout
+|  Type  | Bytes | Value                     |
+|:------:|:-----:|---------------------------|
+| Header | `2`   | `if`                      |
+| Skills | `30`  | [[30]skill](skills.go#L3) |
+
+##### Skill offset map
+|    Class    | Offset |
+|:-----------:|:------:|
+| Amazon      | `6`    |
+| Sorceress   | `36`   |
+| Necromancer | `66`   |
+| Paladin     | `96`   |
+| Barbarian   | `126`  |
+| Druid       | `221`  |
+| Assassin    | `251`  |
 
 
 ## Sections
