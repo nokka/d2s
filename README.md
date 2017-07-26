@@ -122,6 +122,14 @@ Character class is a `byte` where different values represent a class.
 Last played is saved as a `unit32` [unix timestamp](https://en.wikipedia.org/wiki/Unix_time) e.g `1495882861`.
 
 #### Assigned skills
+Assigned skills are a `16 byte` section containing all the [skill IDs](skills.go#L29) a character has assigned to a hotkey.  If the character has only assigned 7 skills for example, then 16-7 = 9 bytes will then be empty. The size of the section is always `16 byte`. 
+
+##### Layout
+|  Type  | Bytes | Value                     |
+|:------:|:-----:|---------------------------|
+| Skill ID | `16`  | [[16]skill](skills.go#L29) |
+
+#### Skills
 Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
 
 ##### Layout
