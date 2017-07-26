@@ -69,10 +69,10 @@ Offset | Bytes | Description
 48   | 4       | [Last played](#last-played)
 52   | 4       | Unknown
 56   | 64      | [Assigned skills](#assigned-skills)
-120   | 4      | Left mouse button
-124   | 4      | Right mouse button
-128   | 4      | Left swap mouse button
-132   | 4      | Right swap mouse button
+120   | 4      | Left mouse button skill ID
+124   | 4      | Right mouse button skill ID
+128   | 4      | Left swap mouse button skill ID
+132   | 4      | Right swap mouse button skill ID
 136   | 32     | Character menu appearance
 168   | 3      | Difficulty
 171   | 4      | Map ID
@@ -122,14 +122,6 @@ Character class is a `byte` where different values represent a class.
 Last played is saved as a `unit32` [unix timestamp](https://en.wikipedia.org/wiki/Unix_time) e.g `1495882861`.
 
 #### Assigned skills
-Assigned skills are a `16 byte` section containing all the [skill IDs](skills.go#L29) a character has assigned to a hotkey.  If the character has only assigned 7 skills for example, then 16-7 = 9 bytes will then be empty. The size of the section is always `16 byte`. 
-
-##### Layout
-|  Type  | Bytes | Value                     |
-|:------:|:-----:|---------------------------|
-| Skill ID | `16`  | [[16]skill](skills.go#L29) |
-
-#### Skills
 Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
 
 ##### Layout
@@ -148,6 +140,29 @@ Assigned skills are a `32 byte` section containing a `2 byte` header with the va
 | Barbarian   | `126`  |
 | Druid       | `221`  |
 | Assassin    | `251`  |
+
+
+#### Quests
+The quests struct is `298 byte` section that describes all quests in the game but also contains data about act traveling and NPC introductions. Each quest is `2 byte` long.
+
+| Type           | Bytes      | Description                                                                             |
+|----------------|------------|-----------------------------------------------------------------------------------------|
+| Introduction   | `2`        | Set to `1` if you have been introduced to Warriv in Act I.                              |
+| Act I quests   | `[6]quest` | All six quests for Act I.                                                               |
+| Travel         | `2`        | Set to `1` if you have traveled to Act II.                                              |
+| Introduction   | `2`        | Set to `1` if you have been introduced to Jerhyn.                                       |
+| Act II quests  | `[6]quest` | All six quests for Act II.                                                              |
+| Travel         | `2`        | Set to `1` if you have traveled to Act III.                                             |
+| Introduction   | `2`        | Set to `1` if you have been introduced to Hratli.                                       |
+| Act III quests | `[6]quest` | All six quests for Act III.                                                             |
+| Travel         | `2`        | Set to `1` if you have traveled to Act IV.                                              |
+| Introduction   | `2`        | Set to `1` if you have been introduced to Act IV. (which you have if you have traveled) |
+| Act IV quests  | `[6]quest` | Act IV only has 3 quests, so the struct has 6 empty bytes here.                         |
+| Travel         | `2`        | Set to `1` if you have traveled to Act V.                                               |
+| Introduction   | `2`        | Seems to be set to 1 after completing Terror's End and talking to Cain in act IV.       |
+| Unknown        | `4`        | Seems to be some kind of padding.                                                       |
+| Act V quests   | `[6]quest` | All six quests for Act V.                                                               |
+| Unknown        | 14         | Some kind of padding after all the quest data.                                          |
 
 
 ## Sections
