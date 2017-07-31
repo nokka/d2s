@@ -50,6 +50,7 @@ func main() {
 ## Binary layout
 
 ### Header
+The header is `765 byte` long struct containing most of the character meta data.
 
 Offset | Bytes | Description
 -----|-------- |------------
@@ -83,10 +84,9 @@ Offset | Bytes | Description
 185   | 2      | Mercenary type
 187   | 4      | Mercenary experience
 191   | 144      | Unknown
-335   | 298      | Quests
-633   | 81      | Waypoints
-714   | 51      | NPC Introductions
-765   |  -     | Attributes
+335   | 298      | [Quests](#quests)
+633   | 81      | [Waypoints](#waypoints)
+714   | 51      | [NPC Introductions](#npc-introductions)
 
 #### Character name
 
@@ -144,25 +144,7 @@ Character class is a `byte` where different values represent a class.
 Last played is saved as a `unit32` [unix timestamp](https://en.wikipedia.org/wiki/Unix_time) e.g `1495882861`.
 
 #### Assigned skills
-Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
-
-##### Layout
-|  Type  | Bytes | Value                     |
-|:------:|:-----:|---------------------------|
-| Header | `2`   | `if`                      |
-| Skills | `30`  | [[30]skill](skills.go#L29) |
-
-##### Skill offset map
-|    Class    | Offset |
-|:-----------:|:------:|
-| Amazon      | `6`    |
-| Sorceress   | `36`   |
-| Necromancer | `66`   |
-| Paladin     | `96`   |
-| Barbarian   | `126`  |
-| Druid       | `221`  |
-| Assassin    | `251`  |
-
+Assigned skills section is a an array of 16 [skill ids](skills.go#29), each a `4 byte` integer (uint32). If no skill is assigned the value is `0x00`.
 
 #### Quests
 The quests struct is `298 byte` section that describes all quests in the game but also contains data about act traveling and NPC introductions. Each quest is `2 byte` long.
@@ -176,7 +158,7 @@ The quests struct is `298 byte` section that describes all quests in the game bu
 ##### Quest structs
 A quest is `2 byte` long, I've created a general `quest` struct that holds the most important data of a quest, if it's completed or not. Each quest has a lot of unique bits set depending on different milestones of the quest. For example if you've consumed the Scroll of Resistance from the quest "Prison of Ice" or not.
 
-###### General 
+##### General 
 | Bit | Description     |
 |-----|-----------------|
 | 0   | Quest completed |
@@ -190,7 +172,7 @@ A quest is `2 byte` long, I've created a general `quest` struct that holds the m
 | 7   | Consumed scroll |
 
 ##### Quest structure
-This structure repeats it self 3 times, once for Normal, Nightmare and Hell.
+This structure repeats it self 3 times, once for Normal, Nightmare and Hell. The offset is the offset into the quest struct.
 
 | Offset | Bytes      | Description                                                                             |
 |--------|------------|-----------------------------------------------------------------------------------------|
@@ -211,22 +193,85 @@ This structure repeats it self 3 times, once for Normal, Nightmare and Hell.
 | 70     | `[6]quest` | All six quests for Act V.                                                               |
 | 82     | 14         | Some kind of padding after all the quest data.                                          |
 
+#### Waypoints
+> Not implemented
 
-## Sections
-The sections is a rough explanation of the different sections that exists, but each section is pretty complex to read and was even more complex to reverse engineer.
+#### NPC Introductions
+> Not implemented
 
-### 1. Header
-Each file starts with a `767 bytes` long header, this header contains all the basic information about your character like Level, Class, Game version, Name and so on.
+### Attributes
+Following the header is the attributes section, this sections layout consists of an array of  `9 bit` attribute id, followed by a `n bit` length attribute value. The section is terminated by a `9 bit` value of `0x1ff`. It's worth mentioning that these fields are [bit reversed](bitreader.go#69). Basically if you find the bits `00100111` they are reversed into `11100100`.  
 
-### 2. Attributes
-Following the header is the attributes section, this sections layout consists of an array of  `9 bit` attribute id, followed by a `n bit` length attribute value. The bit length of all attributes are documented in the [attributes.go](attributes.go) file.
+#### Attribute IDs
+| ID | Attribute       |
+|----|-----------------|
+| 0  | Strength        |
+| 1  | Energy          |
+| 2  | Dexterity       |
+| 3  | Vitality        |
+| 4  | Unused stats    |
+| 5  | Unused skills   |
+| 6  | Current HP      |
+| 7  | Max HP          |
+| 8  | Current mana    |
+| 9  | Max mana        |
+| 10 | Current stamina |
+| 11 | Max stamina     |
+| 12 | Level           |
+| 13 | Experience      |
+| 14 | Gold            |
+| 15 | Stashed gold    |
 
-The section is terminated by a `9 bit` value of `0x1ff`.
+#### Attribute bit lengths
+| Bit length | Attribute       |
+|------------|-----------------|
+| 10         | Strength        |
+| 10         | Energy          |
+| 10         | Dexterity       |
+| 10         | Vitality        |
+| 10         | Unused stats    |
+| 8          | Unused skills   |
+| 21         | Current HP      |
+| 21         | Max HP          |
+| 21         | Current mana    |
+| 21         | Max mana        |
+| 21         | Current stamina |
+| 21         | Max stamina     |
+| 7          | Level           |
+| 32         | Experience      |
+| 25         | Gold            |
+| 25         | Stashed gold    |
+
+#### Example of the reading
+
+```go
+for {
+    // 1. read 9 bits id. (reverse them)
+    // 2. if the id is 0x1ff, terminate the loop
+    // 3. read bit length from attribute map for that id.
+    // 4. read bit length nr of bits. 
+}
+```
 
 ### 3. Skills
-Skills contains a section of `32 bytes` and starts of with a `2 byte` header value of `if`.  
+Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
 
-Each class has 30 skills, and the map of skills are offseted by class. For example the Amazon class starts at index `6`, while the Sorceress starts at `36` and so on. After finding the correct index to start from, the skills section will read 30 skills into an array. Each skill is `1 byte` long.
+##### Layout
+|  Type  | Bytes | Value                     |
+|:------:|:-----:|---------------------------|
+| Header | `2`   | `if`                      |
+| Skills | `30`  | [[30]skill](skills.go#L29) |
+
+##### Skill offset map
+|    Class    | Offset |
+|:-----------:|:------:|
+| Amazon      | `6`    |
+| Sorceress   | `36`   |
+| Necromancer | `66`   |
+| Paladin     | `96`   |
+| Barbarian   | `126`  |
+| Druid       | `221`  |
+| Assassin    | `251`  |
 
 ### 4. Items
 This is by far the most tricky part to read. The items section starts of with a `4 byte` header, containing the value `JM`, and a `uint16` value which is the item count your character currently has. Equipped, inventory, stash, cube and belt all included.

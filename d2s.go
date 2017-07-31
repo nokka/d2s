@@ -69,6 +69,9 @@ func Parse(file io.Reader) (Character, error) {
 func parseHeader(bfr io.Reader, char *Character) error {
 
 	// Make a buffer that can hold 767 bytes, which can hold the entire header.
+	// The header is 765 bytes, but the first 2 bytes of the attributes section
+	// is included here, because it's a 2 bytes header that we're not really
+	// interested in.
 	buf := make([]byte, 767)
 
 	_, err := io.ReadFull(bfr, buf)
