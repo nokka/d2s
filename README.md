@@ -189,6 +189,8 @@ A quest is `2 byte` long, I've created a general `quest` struct that holds the m
 | 0   | Quest completed |
 | 7   | Consumed scroll |
 
+##### Quest structure
+This structure repeats it self 3 times, once for Normal, Nightmare and Hell.
 
 | Offset | Bytes      | Description                                                                             |
 |--------|------------|-----------------------------------------------------------------------------------------|
