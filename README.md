@@ -60,7 +60,7 @@ Offset | Bytes | Description
 16   | 4       | Active weapon
 20   | 16      | [Character Name](#character-name)
 36   | 1       | [Character Status](#character-status)
-37   | 1       | Character progression
+37   | 1       | [Character progression](#character-progression)
 38   | 2       | Unknown
 40   | 1       | [Character Class](#character-class)
 41   | 2       | Unknown
@@ -101,9 +101,31 @@ Character status is a `byte` where different bits will be set, depending on the 
 
 ##### Bit position
 
-| 0 | 1 |        2 | 3    | 4 | 5         | 6 | 7 |
-|---|:-:|---------:|------|---|-----------|---|---|
-| ? | ? | Hardcore | Died | ? | Expansion | ? | ? |
+| 7 | 6 | 5         | 4 | 3    | 2        | 1 | 0 |
+|---|---|-----------|---|------|----------|---|---|
+| ? | ? | Expansion | ? | Died | Hardcore | ? | ? |
+
+#### Character progression 
+>Not implemented yet.
+
+The value is incremented every time you kill an act boss.
+
+##### Classic
+| Value | Standard       | Hardcore       |
+|-------|----------------|----------------|
+| 0-3   | -              | -              |
+| 4-7   | Sir/Dame       | Count/Countess |
+| 8-11  | Lord/Lady      | Duke/Duchess   |
+| 12    | Baron/Baroness | King/Queen     |
+
+##### Expansion
+| Value | Expansion           | Expansion hardcore |
+|-------|---------------------|--------------------|
+| 0-3   | -                   | -                  |
+| 5-8   | Slayer              | Destroyer          |
+| 10-13 | Champion            | Conqueror          |
+| 15    | Patriarch/Matriarch | Guardian           |
+
 
 #### Character class
 Character class is a `byte` where different values represent a class.
@@ -128,7 +150,7 @@ Assigned skills are a `32 byte` section containing a `2 byte` header with the va
 |  Type  | Bytes | Value                     |
 |:------:|:-----:|---------------------------|
 | Header | `2`   | `if`                      |
-| Skills | `30`  | [[30]skill](skills.go#L3) |
+| Skills | `30`  | [[30]skill](skills.go#L29) |
 
 ##### Skill offset map
 |    Class    | Offset |
@@ -145,24 +167,46 @@ Assigned skills are a `32 byte` section containing a `2 byte` header with the va
 #### Quests
 The quests struct is `298 byte` section that describes all quests in the game but also contains data about act traveling and NPC introductions. Each quest is `2 byte` long.
 
-| Type           | Bytes      | Description                                                                             |
-|----------------|------------|-----------------------------------------------------------------------------------------|
-| Introduction   | `2`        | Set to `1` if you have been introduced to Warriv in Act I.                              |
-| Act I quests   | `[6]quest` | All six quests for Act I.                                                               |
-| Travel         | `2`        | Set to `1` if you have traveled to Act II.                                              |
-| Introduction   | `2`        | Set to `1` if you have been introduced to Jerhyn.                                       |
-| Act II quests  | `[6]quest` | All six quests for Act II.                                                              |
-| Travel         | `2`        | Set to `1` if you have traveled to Act III.                                             |
-| Introduction   | `2`        | Set to `1` if you have been introduced to Hratli.                                       |
-| Act III quests | `[6]quest` | All six quests for Act III.                                                             |
-| Travel         | `2`        | Set to `1` if you have traveled to Act IV.                                              |
-| Introduction   | `2`        | Set to `1` if you have been introduced to Act IV. (which you have if you have traveled) |
-| Act IV quests  | `[6]quest` | Act IV only has 3 quests, so the struct has 6 empty bytes here.                         |
-| Travel         | `2`        | Set to `1` if you have traveled to Act V.                                               |
-| Introduction   | `2`        | Seems to be set to 1 after completing Terror's End and talking to Cain in act IV.       |
-| Unknown        | `4`        | Seems to be some kind of padding.                                                       |
-| Act V quests   | `[6]quest` | All six quests for Act V.                                                               |
-| Unknown        | 14         | Some kind of padding after all the quest data.                                          |
+##### Header
+| Offset | Bytes | Content |
+|--------|-------|---------|
+| 335    | 4     | Woo!    |
+| 339    | 6     | Unknown |
+
+##### Quest structs
+A quest is `2 byte` long, I've created a general `quest` struct that holds the most important data of a quest, if it's completed or not. Each quest has a lot of unique bits set depending on different milestones of the quest. For example if you've consumed the Scroll of Resistance from the quest "Prison of Ice" or not.
+
+###### General 
+| Bit | Description     |
+|-----|-----------------|
+| 0   | Quest completed |
+
+##### Prison of Ice
+[Prison of Ice ](quest.go#L26)is the only quest I bothered to implement, because I needed to know if the character has increased resistances from the scroll or not.
+| Bit | Description     |
+|-----|-----------------|
+| 0   | Quest completed |
+| 7   | Consumed scroll |
+
+
+| Offset | Bytes      | Description                                                                             |
+|--------|------------|-----------------------------------------------------------------------------------------|
+| 0      | `2`        | Set to `1` if you have been introduced to Warriv in Act I.                              |
+| 2      | `[6]quest` | All six quests for Act I.                                                               |
+| 14     | `2`        | Set to `1` if you have traveled to Act II.                                              |
+| 16     | `2`        | Set to `1` if you have been introduced to Jerhyn.                                       |
+| 18     | `[6]quest` | All six quests for Act II.                                                              |
+| 30     | `2`        | Set to `1` if you have traveled to Act III.                                             |
+| 32     | `2`        | Set to `1` if you have been introduced to Hratli.                                       |
+| 34     | `[6]quest` | All six quests for Act III.                                                             |
+| 46     | `2`        | Set to `1` if you have traveled to Act IV.                                              |
+| 48     | `2`        | Set to `1` if you have been introduced to Act IV. (which you have if you have traveled) |
+| 50     | `[6]quest` | Act IV only has 3 quests, so the struct has 6 empty bytes here.                         |
+| 62     | `2`        | Set to `1` if you have traveled to Act V.                                               |
+| 64     | `2`        | Seems to be set to 1 after completing Terror's End and talking to Cain in act IV.       |
+| 66     | `4`        | Seems to be some kind of padding.                                                       |
+| 70     | `[6]quest` | All six quests for Act V.                                                               |
+| 82     | 14         | Some kind of padding after all the quest data.                                          |
 
 
 ## Sections
@@ -231,3 +275,6 @@ The mercenary sections starts of with a `2 byte` header with the value `jf` and 
 
 #### 8. Golem
 If your character is both a Necromancer and an expansion character, this section starts of with a `3 byte` header, where the first two bytes are the header `kf` followed by a boolean called `hasGolem`, if this value is true, there's an item list with the length 1 following the header.
+
+
+----------
