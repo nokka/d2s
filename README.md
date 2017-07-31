@@ -326,3 +326,7 @@ If your character is both a Necromancer and an expansion character, this section
 
 
 ----------
+
+## Contributing
+
+Please see [CONTRIBUTING.md](/CONTRIBUTING.md).
