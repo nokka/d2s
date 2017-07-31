@@ -200,7 +200,7 @@ This structure repeats it self 3 times, once for Normal, Nightmare and Hell. The
 > Not implemented
 
 ### Attributes
-Following the header is the attributes section, this sections layout consists of an array of  `9 bit` attribute id, followed by a `n bit` length attribute value. The section is terminated by a `9 bit` value of `0x1ff`. It's worth mentioning that these fields are [bit reversed](bitreader.go#69). Basically if you find the bits `00100111` they are reversed into `11100100`.  
+Following the header is the attributes section, this sections layout consists of an array of  `9 bit` attribute id, followed by a `n bit` length attribute value. The section is terminated by a `9 bit` value of `0x1ff`. It's worth mentioning that these fields are [bit reversed](bitreader.go#L69). Basically if you find the bits `00100111` they are reversed into `11100100`.  
 
 #### Attribute IDs
 | ID | Attribute       |
@@ -254,7 +254,7 @@ for {
 ```
 
 ### 3. Skills
-Assigned skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
+Skills are a `32 byte` section containing a `2 byte` header with the value `if` and `30 byte` of skill data. Each class has 30 skills available to them, so each skill get `1 byte` each. The tricky part about the skill mapping is that each class has a different offset into the [skill map](skills.go#L29) where their class specific skills start, and then go 30 indexes into the map. So for example Assassin has an offset of `251`. Which means Assassin skills are  between the indexes of `251` and `281` which is exactly 30 indexes.
 
 ##### Layout
 |  Type  | Bytes | Value                     |
@@ -323,9 +323,6 @@ The mercenary sections starts of with a `2 byte` header with the value `jf` and 
 
 #### 8. Golem
 If your character is both a Necromancer and an expansion character, this section starts of with a `3 byte` header, where the first two bytes are the header `kf` followed by a boolean called `hasGolem`, if this value is true, there's an item list with the length 1 following the header.
-
-
-----------
 
 ## Contributing
 
