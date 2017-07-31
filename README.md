@@ -183,6 +183,7 @@ A quest is `2 byte` long, I've created a general `quest` struct that holds the m
 
 ##### Prison of Ice
 [Prison of Ice ](quest.go#L26)is the only quest I bothered to implement, because I needed to know if the character has increased resistances from the scroll or not.
+
 | Bit | Description     |
 |-----|-----------------|
 | 0   | Quest completed |
