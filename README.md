@@ -5,7 +5,11 @@
 D2s is a binary parser written in Go that's used to parse `.d2s` files. This is the binary format that the game [Diablo II](http://eu.blizzard.com/en-gb/games/d2/) uses to save all information about a certain character. 
 
 ## Motivation
-This package was built for a private server of Diablo II called [Slashgaming](https://reddit.com/r/slashgaming) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's my sorceress for example [Nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped) .
+This package was built for a private server of Diablo II called [Slash Diablo](https://www.reddit.com/r/slashdiablo/) to build an Armory for all characters on the server. Where anyone could see everything about a particular character at any given point in time. Here's a few examples.
+
+* [nokkasorc](https://armory.slashgaming.net/character/nokkasorc#equipped)
+* [bluntakira](https://armory.slashgaming.net/character/bluntakira#equipped)
+* [freremort](https://armory.slashgaming.net/character/freremort#equipped)
 
 ## Install
 

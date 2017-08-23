@@ -11,54 +11,46 @@ import (
 )
 
 // Parse will read the data from a d2s character file and return a normalized struct.
-func Parse(file io.Reader) (Character, error) {
+func Parse(file io.Reader) (*Character, error) {
 
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
 
 	// Create character, we'll pass it around.
-	char := Character{}
+	char := &Character{}
 
-	err := parseHeader(bfr, &char)
-
-	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+	if err := parseHeader(bfr, char); err != nil {
+		return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
-	err = parseAttributes(bfr, &char)
-	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+	if err := parseAttributes(bfr, char); err != nil {
+		return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
-	err = parseSkills(bfr, &char)
-	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+	if err := parseSkills(bfr, char); err != nil {
+		return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
-	err = parseItems(bfr, &char)
-	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+	if err := parseItems(bfr, char); err != nil {
+		return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
-	err = parseCorpse(bfr, &char)
-	if err != nil {
-		return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+	if err := parseCorpse(bfr, char); err != nil {
+		return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 	}
 
 	// Normalize the character status, that is being stored as a byte.
 	status := char.Header.Status.Readable()
 
 	if status.Expansion {
-		err = parseMercItems(bfr, &char)
-		if err != nil {
-			return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+		if err := parseMercItems(bfr, char); err != nil {
+			return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 		}
 	}
 
 	if char.Header.Class == Necromancer && status.Expansion {
-		err = parseIronGolem(bfr, &char)
-		if err != nil {
-			return Character{}, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
+		if err := parseIronGolem(bfr, char); err != nil {
+			return nil, fmt.Errorf("Char name: %s, error that occurred: %s", char.Header.Name, err.Error())
 		}
 	}
 
