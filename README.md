@@ -312,7 +312,7 @@ This is the magical property with id `83` which contains 2 bit fields each `3` b
 83: {Bits: []uint{3, 3}, Name: "+{1} to {0} Skill Levels"},
 ```
 
-All magical properties are mapped in the [items.go](items.go) file.
+All magical properties are mapped in the [item.go](item.go) file.
 
 ### 5. Corpse data
 If your character is currently dead, and a corpse is on the ground when you enter a game, your equipped items will be in this item struct. It's a corpse header `16 bytes` containing the header `JM` followed by an item count similar to the item list.
