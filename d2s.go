@@ -19,7 +19,7 @@ func Parse(file io.Reader) (*Character, error) {
 	return parse(bfr)
 }
 
-// ParseFromContent will read the data a byte slice.
+// ParseFromContent will read the character from a byte slice.
 func ParseFromContent(data []byte) (*Character, error) {
 	// Create a reader from the byte slice.
 	r := bytes.NewReader(data)
