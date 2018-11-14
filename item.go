@@ -24,7 +24,7 @@ type item struct {
 	Level              uint64             `json:"level"`
 	Quality            uint64             `json:"quality"`
 	MultiplePictures   uint64             `json:"multiple_pictures"`
-	PictureID          uint64             `json:"picture_id, omitempty"`
+	PictureID          uint64             `json:"picture_id,omitempty"`
 	ClassSpecific      uint64             `json:"class_specific"`
 	LowQualityID       uint64             `json:"low_quality_id"`
 	Timestamp          uint64             `json:"timestamp"`

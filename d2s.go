@@ -12,11 +12,28 @@ import (
 
 // Parse will read the data from a d2s character file and return a normalized struct.
 func Parse(file io.Reader) (*Character, error) {
-
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
 
-	// Create character, we'll pass it around.
+	// Perform the actual reading.
+	return parse(bfr)
+}
+
+// ParseFromContent will read the data a byte slice.
+func ParseFromContent(data []byte) (*Character, error) {
+	// Create a reader from the byte slice.
+	r := bytes.NewReader(data)
+
+	// Implements buffered reading, wraps io.Reader.
+	bfr := bufio.NewReader(r)
+
+	// Perform the actual reading.
+	return parse(bfr)
+}
+
+// parse will do the actual reading from an io.Reader.
+func parse(bfr *bufio.Reader) (*Character, error) {
+	// Create character pointer, we'll pass it around.
 	char := &Character{}
 
 	if err := parseHeader(bfr, char); err != nil {
