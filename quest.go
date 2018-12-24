@@ -9,7 +9,7 @@ type quest [2]byte
 
 // isCompleted will return a bool, telling us if the quest is completed or not.
 // We'll do this by looking at bit 0, if it's set or not.
-func (q quest) isCompleted() bool {
+func (q quest) IsCompleted() bool {
 	return ((q[0] >> 0) & 1) > 0
 }
 
@@ -17,7 +17,7 @@ func (q *quest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		IsCompleted bool `json:"is_completed"`
 	}{
-		IsCompleted: q.isCompleted(),
+		IsCompleted: q.IsCompleted(),
 	})
 }
 
