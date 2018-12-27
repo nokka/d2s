@@ -25,6 +25,12 @@ func (q *quest) MarshalJSON() ([]byte, error) {
 // If you have consumed the scroll of resistance you'll get +10 @ res.
 type prisonOfIce [2]byte
 
+// isCompleted will return a bool, telling us if the quest is completed or not.
+// We'll do this by looking at bit 0, if it's set or not.
+func (q prisonOfIce) IsCompleted() bool {
+	return ((q[0] >> 0) & 1) > 0
+}
+
 func (q *prisonOfIce) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		IsCompleted    bool `json:"is_completed"`
