@@ -13,11 +13,20 @@ func (q quest) IsCompleted() bool {
 	return ((q[0] >> 0) & 1) > 0
 }
 
+// isRequirementCompleted will return a bool, telling us if the quest requirement is
+// completed, this usually means you have killed the boss demon, or all that is left
+// is to collect the reward.
+func (q quest) IsRequirementCompleted() bool {
+	return ((q[0] >> 1) & 1) > 0
+}
+
 func (q *quest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		IsCompleted bool `json:"is_completed"`
+		IsCompleted            bool `json:"is_completed"`
+		IsRequirementCompleted bool `json:"is_requirement_completed"`
 	}{
-		IsCompleted: q.IsCompleted(),
+		IsCompleted:            q.IsCompleted(),
+		IsRequirementCompleted: q.IsRequirementCompleted(),
 	})
 }
 
@@ -31,12 +40,21 @@ func (q prisonOfIce) IsCompleted() bool {
 	return ((q[0] >> 0) & 1) > 0
 }
 
+// isRequirementCompleted will return a bool, telling us if the quest requirement is
+// completed, this usually means you have killed the boss demon, or all that is left
+// is to collect the reward.
+func (q prisonOfIce) IsRequirementCompleted() bool {
+	return ((q[0] >> 1) & 1) > 0
+}
+
 func (q *prisonOfIce) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		IsCompleted    bool `json:"is_completed"`
-		ConsumedScroll bool `json:"consumed_scroll"`
+		IsCompleted            bool `json:"is_completed"`
+		ConsumedScroll         bool `json:"consumed_scroll"`
+		IsRequirementCompleted bool `json:"is_requirement_completed"`
 	}{
-		IsCompleted:    ((q[0] >> 0) & 1) > 0,
-		ConsumedScroll: ((q[0] >> 7) & 1) > 0,
+		IsCompleted:            ((q[0] >> 0) & 1) > 0,
+		ConsumedScroll:         ((q[0] >> 7) & 1) > 0,
+		IsRequirementCompleted: ((q[0] >> 1) & 1) > 0,
 	})
 }
