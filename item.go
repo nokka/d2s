@@ -552,6 +552,8 @@ var magicalProperties = map[uint64]magicalProperty{
 	22: {Bits: []uint{7}, Name: "+{0} to Maximum 1-handed damage"},
 	23: {Bits: []uint{6}, Name: "+{0} to Minimum 2-handed damage"},
 	24: {Bits: []uint{7}, Name: "+{0} to Maximum 2-handed damage"},
+	25: {Bits: []uint{8}, Name: "Unknown (Invisible)"}, // damagepercent
+	26: {Bits: []uint{8}, Name: "Unknown (Invisible)"}, // manarecovery
 	27: {Bits: []uint{8}, Name: "Regenerate Mana {0}%"},
 	28: {Bits: []uint{8}, Name: "Heal Stamina {0}%"},
 	31: {Bits: []uint{11}, Bias: 10, Name: "+{0} Defense"},
@@ -577,6 +579,10 @@ var magicalProperties = map[uint64]magicalProperty{
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds {0}-{1} Poison Damage over {2} Seconds"},
 	60: {Bits: []uint{7}, Name: "{0}% Life Stolen Per Hit"},
 	62: {Bits: []uint{7}, Name: "{0}% Mana Stolen Per Hit"},
+	67: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"}, // velocitypercent
+	68: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"}, // attackrate
+	71: {Bits: []uint{8}, Bias: 100, Name: "Unknown (Invisible)"}, // value
+	72: {Bits: []uint{9}, Name: "Unknown (Invisible)"}, // durability
 	73: {Bits: []uint{8}, Name: "+{0} Maximum Durability"},
 	74: {Bits: []uint{6}, Bias: 30, Name: "Replenish Life +{0}"},
 	75: {Bits: []uint{7}, Bias: 20, Name: "Increase Maximum Durability {0}%"},
@@ -586,6 +592,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	79: {Bits: []uint{9}, Bias: 100, Name: "{0}% Extra Gold from Monsters"},
 	80: {Bits: []uint{8}, Bias: 100, Name: "{0}% Better Chance of Getting Magic Items"},
 	81: {Bits: []uint{7}, Name: "Knockback"},
+	82: {Bits: []uint{9}, Bias: 20, Name: "Unknown (Invisible)"}, // item_timeduration
 
 	// First value is class, second is skill level, but they're printed in reverse
 	// e.g. "+3 To Sorceress Skill Levels"
@@ -596,6 +603,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	85: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Experience Gained"},
 	86: {Bits: []uint{7}, Name: "+{0} Life After Each Kill"},
 	87: {Bits: []uint{7}, Name: "Reduces Prices {0}%"},
+	88: {Bits: []uint{1}, Name: "Unknown (Invisible)"}, // item_doubleherbduration
 	89: {Bits: []uint{4}, Bias: 4, Name: "+{0} to Light Radius"},
 	// This property is not displayed on the item, but its effect is to alter
 	// the color of the ambient light.
@@ -604,6 +612,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	91: {Bits: []uint{8}, Bias: 100, Name: "Requirements {0}%"},
 	92: {Bits: []uint{7}, Name: "Level requirements +{0} (Invisible)"},
 	93: {Bits: []uint{7}, Bias: 20, Name: "{0}% Increased Attack Speed"},
+	94: {Bits: []uint{7}, Bias: 64, Name: "Unknown (Invisible)"}, // item_levelreqpct
 	96: {Bits: []uint{7}, Bias: 20, Name: "{0}% Faster Run/Walk"},
 
 	// Number of levels to a certain skill, e.g. +1 To Teleport.
@@ -650,6 +659,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	122: {Bits: []uint{9}, Bias: 20, Name: "+{0}% Damage to Undead"},
 	123: {Bits: []uint{10}, Bias: 128, Name: "+{0} to Attack Rating against Demons"},
 	124: {Bits: []uint{10}, Bias: 128, Name: "+{0} to Attack Rating against Undead"},
+	125: {Bits: []uint{1}, Name: "Throwable"},
 	// First value is class id, the next one is skill tree
 	126: {Bits: []uint{3, 3}, Name: "+{0} to Fire Skills"},
 	127: {Bits: []uint{3}, Name: "+{0} to All Skill Levels"},
@@ -661,7 +671,7 @@ var magicalProperties = map[uint64]magicalProperty{
 	138: {Bits: []uint{7}, Name: "+{0} to Mana After Each Kill"},
 	139: {Bits: []uint{7}, Name: "+{0} Life after each Demon Kill"},
 	// Unknown property, shows up on Swordback Hold Spiked Shield.
-	140: {Bits: []uint{7}, Name: "Unknown"},
+	140: {Bits: []uint{7}, Name: "Extra Blood (Invisible)"}, // item_extrablood
 	141: {Bits: []uint{7}, Name: "{0}% Deadly Strike"},
 	142: {Bits: []uint{7}, Name: "Fire Absorb {0}%"},
 	143: {Bits: []uint{7}, Name: "+{0} Fire Absorb"},
@@ -806,10 +816,12 @@ var magicalProperties = map[uint64]magicalProperty{
 	// The second and third are respectively the minimum and maximum values of the property.
 	// The maximum value at the time specified and the minimum at the opposite.
 
-	305: {Bits: []uint{8}, Name: "{0} Pierce Cold"},
-	306: {Bits: []uint{8}, Name: "{0} Pierce Fire"},
-	307: {Bits: []uint{8}, Name: "{0} Pierce Lightning"},
+	305: {Bits: []uint{8}, Bias: 50, Name: "{0} Pierce Cold"},
+	306: {Bits: []uint{8}, Bias: 50, Name: "{0} Pierce Fire"},
+	307: {Bits: []uint{8}, Bias: 50, Name: "{0} Pierce Lightning"},
+	308: {Bits: []uint{8}, Bias: 50, Name: "{0} Pierce Poision"},
 
+	324: {Bits: []uint{6}, Name: "Unknown (Invisible)"}, // item_extra_charges
 	329: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Fire Skill Damage"},
 	330: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Lightning Skill Damage"},
 	331: {Bits: []uint{9}, Bias: 50, Name: "{0}% To Cold Skill Damage"},
