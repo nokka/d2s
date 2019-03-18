@@ -588,8 +588,9 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 			// If the item is part of a set, these bit will tell us how many lists
 			// of magical properties follow the one regular magical property list.
+			var setListValue uint64 = 0
 			if parsed.Quality == partOfSet {
-				setListValue := reverseBits(ibr.ReadBits64(5, true), 5)
+				setListValue = reverseBits(ibr.ReadBits64(5, true), 5)
 				readBits += 5
 
 				listCount, ok := setListMap[setListValue]
@@ -622,6 +623,16 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 					}
 
 					parsed.SetAttributes = append(parsed.SetAttributes, setAttrList)
+				}
+				// The bits set in setListValue correspond to the number
+				// of items that need to be worn for each list of magical properties
+				// to be active
+				for i := 0; i < 5; i++ {
+					if (setListValue & (1 << uint(i)) == 0) {
+						continue
+					}
+					// bit position 0 means it requires >= 2 items worn, etc
+					parsed.SetAttributesReq = append(parsed.SetAttributesReq, uint(i+2))
 				}
 			}
 

@@ -45,6 +45,7 @@ type item struct {
 	SetName            string             `json:"set_name,omitempty"`
 	SetListCount       uint64             `json:"set_list_count"`
 	SetAttributes      [][]magicAttribute `json:"set_attributes"`
+	SetAttributesReq   []uint             `json:"set_attributes_req,omitempty"`
 	RareName           string             `json:"rare_name,omitempty"`
 	RareName2          string             `json:"rare_name2,omitempty"`
 	MagicalNameIDs     []uint64           `json:"magical_name_ids,omitempty"`
