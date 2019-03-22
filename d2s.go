@@ -624,15 +624,20 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 
 					parsed.SetAttributes = append(parsed.SetAttributes, setAttrList)
 				}
-				// The bits set in setListValue correspond to the number
-				// of items that need to be worn for each list of magical properties
-				// to be active
-				for i := 0; i < 5; i++ {
-					if (setListValue & (1 << uint(i)) == 0) {
-						continue
+				reqSetIDs, ok := setReqIDsMap[parsed.SetID]
+				if ok {
+					parsed.SetAttributesIDsReq = reqSetIDs
+				} else {
+					// The bits set in setListValue correspond to the number
+					// of items that need to be worn for each list of magical properties
+					// to be active
+					for i := 0; i < 5; i++ {
+						if (setListValue & (1 << uint(i)) == 0) {
+							continue
+						}
+						// bit position 0 means it requires >= 2 items worn, etc
+						parsed.SetAttributesNumReq = append(parsed.SetAttributesNumReq, uint(i+2))
 					}
-					// bit position 0 means it requires >= 2 items worn, etc
-					parsed.SetAttributesReq = append(parsed.SetAttributesReq, uint(i+2))
 				}
 			}
 
