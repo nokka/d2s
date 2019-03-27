@@ -45,6 +45,8 @@ type item struct {
 	SetName            string             `json:"set_name,omitempty"`
 	SetListCount       uint64             `json:"set_list_count"`
 	SetAttributes      [][]magicAttribute `json:"set_attributes"`
+	SetAttributesNumReq []uint            `json:"set_attributes_num_req,omitempty"`
+	SetAttributesIDsReq []uint64          `json:"set_attributes_ids_req,omitempty"`
 	RareName           string             `json:"rare_name,omitempty"`
 	RareName2          string             `json:"rare_name2,omitempty"`
 	MagicalNameIDs     []uint64           `json:"magical_name_ids,omitempty"`
@@ -471,6 +473,15 @@ var setListMap = map[uint64]uint64{
 	12: 2,
 	15: 4,
 	31: 5,
+}
+
+// Certain set items (only Civerb's Ward in unmodded D2) have bonuses
+// that require certain other set items in order to be activated
+// (instead of the normal requirements of just 'wearing > x of any
+// items in the set'); determined by add_func=1 in SetItems.txt
+var setReqIDsMap = map[uint64][]uint64{
+	// Civerb's Ward: [Civerb's Icon, Civerb's Cudgel]
+	0: []uint64{1, 2},
 }
 
 // All item types that contain the quantity bits will exist in here,
