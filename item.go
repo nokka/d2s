@@ -1,60 +1,60 @@
 package d2s
 
 type item struct {
-	Identified         uint64             `json:"identified"`
-	Socketed           uint64             `json:"socketed"`
-	New                uint64             `json:"new"`
-	IsEar              uint64             `json:"is_ear"`
-	StarterItem        uint64             `json:"starter_item"`
-	SimpleItem         uint64             `json:"simple_item"`
-	Ethereal           uint64             `json:"ethereal"`
-	Personalized       uint64             `json:"personalized"`
-	PersonalizedName   string             `json:"personalized_name,omitempty"`
-	GivenRuneword      uint64             `json:"given_runeword"`
-	LocationID         uint64             `json:"location_id"`
-	EquippedID         uint64             `json:"equipped_id,omitempty"`
-	PositionX          uint64             `json:"position_x"`
-	PositionY          uint64             `json:"position_y"`
-	AltPositionID      uint64             `json:"alt_position_id"`
-	Type               string             `json:"type"`
-	TypeID             uint64             `json:"type_id"`
-	TypeName           string             `json:"type_name"`
-	NrOfItemsInSockets uint64             `json:"nr_of_items_in_sockets"`
-	ID                 uint64             `json:"id"`
-	Level              uint64             `json:"level"`
-	Quality            uint64             `json:"quality"`
-	MultiplePictures   uint64             `json:"multiple_pictures"`
-	PictureID          uint64             `json:"picture_id,omitempty"`
-	ClassSpecific      uint64             `json:"class_specific"`
-	LowQualityID       uint64             `json:"low_quality_id"`
-	Timestamp          uint64             `json:"timestamp"`
-	EarAttributes      earAttributes      `json:"ear_attributes"`
-	DefenseRating      int64              `json:"defense_rating,omitempty"`
-	MaxDurability      uint64             `json:"max_durability,omitempty"`
-	CurrentDurability  uint64             `json:"current_durability,omitempty"`
-	TotalNrOfSockets   uint64             `json:"total_nr_of_sockets"`
-	Quantity           uint64             `json:"quantity,omitempty"`
-	MagicPrefix        uint64             `json:"magic_prefix,omitempty"`
-	MagicPrefixName    string             `json:"magic_prefix_name,omitempty"`
-	MagicSuffix        uint64             `json:"magic_suffix,omitempty"`
-	MagicSuffixName    string             `json:"magic_suffix_name,omitempty"`
-	RunewordID         uint64             `json:"runeword_id,omitempty"`
-	RunewordName       string             `json:"runeword_name,omitempty"`
-	RunewordAttributes []magicAttribute   `json:"runeword_attributes"`
-	SetID              uint64             `json:"set_id,omitempty"`
-	SetName            string             `json:"set_name,omitempty"`
-	SetListCount       uint64             `json:"set_list_count"`
-	SetAttributes      [][]magicAttribute `json:"set_attributes"`
-	SetAttributesNumReq []uint            `json:"set_attributes_num_req,omitempty"`
-	SetAttributesIDsReq []uint64          `json:"set_attributes_ids_req,omitempty"`
-	RareName           string             `json:"rare_name,omitempty"`
-	RareName2          string             `json:"rare_name2,omitempty"`
-	MagicalNameIDs     []uint64           `json:"magical_name_ids,omitempty"`
-	UniqueID           uint64             `json:"unique_id,omitempty"`
-	UniqueName         string             `json:"unique_name,omitempty"`
-	MagicAttributes    []magicAttribute   `json:"magic_attributes"`
-	SocketedItems      []item             `json:"socketed_items"`
-	BaseDamage         *weaponDamage      `json:"base_damage,omitempty"`
+	Identified          uint64             `json:"identified"`
+	Socketed            uint64             `json:"socketed"`
+	New                 uint64             `json:"new"`
+	IsEar               uint64             `json:"is_ear"`
+	StarterItem         uint64             `json:"starter_item"`
+	SimpleItem          uint64             `json:"simple_item"`
+	Ethereal            uint64             `json:"ethereal"`
+	Personalized        uint64             `json:"personalized"`
+	PersonalizedName    string             `json:"personalized_name,omitempty"`
+	GivenRuneword       uint64             `json:"given_runeword"`
+	LocationID          uint64             `json:"location_id"`
+	EquippedID          uint64             `json:"equipped_id,omitempty"`
+	PositionX           uint64             `json:"position_x"`
+	PositionY           uint64             `json:"position_y"`
+	AltPositionID       uint64             `json:"alt_position_id"`
+	Type                string             `json:"type"`
+	TypeID              uint64             `json:"type_id"`
+	TypeName            string             `json:"type_name"`
+	NrOfItemsInSockets  uint64             `json:"nr_of_items_in_sockets"`
+	ID                  uint64             `json:"id"`
+	Level               uint64             `json:"level"`
+	Quality             uint64             `json:"quality"`
+	MultiplePictures    uint64             `json:"multiple_pictures"`
+	PictureID           uint64             `json:"picture_id,omitempty"`
+	ClassSpecific       uint64             `json:"class_specific"`
+	LowQualityID        uint64             `json:"low_quality_id"`
+	Timestamp           uint64             `json:"timestamp"`
+	EarAttributes       earAttributes      `json:"ear_attributes"`
+	DefenseRating       int64              `json:"defense_rating,omitempty"`
+	MaxDurability       uint64             `json:"max_durability,omitempty"`
+	CurrentDurability   uint64             `json:"current_durability,omitempty"`
+	TotalNrOfSockets    uint64             `json:"total_nr_of_sockets"`
+	Quantity            uint64             `json:"quantity,omitempty"`
+	MagicPrefix         uint64             `json:"magic_prefix,omitempty"`
+	MagicPrefixName     string             `json:"magic_prefix_name,omitempty"`
+	MagicSuffix         uint64             `json:"magic_suffix,omitempty"`
+	MagicSuffixName     string             `json:"magic_suffix_name,omitempty"`
+	RunewordID          uint64             `json:"runeword_id,omitempty"`
+	RunewordName        string             `json:"runeword_name,omitempty"`
+	RunewordAttributes  []magicAttribute   `json:"runeword_attributes"`
+	SetID               uint64             `json:"set_id,omitempty"`
+	SetName             string             `json:"set_name,omitempty"`
+	SetListCount        uint64             `json:"set_list_count"`
+	SetAttributes       [][]magicAttribute `json:"set_attributes"`
+	SetAttributesNumReq []uint             `json:"set_attributes_num_req,omitempty"`
+	SetAttributesIDsReq []uint64           `json:"set_attributes_ids_req,omitempty"`
+	RareName            string             `json:"rare_name,omitempty"`
+	RareName2           string             `json:"rare_name2,omitempty"`
+	MagicalNameIDs      []uint64           `json:"magical_name_ids,omitempty"`
+	UniqueID            uint64             `json:"unique_id,omitempty"`
+	UniqueName          string             `json:"unique_name,omitempty"`
+	MagicAttributes     []magicAttribute   `json:"magic_attributes"`
+	SocketedItems       []item             `json:"socketed_items"`
+	BaseDamage          *weaponDamage      `json:"base_damage,omitempty"`
 }
 
 func (i *item) getTypeID() uint64 {
@@ -584,16 +584,17 @@ var magicalProperties = map[uint64]magicalProperty{
 	45: {Bits: []uint{8}, Bias: 50, Name: "Poison Resist +{0}%"},
 	46: {Bits: []uint{5}, Name: "+{0}% to Maximum Poison Resist"},
 	48: {Bits: []uint{8, 9}, Name: "Adds {0}-{1} Fire Damage"},
+	49: {Bits: []uint{9}, Name: "+{0} to Maximum Fire Damage"},
 	50: {Bits: []uint{6, 10}, Name: "Adds {0}-{1} Lightning Damage"},
 	52: {Bits: []uint{8, 9}, Name: "Adds {0}-{1} Magic Damage"},
 	54: {Bits: []uint{8, 9, 8}, Name: "Adds {0}-{1} Cold Damage"},
 	57: {Bits: []uint{10, 10, 9}, Name: "Adds {0}-{1} Poison Damage over {2} Seconds"},
 	60: {Bits: []uint{7}, Name: "{0}% Life Stolen Per Hit"},
 	62: {Bits: []uint{7}, Name: "{0}% Mana Stolen Per Hit"},
-	67: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"}, // velocitypercent
-	68: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"}, // attackrate
+	67: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"},  // velocitypercent
+	68: {Bits: []uint{7}, Bias: 30, Name: "Unknown (Invisible)"},  // attackrate
 	71: {Bits: []uint{8}, Bias: 100, Name: "Unknown (Invisible)"}, // value
-	72: {Bits: []uint{9}, Name: "Unknown (Invisible)"}, // durability
+	72: {Bits: []uint{9}, Name: "Unknown (Invisible)"},            // durability
 	73: {Bits: []uint{8}, Name: "+{0} Maximum Durability"},
 	74: {Bits: []uint{6}, Bias: 30, Name: "Replenish Life +{0}"},
 	75: {Bits: []uint{7}, Bias: 20, Name: "Increase Maximum Durability {0}%"},
