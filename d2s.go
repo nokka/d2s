@@ -323,7 +323,7 @@ func parseMercItems(bfr io.ByteReader, char *Character) error {
 	// offset: 8, "f"
 	f := ibr.ReadBits64(8, false)
 
-	if string(j) != "j" || string(f) != "f" {
+	if fmt.Sprintf("%c", j) != "j" || fmt.Sprintf("%c", f) != "f" {
 		return errors.New("Failed to find merc header jf")
 	}
 
@@ -526,7 +526,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 						break
 					}
 
-					name += string(c)
+					name += fmt.Sprintf("%c", c)
 				}
 
 				parsed.PersonalizedName = name
@@ -632,7 +632,7 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]item, error) {
 					// of items that need to be worn for each list of magical properties
 					// to be active
 					for i := 0; i < 5; i++ {
-						if (setListValue & (1 << uint(i)) == 0) {
+						if setListValue&(1<<uint(i)) == 0 {
 							continue
 						}
 						// bit position 0 means it requires >= 2 items worn, etc
@@ -728,7 +728,7 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 	m := ibr.ReadBits64(8, false)
 	readBits += 8
 
-	if string(j) != "J" || string(m) != "M" {
+	if fmt.Sprintf("%c", j) != "J" || fmt.Sprintf("%c", m) != "M" {
 		return errors.New("Failed to find item header JM")
 	}
 
@@ -797,8 +797,16 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 	readBits++
 
 	// offset 43, unknown
-	reverseBits(ibr.ReadBits64(15, true), 15)
-	readBits += 15
+	reverseBits(ibr.ReadBits64(5, true), 5)
+	readBits += 5
+
+	// offset 48
+	item.Version = reverseBits(ibr.ReadBits64(8, true), 8)
+	readBits += 8
+
+	// offset 56, unknown
+	reverseBits(ibr.ReadBits64(2, true), 2)
+	readBits += 2
 
 	// offset 58
 	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
@@ -828,7 +836,7 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
 		var itemType string
 		for j := 0; j < 4; j++ {
-			itemType += string(reverseBits(ibr.ReadBits64(8, true), 8))
+			itemType += fmt.Sprintf("%c", reverseBits(ibr.ReadBits64(8, true), 8))
 		}
 
 		item.Type = strings.Trim(itemType, " ")
@@ -896,7 +904,7 @@ func parseSimpleBits(ibr *bitReader, item *item) error {
 				break
 			}
 			readBits += 7
-			name += string(c)
+			name += fmt.Sprintf("%c", c)
 		}
 
 		item.EarAttributes = earAttributes{
@@ -944,9 +952,9 @@ func parseRareOrCraftedBits(ibr *bitReader, item *item) (int, error) {
 
 	item.RareName2 = name2
 
-	// Following the name IDs, we got 6 possible magical name IDs, the pattern
-	// is 1 bit id, 11 bit value... But the value will only exist if the prefix
-	// is 1. So we'll read the id first and check it against 1.
+	// Array of 6 possible prefixes and suffixes. First read 1 bit. If 1, read 11 more
+	// for the prefix/suffix id defined in MagicPrefix.txt and MagicSuffix.txt.
+	// Even indices are prefixes, odd suffixes.
 	for i := 0; i < 6; i++ {
 		prefix := reverseBits(ibr.ReadBits64(1, true), 1)
 		readBits++
@@ -954,6 +962,8 @@ func parseRareOrCraftedBits(ibr *bitReader, item *item) (int, error) {
 		if prefix == 1 {
 			item.MagicalNameIDs = append(item.MagicalNameIDs, reverseBits(ibr.ReadBits64(11, true), 11))
 			readBits += 11
+		} else {
+			item.MagicalNameIDs = append(item.MagicalNameIDs, 0)
 		}
 	}
 
