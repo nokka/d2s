@@ -11,6 +11,7 @@ type item struct {
 	Personalized        uint64             `json:"personalized"`
 	PersonalizedName    string             `json:"personalized_name,omitempty"`
 	GivenRuneword       uint64             `json:"given_runeword"`
+	Version             uint64             `json:"version"`
 	LocationID          uint64             `json:"location_id"`
 	EquippedID          uint64             `json:"equipped_id,omitempty"`
 	PositionX           uint64             `json:"position_x"`
