@@ -26,8 +26,4 @@ func TestParse(t *testing.T) {
 	if char.Header.Name.String() != "NokkaSorc" {
 		t.Errorf("Expected char name to be %v. Got %v", "NokkaSorc", char.Header.Name)
 	}
-
-	//Write out the data to console.
-	//charJSON, err := json.MarshalIndent(char, "", "  ")
-	//fmt.Printf("%s", string(charJSON))
 }
