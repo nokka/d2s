@@ -10,7 +10,7 @@ import (
 * Parse NokkaSorc.d2s from examples and verify the chars name
 **/
 func TestParse(t *testing.T) {
-	path := "examples/NokkaSorc.d2s"
+	path := "examples/nokkasorc"
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Error while opening .d2s file", err)
