@@ -1898,6 +1898,7 @@ var runewordNames = map[uint64]string{
 	123:  "Peace",
 	124:  "Winter",
 	128:  "Phoenix",
+	131:  "Plague",
 	134:  "Pride",
 	135:  "Principle",
 	137:  "Prudence",
