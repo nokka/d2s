@@ -20,7 +20,8 @@ const (
 	stashedGold    = 15
 )
 
-type attributes struct {
+// Attributes are the different type of attributes a character can have.
+type Attributes struct {
 	Strength          uint64 `json:"strength"`
 	Energy            uint64 `json:"energy"`
 	Dexterity         uint64 `json:"dexterity"`

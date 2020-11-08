@@ -1,6 +1,7 @@
 package d2s
 
-type skill struct {
+// Skill represents an available character skill in d2.
+type Skill struct {
 	ID     int    `json:"id"`
 	Points int    `json:"points"`
 	Name   string `json:"name"`
@@ -14,16 +15,6 @@ var skillOffsetMap = map[uint]int{
 	Barbarian:   126,
 	Druid:       221,
 	Assassin:    251,
-}
-
-var skillTreeOffsetMap = map[uint]int{
-	Amazon:      0,
-	Sorceress:   3,
-	Necromancer: 6,
-	Paladin:     9,
-	Barbarian:   12,
-	Druid:       15,
-	Assassin:    18,
 }
 
 var skillMap = map[int]string{

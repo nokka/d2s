@@ -10,7 +10,7 @@ import (
 * Parse NokkaSorc.d2s from examples and verify the chars name
 **/
 func TestParse(t *testing.T) {
-	path := "examples/NokkaSorc.d2s"
+	path := "examples/nokkasorc"
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Error while opening .d2s file", err)
@@ -26,8 +26,4 @@ func TestParse(t *testing.T) {
 	if char.Header.Name.String() != "NokkaSorc" {
 		t.Errorf("Expected char name to be %v. Got %v", "NokkaSorc", char.Header.Name)
 	}
-
-	//Write out the data to console.
-	//charJSON, err := json.MarshalIndent(char, "", "  ")
-	//fmt.Printf("%s", string(charJSON))
 }

@@ -1,6 +1,7 @@
 package d2s
 
-type item struct {
+// Item describes any type of item and all it's data.
+type Item struct {
 	Identified          uint64             `json:"identified"`
 	Socketed            uint64             `json:"socketed"`
 	New                 uint64             `json:"new"`
@@ -54,12 +55,11 @@ type item struct {
 	UniqueID            uint64             `json:"unique_id,omitempty"`
 	UniqueName          string             `json:"unique_name,omitempty"`
 	MagicAttributes     []magicAttribute   `json:"magic_attributes"`
-	SocketedItems       []item             `json:"socketed_items"`
+	SocketedItems       []Item             `json:"socketed_items"`
 	BaseDamage          *weaponDamage      `json:"base_damage,omitempty"`
 }
 
-func (i *item) getTypeID() uint64 {
-
+func (i *Item) getTypeID() uint64 {
 	if _, ok := armorCodes[i.Type]; ok {
 		return armor
 	}
@@ -482,7 +482,7 @@ var setListMap = map[uint64]uint64{
 // items in the set'); determined by add_func=1 in SetItems.txt
 var setReqIDsMap = map[uint64][]uint64{
 	// Civerb's Ward: [Civerb's Icon, Civerb's Cudgel]
-	0: []uint64{1, 2},
+	0: {1, 2},
 }
 
 // All item types that contain the quantity bits will exist in here,
@@ -1898,6 +1898,7 @@ var runewordNames = map[uint64]string{
 	123:  "Peace",
 	124:  "Winter",
 	128:  "Phoenix",
+	131:  "Plague",
 	134:  "Pride",
 	135:  "Principle",
 	137:  "Prudence",

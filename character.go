@@ -7,18 +7,19 @@ import (
 
 // Character represents all the d2s character data.
 type Character struct {
-	Header      header     `json:"header"`
-	Attributes  attributes `json:"attributes"`
-	Skills      []skill    `json:"skills"`
-	Items       []item     `json:"items"`
-	CorpseItems []item     `json:"corpse_items"`
-	MercItems   []item     `json:"merc_items"`
-	GolemItem   *item      `json:"golem_item"`
+	Header      Header     `json:"header"`
+	Attributes  Attributes `json:"attributes"`
+	Skills      []Skill    `json:"skills"`
+	Items       []Item     `json:"items"`
+	CorpseItems []Item     `json:"corpse_items"`
+	MercItems   []Item     `json:"merc_items"`
+	GolemItem   *Item      `json:"golem_item"`
 	IsDead      uint16     `json:"is_dead"`
 }
 
-func (h *header) MarshalJSON() ([]byte, error) {
-	type Alias header
+// MarshalJSON ...
+func (h *Header) MarshalJSON() ([]byte, error) {
+	type Alias Header
 
 	leftSkill, ok := skillMap[int(h.LeftSkill)]
 	if !ok {
@@ -86,7 +87,7 @@ func (h *header) MarshalJSON() ([]byte, error) {
 }
 
 // Header determines the header data of a d2s file.
-type header struct {
+type Header struct {
 	Identifier        uint32      `json:"identifier"`
 	Version           uint32      `json:"version"`
 	FileSize          uint32      `json:"filesize"`
