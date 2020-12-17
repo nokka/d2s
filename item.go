@@ -42,11 +42,11 @@ type Item struct {
 	MagicSuffixName     string             `json:"magic_suffix_name,omitempty"`
 	RunewordID          uint64             `json:"runeword_id,omitempty"`
 	RunewordName        string             `json:"runeword_name,omitempty"`
-	RunewordAttributes  []magicAttribute   `json:"runeword_attributes"`
+	RunewordAttributes  []MagicAttribute   `json:"runeword_attributes"`
 	SetID               uint64             `json:"set_id,omitempty"`
 	SetName             string             `json:"set_name,omitempty"`
 	SetListCount        uint64             `json:"set_list_count"`
-	SetAttributes       [][]magicAttribute `json:"set_attributes"`
+	SetAttributes       [][]MagicAttribute `json:"set_attributes"`
 	SetAttributesNumReq []uint             `json:"set_attributes_num_req,omitempty"`
 	SetAttributesIDsReq []uint64           `json:"set_attributes_ids_req,omitempty"`
 	RareName            string             `json:"rare_name,omitempty"`
@@ -54,9 +54,9 @@ type Item struct {
 	MagicalNameIDs      []uint64           `json:"magical_name_ids,omitempty"`
 	UniqueID            uint64             `json:"unique_id,omitempty"`
 	UniqueName          string             `json:"unique_name,omitempty"`
-	MagicAttributes     []magicAttribute   `json:"magic_attributes"`
+	MagicAttributes     []MagicAttribute   `json:"magic_attributes"`
 	SocketedItems       []Item             `json:"socketed_items"`
-	BaseDamage          *weaponDamage      `json:"base_damage,omitempty"`
+	BaseDamage          *WeaponDamage      `json:"base_damage,omitempty"`
 }
 
 func (i *Item) getTypeID() uint64 {
@@ -740,21 +740,32 @@ type earAttributes struct {
 	Name  string `json:"name"`
 }
 
+// MagicAttribute describes one of potentially many attributes on an item.
+//
+// The values array is replaced into the name string using the value's own array
+// index wrapped in curly braces, e.g., `{i}`. Some values will need to be
+// denormalized before replacing, such as class names, and various calculations.
+//
 // Note the values array is of the type int64, this is because some properties
 // contain negative values, such as - % requirements.
-type magicAttribute struct {
+type MagicAttribute struct {
 	ID     uint64  `json:"id"`
 	Name   string  `json:"name"`
 	Values []int64 `json:"values"`
 }
 
-type magicalProperty struct {
+// MagicalProperty describes a string template, bias, and bit length for a
+// particular kind of magical property, such as bonuses to all resistences or
+// magic item finding.
+type MagicalProperty struct {
 	Bits []uint
 	Bias uint64
 	Name string
 }
 
-type weaponDamage struct {
+// WeaponDamage contains integer ranges for any weapon's one-handed, two-handed
+// (and maybe soon throwing as well?) damage.
+type WeaponDamage struct {
 	Min    int `json:"min,omitempty"`
 	Max    int `json:"max,omitempty"`
 	TwoMin int `json:"twohand_min,omitempty"`
