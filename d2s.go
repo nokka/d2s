@@ -972,9 +972,9 @@ func parseRunewordBits(ibr *bitReader, item *Item) {
 
 // Parses the magical property list in the byte queue that belongs to an item
 // and returns the list of properties.
-func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
+func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
 
-	var magicAttributes []magicAttribute
+	var magicAttributes []MagicAttribute
 	var readBits int
 
 	for {
@@ -1009,7 +1009,7 @@ func parseMagicalList(ibr *bitReader) ([]magicAttribute, int, error) {
 			values = append(values, int64(val))
 		}
 
-		attr := magicAttribute{
+		attr := MagicAttribute{
 			ID:     id,
 			Name:   prop.Name,
 			Values: values,

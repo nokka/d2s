@@ -42,11 +42,11 @@ type Item struct {
 	MagicSuffixName     string             `json:"magic_suffix_name,omitempty"`
 	RunewordID          uint64             `json:"runeword_id,omitempty"`
 	RunewordName        string             `json:"runeword_name,omitempty"`
-	RunewordAttributes  []magicAttribute   `json:"runeword_attributes"`
+	RunewordAttributes  []MagicAttribute   `json:"runeword_attributes"`
 	SetID               uint64             `json:"set_id,omitempty"`
 	SetName             string             `json:"set_name,omitempty"`
 	SetListCount        uint64             `json:"set_list_count"`
-	SetAttributes       [][]magicAttribute `json:"set_attributes"`
+	SetAttributes       [][]MagicAttribute `json:"set_attributes"`
 	SetAttributesNumReq []uint             `json:"set_attributes_num_req,omitempty"`
 	SetAttributesIDsReq []uint64           `json:"set_attributes_ids_req,omitempty"`
 	RareName            string             `json:"rare_name,omitempty"`
@@ -54,9 +54,9 @@ type Item struct {
 	MagicalNameIDs      []uint64           `json:"magical_name_ids,omitempty"`
 	UniqueID            uint64             `json:"unique_id,omitempty"`
 	UniqueName          string             `json:"unique_name,omitempty"`
-	MagicAttributes     []magicAttribute   `json:"magic_attributes"`
+	MagicAttributes     []MagicAttribute   `json:"magic_attributes"`
 	SocketedItems       []Item             `json:"socketed_items"`
-	BaseDamage          *weaponDamage      `json:"base_damage,omitempty"`
+	BaseDamage          *WeaponDamage      `json:"base_damage,omitempty"`
 }
 
 func (i *Item) getTypeID() uint64 {
@@ -75,6 +75,664 @@ func (i *Item) getTypeID() uint64 {
 	return other
 }
 
+// Item code value constant used as an internal reference or "ID".
+const (
+	// Armor
+	AlphaHelm         string = "dr6"
+	AncientArmor      string = "aar"
+	Antlers           string = "dr3"
+	ArchonPlate       string = "utp"
+	Armet             string = "ulm"
+	AssaultHelmet     string = "ba4"
+	AvengerGuard      string = "ba5"
+	BalrogSkin        string = "upl"
+	Basinet           string = "xhl"
+	BattleBelt        string = "ztb"
+	BattleBoots       string = "xtb"
+	BattleGauntlets   string = "xtg"
+	Belt              string = "mbl"
+	BloodSpirit       string = "drb"
+	BoneHelm          string = "bhm"
+	BoneVisage        string = "uh9"
+	Boneweave         string = "uhn"
+	BoneweaveBoots    string = "umb"
+	Bracers           string = "mgl"
+	BrambleMitts      string = "ulg"
+	BreastPlate       string = "brs"
+	Cap               string = "cap"
+	CarnageHelm       string = "bab"
+	Casque            string = "xlm"
+	ChainBoots        string = "mbt"
+	ChainMail         string = "chn"
+	ChaosArmor        string = "xul"
+	Circlet           string = "ci0"
+	ColossusGirdle    string = "uhc"
+	ConquerorCrown    string = "bae"
+	Corona            string = "urn"
+	Coronet           string = "ci1"
+	Crown             string = "crn"
+	CrusaderGauntlets string = "utg"
+	Cuirass           string = "xrs"
+	DeathMask         string = "xsk"
+	Demonhead         string = "usk"
+	DemonhideArmor    string = "xla"
+	DemonhideBoots    string = "xlb"
+	DemonhideGloves   string = "xlg"
+	DemonhideSash     string = "zlb"
+	DestroyerHelm     string = "bad"
+	Diadem            string = "ci3"
+	DiamondMail       string = "ung"
+	DreamSpirit       string = "drf"
+	DuskShroud        string = "uui"
+	EarthSpirit       string = "drd"
+	EmbossedPlate     string = "xth"
+	FalconMask        string = "dr4"
+	FangedHelm        string = "ba2"
+	FieldPlate        string = "fld"
+	FullHelm          string = "fhl"
+	PlateMail         string = "plt"
+	FullPlateMail     string = "ful"
+	FuryVisor         string = "bac"
+	Gauntlets         string = "hgl"
+	GhostArmor        string = "xui"
+	GiantConch        string = "uhl"
+	Girdle            string = "hbl"
+	Gloves            string = "lgl"
+	GothicPlate       string = "gth"
+	GrandCrown        string = "xrn"
+	GreatHauberk      string = "urs"
+	GreatHelm         string = "ghm"
+	GriffonHeadress   string = "dr7"
+	GrimHelm          string = "xh9"
+	GuardianCrown     string = "baf"
+	HardLeatherArmor  string = "hla"
+	HawkHelm          string = "dr2"
+	HeavyBelt         string = "tbl"
+	HeavyBoots        string = "vbt"
+	HeavyBracers      string = "xmg"
+	HeavyGloves       string = "vgl"
+	HellforgedPlate   string = "ult"
+	Helm              string = "hlm"
+	HornedHelm        string = "ba3"
+	HuntersGuise      string = "dr8"
+	Hydraskull        string = "ukp"
+	Hyperion          string = "urg"
+	JawboneCap        string = "ba1"
+	JawboneVisor      string = "ba6"
+	KrakenShell       string = "uld"
+	LacqueredPlate    string = "uth"
+	LeatherArmor      string = "lea"
+	LeatherBoots      string = "lbt"
+	LightBelt         string = "vbl"
+	LightGauntlets    string = "tgl"
+	LightPlate        string = "ltp"
+	LightPlatedBoots  string = "tbt"
+	LinkedMail        string = "xng"
+	LionHelm          string = "ba7"
+	LoricatedMail     string = "ucl"
+	MagePlate         string = "xtp"
+	Mask              string = "msk"
+	MeshArmor         string = "xhn"
+	MeshBelt          string = "zmb"
+	MeshBoots         string = "xmb"
+	MirroredBoots     string = "utb"
+	MithrilCoil       string = "umc"
+	MyrmidonGreaves   string = "uhb"
+	OgreGauntlets     string = "uhg"
+	OrnatePlate       string = "xar"
+	PlateBoots        string = "hbt"
+	QuiltedArmor      string = "qui"
+	RageMask          string = "ba8"
+	RingMail          string = "rng"
+	RussetArmor       string = "xpl"
+	SacredArmor       string = "uar"
+	SacredFeathers    string = "dr9"
+	Sallet            string = "xkp"
+	Sash              string = "lbl"
+	SavageHelmet      string = "ba9"
+	ScaleMail         string = "scl"
+	ScarabHusk        string = "ula"
+	ScarabshellBoots  string = "uvb"
+	SerpentskinArmor  string = "xea"
+	ShadowPlate       string = "uul"
+	Shako             string = "uap"
+	SharkskinBelt     string = "zvb"
+	SharkskinBoots    string = "xvb"
+	SharkskinGloves   string = "xvg"
+	SharktoothArmor   string = "xld"
+	SkullCap          string = "skp"
+	SkySpirit         string = "dre"
+	SlayerGuard       string = "baa"
+	SpiderwebSash     string = "ulc"
+	SpiredHelm        string = "uhm"
+	SpiritMask        string = "dr5"
+	SplintMail        string = "spl"
+	StuddedLeather    string = "stu"
+	SunSpirit         string = "drc"
+	TemplarCoat       string = "xlt"
+	Tiara             string = "ci2"
+	TigulatedMail     string = "xcl"
+	TotemicMask       string = "dra"
+	TrellisedArmor    string = "xtu"
+	TrollBelt         string = "utc"
+	Vambraces         string = "umg"
+	VampireboneGloves string = "uvg"
+	VampirefangBelt   string = "uvc"
+	WarBelt           string = "zhb"
+	WarBoots          string = "xhb"
+	WarGauntlets      string = "xhg"
+	WarHat            string = "xap"
+	WingedHelm        string = "xhm"
+	WireFleece        string = "utu"
+	WolfHead          string = "dr1"
+	Wyrmhide          string = "uea"
+	WyrmhideBoots     string = "ulb"
+
+	// Misc
+	Amethyst                      string = "gsv"
+	AmnRune                       string = "r11"
+	Amulet                        string = "amu"
+	AntidotePotion                string = "yps"
+	Arrows                        string = "aqv"
+	BaalsEye                      string = "bey"
+	BarkScroll                    string = "bks"
+	BerRune                       string = "r30"
+	Bolts                         string = "cqv"
+	BookofSkill                   string = "ass"
+	BurningEssenceofTerror        string = "bet"
+	ChamRune                      string = "r32"
+	ChargedEssenceofHatred        string = "ceh"
+	GrandCharm                    string = "cm3"
+	LargeCharm                    string = "cm2"
+	SmallCharm                    string = "cm1"
+	ChippedAmethyst               string = "gcv"
+	ChippedDiamond                string = "gcw"
+	ChippedEmerald                string = "gcg"
+	ChippedRuby                   string = "gcr"
+	ChippedSapphire               string = "gcb"
+	ChippedSkull                  string = "skc"
+	ChippedTopaz                  string = "gcy"
+	DecipheredBarkScroll          string = "bkd"
+	DiablosHorn                   string = "dhn"
+	Diamond                       string = "gsw"
+	DolRune                       string = "r14"
+	ElRune                        string = "r01"
+	EldRune                       string = "r02"
+	Elixir                        string = "elx"
+	Emerald                       string = "gsg"
+	EthRune                       string = "r05"
+	FalRune                       string = "r19"
+	FesteringEssenceofDestruction string = "fed"
+	FlawedAmethyst                string = "gfv"
+	FlawedDiamond                 string = "gfw"
+	FlawedEmerald                 string = "gfg"
+	FlawedRuby                    string = "gfr"
+	FlawedSapphire                string = "gfb"
+	FlawedSkull                   string = "skf"
+	FlawedTopaz                   string = "gfy"
+	FlawlessAmethyst              string = "gzv"
+	FlawlessDiamond               string = "glw"
+	FlawlessEmerald               string = "glg"
+	FlawlessRuby                  string = "glr"
+	FlawlessSapphire              string = "glb"
+	FlawlessSkull                 string = "skl"
+	FlawlessTopaz                 string = "gly"
+	FullHealingPotion             string = "hpf"
+	FullManaPotion                string = "mpf"
+	FullRejuvenationPotion        string = "rvl"
+	Gold                          string = "gld"
+	GoldBird                      string = "g34"
+	GreaterHealingPotion          string = "hp5"
+	GreaterManaPotion             string = "mp5"
+	GulRune                       string = "r25"
+	HealingPotion                 string = "hp3"
+	HealingPotionMid              string = "hpo"
+	HelRune                       string = "r15"
+	Herb                          string = "hrb"
+	HoradricCube                  string = "box"
+	IdentifyBook                  string = "ibk"
+	IdentifyScroll                string = "isc"
+	IoRune                        string = "r16"
+	IstRune                       string = "r24"
+	IthRune                       string = "r06"
+	JadeFigurine                  string = "j34"
+	JahRune                       string = "r31"
+	Jewel                         string = "jew"
+	KeyofDestruction              string = "pk3"
+	KeyofHate                     string = "pk2"
+	KeyofTerror                   string = "pk1"
+	KhalimsBrain                  string = "qbr"
+	KhalimsEye                    string = "qey"
+	KhalimsHeart                  string = "qhr"
+	KoRune                        string = "r18"
+	LamEsensTome                  string = "bbb"
+	LargeBluePotion               string = "bpl"
+	LargeRedPotion                string = "rpl"
+	LemRune                       string = "r20"
+	LesserHealingPotion           string = "hp1"
+	LesserManaPotion              string = "mp1"
+	LightHealingPotion            string = "hp2"
+	LightManaPotion               string = "mp2"
+	LoRune                        string = "r28"
+	LumRune                       string = "r17"
+	Maguffin                      string = "ice"
+	MalRune                       string = "r23"
+	ManaPotion                    string = "mp3"
+	ManaPotionMid                 string = "mpo"
+	MephistosBrain                string = "mbr"
+	MephistoKey                   string = "luv"
+	MephistoSoulStone             string = "mss"
+	NefRune                       string = "r04"
+	OhmRune                       string = "r27"
+	OrtRune                       string = "r09"
+	PerfectAmethyst               string = "gpv"
+	PerfectDiamond                string = "gpw"
+	PerfectEmerald                string = "gpg"
+	PerfectRuby                   string = "gpr"
+	PerfectSapphire               string = "gpb"
+	PerfectSkull                  string = "skz"
+	PerfectTopaz                  string = "gpy"
+	PlayerEar                     string = "ear"
+	PulRune                       string = "r21"
+	RalRune                       string = "r08"
+	RejuvenationPotion            string = "rvs"
+	Ring                          string = "rin"
+	Ruby                          string = "gsr"
+	Sapphire                      string = "gsb"
+	Scroll                        string = "0sc"
+	ScrollofHoradric              string = "tr1"
+	ScrollofMalah                 string = "tr2"
+	PotionofLife                  string = "xyz"
+	ShaelRune                     string = "r13"
+	SkeletonKey                   string = "key"
+	Skull                         string = "sku"
+	SmallBluePotion               string = "bps"
+	SmallRedPotion                string = "rps"
+	SolRune                       string = "r12"
+	StaminaPotion                 string = "vps"
+	StandardofHeroes              string = "std"
+	StrongHealingPotion           string = "hp4"
+	StrongManaPotion              string = "mp4"
+	SurRune                       string = "r29"
+	TalRune                       string = "r07"
+	ThawingPotion                 string = "wms"
+	ThulRune                      string = "r10"
+	TirRune                       string = "r03"
+	TokenofAbsolution             string = "toa"
+	Topaz                         string = "gsy"
+	Torch                         string = "tch"
+	TownPortalBook                string = "tbk"
+	TownPortalScroll              string = "tsc"
+	TwistedEssenceofSuffering     string = "tes"
+	UmRune                        string = "r22"
+	VexRune                       string = "r26"
+	ViperAmulet                   string = "vip"
+	ZodRune                       string = "r33"
+
+	// Shields
+	Aegis            string = "uow"
+	AerinShield      string = "pa4"
+	AkaranRondache   string = "pa7"
+	AkaranTarge      string = "pa6"
+	KurastShield     string = "pad"
+	AncientShield    string = "xts"
+	BarbedShield     string = "xpk"
+	BladeBarrier     string = "upk"
+	BloodlordSkull   string = "nef"
+	BoneShield       string = "bsh"
+	Buckler          string = "buc"
+	CantorTrophy     string = "ne9"
+	CrownShield      string = "pa5"
+	Defender         string = "xuc"
+	DemonHead        string = "ne5"
+	DragonShield     string = "xit"
+	FetishTrophy     string = "ne7"
+	GargoyleHead     string = "ne4"
+	GothicShield     string = "gts"
+	GrimShield       string = "xsh"
+	GildedShield     string = "pa9"
+	HeirophantTrophy string = "nea"
+	Heater           string = "uuc"
+	HellspawnSkull   string = "neg"
+	HeraldicShield   string = "pa3"
+	KiteShield       string = "kit"
+	LargeShield      string = "lrg"
+	Luna             string = "uml"
+	MinionSkull      string = "neb"
+	Monarch          string = "uit"
+	MummifiedTrophy  string = "ne6"
+	OverseerSkull    string = "ned"
+	Pavise           string = "xow"
+	PreservedHead    string = "ne1"
+	ProtectorShield  string = "pa8"
+	Rondache         string = "pa2"
+	RoundShield      string = "xml"
+	RoyalShield      string = "paa"
+	SacredRondache   string = "pac"
+	SacredTarge      string = "pab"
+	Scutum           string = "xrg"
+	SextonTrophy     string = "ne8"
+	SmallShield      string = "sml"
+	SpikedShield     string = "spk"
+	SuccubusSkull    string = "nee"
+	Targe            string = "pa1"
+	TowerShield      string = "tow"
+	TrollNest        string = "ush"
+	UnravellerHead   string = "ne3"
+	VortexShield     string = "paf"
+	Ward             string = "uts"
+	ZakarumShield    string = "pae"
+	ZombieHead       string = "ne2"
+
+	// Weapons
+	AncientAxe          string = "9gi"
+	AncientSword        string = "9wd"
+	Arbalest            string = "8lx"
+	ArchonStaff         string = "6ws"
+	AshwoodBow          string = "am6"
+	Ataghan             string = "7sm"
+	Axe                 string = "axe"
+	BalancedAxe         string = "bal"
+	BalancedKnife       string = "bkf"
+	Balista             string = "8hx"
+	BalrogBlade         string = "7gs"
+	BalrogSpear         string = "7s7"
+	BarbedClub          string = "9sp"
+	Bardiche            string = "bar"
+	BastardSword        string = "bsw"
+	BattleAxe           string = "btx"
+	BattleCestus        string = "7cs"
+	BattleDart          string = "9tk"
+	BattleHammer        string = "9wh"
+	BattleScythe        string = "9s8"
+	BattleStaff         string = "bst"
+	BattleSword         string = "9bs"
+	BeardedAxe          string = "9ba"
+	BecDeCorbin         string = "9h9"
+	BerserkerAxe        string = "7wa"
+	Bill                string = "9vo"
+	Blade               string = "bld"
+	BladeBow            string = "6hb"
+	BladeTalons         string = "btl"
+	BoneKnife           string = "7dg"
+	BoneWand            string = "bwn"
+	Brandistock         string = "brn"
+	BroadAxe            string = "bax"
+	BroadSword          string = "bsd"
+	BurntWand           string = "9wn"
+	Caduceus            string = "7ws"
+	CedarBow            string = "8lb"
+	CedarStaff          string = "8cs"
+	CeremonialBow       string = "am7"
+	CeremonialJavelin   string = "ama"
+	CeremonialPike      string = "am9"
+	CeremonialSpear     string = "am8"
+	Cestus              string = "ces"
+	ChampionAxe         string = "7ga"
+	ChampionSword       string = "7b7"
+	ChokingGasPotion    string = "gpm"
+	ChuKoNu             string = "8rx"
+	Cinquedeas          string = "9kr"
+	ClaspedOrb          string = "ob4"
+	Claws               string = "clw"
+	Claymore            string = "clm"
+	Cleaver             string = "9ax"
+	CloudySphere        string = "ob8"
+	Club                string = "clb"
+	ColossalSword       string = "7fb"
+	ColossalBlade       string = "7gd"
+	ColossusCrossbow    string = "6hx"
+	ColossusVoulge      string = "7vo"
+	CompositeBow        string = "cbw"
+	ConquestSword       string = "7bs"
+	Crossbow            string = "mxb"
+	Crowbill            string = "9mp"
+	CrusaderBow         string = "6l7"
+	CrypticAxe          string = "7pa"
+	CrypticSword        string = "7ls"
+	CrystalSword        string = "crs"
+	CrystallineGlobe    string = "ob7"
+	Cudgel              string = "9cl"
+	Cutlass             string = "9sm"
+	DacianFalx          string = "9cm"
+	Dagger              string = "dgr"
+	Decapitator         string = "7bt"
+	DecoyDagger         string = "d33"
+	DemonCrossbow       string = "6rx"
+	DemonHeart          string = "obd"
+	DevilStar           string = "7mt"
+	DiamondBow          string = "6s7"
+	DimensionalBlade    string = "9cr"
+	DimensionalShard    string = "obf"
+	Dirk                string = "dir"
+	DivineScepter       string = "9ws"
+	DoubleAxe           string = "2ax"
+	DoubleBow           string = "8cb"
+	DragonStone         string = "ob5"
+	EableOrb            string = "ob1"
+	EdgeBow             string = "8sb"
+	ElderStaff          string = "6cs"
+	EldritchOrb         string = "obc"
+	ElegantBlade        string = "7sb"
+	Espadon             string = "92h"
+	EttinAxe            string = "72a"
+	ExecutionerSword    string = "9gd"
+	ExplodingPotion     string = "opm"
+	Falcata             string = "7ss"
+	Falchion            string = "flc"
+	FangedKnife         string = "7kr"
+	Fascia              string = "9xf"
+	FeralAxe            string = "7la"
+	FeralClaws          string = "7lw"
+	Flail               string = "fla"
+	Flamberge           string = "flb"
+	FlangedMace         string = "9ma"
+	FlyingAxe           string = "7ta"
+	FlyingKnife         string = "7tk"
+	Francisca           string = "9ta"
+	FulmatingPotion     string = "opl"
+	Fuscina             string = "9tr"
+	GhostGlaive         string = "7gl"
+	GhostSpear          string = "7st"
+	GhostWand           string = "7yw"
+	GiantAxe            string = "gix"
+	GiantSword          string = "gis"
+	GiantThresher       string = "7wc"
+	Gidbinn             string = "g33"
+	Gladius             string = "9ss"
+	Glaive              string = "glv"
+	GloriousAxe         string = "7gi"
+	GlowingOrb          string = "ob6"
+	GnarledStaff        string = "cst"
+	GorgonCrossbow      string = "6mx"
+	GothicAxe           string = "9ga"
+	GothicBow           string = "8lw"
+	GothicStaff         string = "8bs"
+	GothicSword         string = "9b9"
+	GrandMatronBow      string = "amc"
+	GrandScepter        string = "gsc"
+	GraveWand           string = "9gw"
+	GreatAxe            string = "gax"
+	GreatBow            string = "6cb"
+	GreatMaul           string = "gma"
+	GreatPilum          string = "9pi"
+	GreatPoleaxe        string = "7h7"
+	GreatSword          string = "gsd"
+	GreaterClaws        string = "9lw"
+	GreaterTalons       string = "9tw"
+	GrimScythe          string = "9wc"
+	GrimWand            string = "gwn"
+	Halberd             string = "hal"
+	HandAxe             string = "hax"
+	HandScythe          string = "9cs"
+	Harpoon             string = "9ts"
+	Hatchet             string = "9ha"
+	HatchetHands        string = "axf"
+	HeavenlyStone       string = "obb"
+	HeavyCrossbow       string = "hxb"
+	HellforgeHammer     string = "hfh"
+	HighlandBlade       string = "7cm"
+	HolyWaterSprinkler  string = "9qs"
+	HoradricMalus       string = "hdm"
+	HoradricStaff       string = "hst"
+	HuntersBow          string = "hbw"
+	Hurlbat             string = "9b8"
+	HydraBow            string = "6lw"
+	HydraEdge           string = "7fc"
+	HyperionJavelin     string = "7ja"
+	HyperionSpear       string = "7sr"
+	JaggedStar          string = "9mt"
+	Javelin             string = "jav"
+	JoStaff             string = "8ss"
+	Katar               string = "ktr"
+	KhalimFlail         string = "qf1"
+	Knout               string = "9fl"
+	Kriss               string = "kri"
+	Lance               string = "9p9"
+	LargeAxe            string = "lax"
+	LegendSpike         string = "7bl"
+	LegendSword         string = "72h"
+	LegendaryMallet     string = "7wh"
+	LichWand            string = "7bw"
+	LightCrossbow       string = "lxb"
+	LochaberAxe         string = "9b7"
+	LongBattleBow       string = "lbb"
+	LongBow             string = "lbw"
+	LongSiegeBow        string = "8l8"
+	LongStaff           string = "lst"
+	LongSword           string = "lsd"
+	LongWarBow          string = "lwb"
+	Mace                string = "mac"
+	MaidenJavelin       string = "am5"
+	MaidenPike          string = "am4"
+	MaidenSpear         string = "am3"
+	Mancatcher          string = "7br"
+	MarteldeFer         string = "9gm"
+	MatriarchalBow      string = "amb"
+	MatriarchalPike     string = "ame"
+	MatriarchalSpear    string = "amd"
+	MatriarchalJavelin  string = "amf"
+	Maul                string = "mau"
+	MightyScepter       string = "7sc"
+	MilitaryAxe         string = "9la"
+	MilitaryPick        string = "mpi"
+	MithralPoint        string = "7di"
+	MorningStar         string = "mst"
+	MythicalSword       string = "7wd"
+	Naga                string = "9wa"
+	OgreAxe             string = "7o7"
+	OgreMaul            string = "7m7"
+	OilPotion           string = "ops"
+	Partizan            string = "9pa"
+	PelletBow           string = "6lx"
+	PetrifiedWand       string = "9yw"
+	PhaseBlade          string = "7cr"
+	Pike                string = "pik"
+	Pilum               string = "pil"
+	Poignard            string = "9dg"
+	Poleaxe             string = "pax"
+	PolishedWand        string = "7wn"
+	QuarterStaff        string = "8ls"
+	Quhab               string = "9ar"
+	RancidGasPotion     string = "gps"
+	RazorBow            string = "8hb"
+	ReflexBow           string = "am2"
+	ReinforcedMace      string = "7ma"
+	RepeatingCrossbow   string = "rxb"
+	Rondel              string = "9di"
+	RuneBow             string = "8sw"
+	RuneScepter         string = "9sc"
+	RuneStaff           string = "8ws"
+	RuneSword           string = "9ls"
+	RunicTalons         string = "7tw"
+	Sabre               string = "sbr"
+	SacredGlobe         string = "ob2"
+	Scepter             string = "scp"
+	Scimitar            string = "scm"
+	ScissorsKatar       string = "skr"
+	ScissorsQuhab       string = "9qr"
+	ScissorsSuwayyah    string = "7qr"
+	Scourge             string = "7fl"
+	Scythe              string = "scy"
+	SeraphRod           string = "7qs"
+	ShadowBow           string = "6lb"
+	Shamshir            string = "9sb"
+	Shillelah           string = "6bs"
+	ShortBattleBow      string = "sbb"
+	ShortBow            string = "sbw"
+	ShortSiegeBow       string = "8s8"
+	ShortSpear          string = "ssp"
+	ShortStaff          string = "sst"
+	ShortSword          string = "ssd"
+	ShortWarBow         string = "swb"
+	SiegeCrossbow       string = "8mx"
+	SilverEdgedAxe      string = "7ba"
+	Simbilan            string = "9s9"
+	SmallCrescent       string = "7ax"
+	SmokedSphere        string = "ob3"
+	SparklingBall       string = "ob9"
+	Spear               string = "spr"
+	Spetum              string = "spt"
+	Spiculum            string = "9gl"
+	SpiderBow           string = "6sb"
+	SpikedClub          string = "spc"
+	StaffOfTheKings     string = "msf"
+	StagBow             string = "am1"
+	Stalagmite          string = "6ls"
+	Stilleto            string = "9bl"
+	StranglingGasPotion string = "gpl"
+	StygianPike         string = "7tr"
+	StygianPilum        string = "7pi"
+	SuperKhalimFlail    string = "qf2"
+	Suwayyah            string = "7ar"
+	SwirlingCrystal     string = "oba"
+	Tabar               string = "9bt"
+	Thresher            string = "7s8"
+	ThrowingAxe         string = "tax"
+	ThrowingKnife       string = "tkf"
+	ThrowingSpear       string = "tsp"
+	ThunderMaul         string = "7gm"
+	Tomahawk            string = "7ha"
+	TombWand            string = "9bw"
+	Trident             string = "tri"
+	Truncheon           string = "7cl"
+	Tulwar              string = "9fc"
+	TuskSword           string = "9gs"
+	TwinAxe             string = "92a"
+	TwoHandedSword      string = "2hs"
+	TyrantClub          string = "7sp"
+	UnearthedWand       string = "7gw"
+	VortexOrb           string = "obe"
+	Voulge              string = "vou"
+	WalkingStick        string = "6ss"
+	Wand                string = "wnd"
+	WarAxe              string = "wax"
+	WarClub             string = "9m9"
+	WarDart             string = "9bk"
+	WarFist             string = "7xf"
+	WarFork             string = "9br"
+	WarHammer           string = "whm"
+	WarJavelin          string = "9ja"
+	WarPike             string = "7p7"
+	WarScepter          string = "wsp"
+	WarScythe           string = "wsc"
+	WarSpear            string = "9sr"
+	WarSpike            string = "7mp"
+	WarStaff            string = "wst"
+	WarSword            string = "wsd"
+	WardBow             string = "6sw"
+	WingedAxe           string = "7b8"
+	WingedHarpoon       string = "7ts"
+	WingedKnife         string = "7bk"
+	WirtsLeg            string = "leg"
+	WristBlade          string = "wrb"
+	WristSpike          string = "9wb"
+	WristSword          string = "7wb"
+	Yari                string = "9st"
+	YewWand             string = "ywn"
+	Zweihander          string = "9fb"
+)
+
 // Attributes that only exists on a player ear.
 type earAttributes struct {
 	Class uint64 `json:"class"`
@@ -82,351 +740,362 @@ type earAttributes struct {
 	Name  string `json:"name"`
 }
 
+// MagicAttribute describes one of potentially many attributes on an item.
+//
+// The values array is replaced into the name string using the value's own array
+// index wrapped in curly braces, e.g., `{i}`. Some values will need to be
+// denormalized before replacing, such as class names, and various calculations.
+//
 // Note the values array is of the type int64, this is because some properties
 // contain negative values, such as - % requirements.
-type magicAttribute struct {
+type MagicAttribute struct {
 	ID     uint64  `json:"id"`
 	Name   string  `json:"name"`
 	Values []int64 `json:"values"`
 }
 
-type magicalProperty struct {
+// MagicalProperty describes a string template, bias, and bit length for a
+// particular kind of magical property, such as bonuses to all resistences or
+// magic item finding.
+type MagicalProperty struct {
 	Bits []uint
 	Bias uint64
 	Name string
 }
 
-type weaponDamage struct {
+// WeaponDamage contains integer ranges for any weapon's one-handed, two-handed
+// (and maybe soon throwing as well?) damage.
+type WeaponDamage struct {
 	Min    int `json:"min,omitempty"`
 	Max    int `json:"max,omitempty"`
 	TwoMin int `json:"twohand_min,omitempty"`
 	TwoMax int `json:"twohand_max,omitempty"`
 }
 
-var weaponDamageMap = map[string]weaponDamage{
-	//Axes
-	"hax": {Min: 3, Max: 6},
-	"axe": {Min: 4, Max: 11},
-	"2ax": {Min: 5, Max: 13},
-	"mpi": {Min: 7, Max: 11},
-	"wax": {Min: 10, Max: 18},
-	"lax": {Min: 6, Max: 13},
-	"bax": {Min: 10, Max: 18},
-	"btx": {Min: 12, Max: 32},
-	"gax": {Min: 9, Max: 30},
-	"gix": {Min: 22, Max: 45},
-	"9ha": {Min: 10, Max: 21},
-	"9ax": {Min: 10, Max: 33},
-	"92a": {Min: 13, Max: 38},
-	"9mp": {Min: 14, Max: 34},
-	"9wa": {Min: 16, Max: 45},
-	"9la": {Min: 14, Max: 34},
-	"9ba": {Min: 21, Max: 49},
-	"9bt": {Min: 24, Max: 77},
-	"9ga": {Min: 18, Max: 70},
-	"9gi": {Min: 43, Max: 85},
-	"7ha": {Min: 33, Max: 58},
-	"7ax": {Min: 38, Max: 60},
-	"72a": {Min: 33, Max: 66},
-	"7mp": {Min: 30, Max: 48},
-	"7wa": {Min: 24, Max: 71},
-	"7la": {Min: 25, Max: 123},
-	"7ba": {Min: 62, Max: 110},
-	"7bt": {Min: 49, Max: 137},
-	"7ga": {Min: 59, Max: 94},
-	"7gi": {Min: 60, Max: 124},
+var weaponDamageMap = map[string]WeaponDamage{
+	// Axes
+	HandAxe:        {Min: 3, Max: 6},
+	Axe:            {Min: 4, Max: 11},
+	DoubleAxe:      {Min: 5, Max: 13},
+	MilitaryPick:   {Min: 7, Max: 11},
+	WarAxe:         {Min: 10, Max: 18},
+	LargeAxe:       {Min: 6, Max: 13},
+	BroadAxe:       {Min: 10, Max: 18},
+	BattleAxe:      {Min: 12, Max: 32},
+	GreatAxe:       {Min: 9, Max: 30},
+	GiantAxe:       {Min: 22, Max: 45},
+	Hatchet:        {Min: 10, Max: 21},
+	Cleaver:        {Min: 10, Max: 33},
+	TwinAxe:        {Min: 13, Max: 38},
+	Crowbill:       {Min: 14, Max: 34},
+	Naga:           {Min: 16, Max: 45},
+	MilitaryAxe:    {Min: 14, Max: 34},
+	BeardedAxe:     {Min: 21, Max: 49},
+	Tabar:          {Min: 24, Max: 77},
+	GothicAxe:      {Min: 18, Max: 70},
+	AncientAxe:     {Min: 43, Max: 85},
+	Tomahawk:       {Min: 33, Max: 58},
+	SmallCrescent:  {Min: 38, Max: 60},
+	EttinAxe:       {Min: 33, Max: 66},
+	WarSpike:       {Min: 30, Max: 48},
+	BerserkerAxe:   {Min: 24, Max: 71},
+	FeralAxe:       {Min: 25, Max: 123},
+	SilverEdgedAxe: {Min: 62, Max: 110},
+	Decapitator:    {Min: 49, Max: 137},
+	ChampionAxe:    {Min: 59, Max: 94},
+	GloriousAxe:    {Min: 60, Max: 124},
 
-	//Maces
-	"clb": {Min: 1, Max: 6},
-	"spc": {Min: 5, Max: 8},
-	"mac": {Min: 3, Max: 10},
-	"mst": {Min: 7, Max: 16},
-	"fla": {Min: 1, Max: 24},
-	"whm": {Min: 19, Max: 29},
-	"mau": {Min: 30, Max: 43},
-	"gma": {Min: 38, Max: 58},
-	"9cl": {Min: 6, Max: 21},
-	"9sp": {Min: 13, Max: 25},
-	"9ma": {Min: 15, Max: 23},
-	"9mt": {Min: 20, Max: 31},
-	"9fl": {Min: 13, Max: 35},
-	"9wh": {Min: 35, Max: 58},
-	"9m9": {Min: 53, Max: 78},
-	"9gm": {Min: 61, Max: 99},
-	"7cl": {Min: 35, Max: 43},
-	"7sp": {Min: 32, Max: 58},
-	"7ma": {Min: 41, Max: 49},
-	"7mt": {Min: 42, Max: 53},
-	"7fl": {Min: 3, Max: 80},
-	"7wh": {Min: 50, Max: 61},
-	"7m7": {Min: 77, Max: 106},
-	"7gm": {Min: 33, Max: 180},
+	// Maces
+	Club:            {Min: 1, Max: 6},
+	SpikedClub:      {Min: 5, Max: 8},
+	Mace:            {Min: 3, Max: 10},
+	MorningStar:     {Min: 7, Max: 16},
+	Flail:           {Min: 1, Max: 24},
+	WarHammer:       {Min: 19, Max: 29},
+	Maul:            {Min: 30, Max: 43},
+	GreatMaul:       {Min: 38, Max: 58},
+	Cudgel:          {Min: 6, Max: 21},
+	BarbedClub:      {Min: 13, Max: 25},
+	FlangedMace:     {Min: 15, Max: 23},
+	JaggedStar:      {Min: 20, Max: 31},
+	Knout:           {Min: 13, Max: 35},
+	BattleHammer:    {Min: 35, Max: 58},
+	WarClub:         {Min: 53, Max: 78},
+	MarteldeFer:     {Min: 61, Max: 99},
+	Truncheon:       {Min: 35, Max: 43},
+	TyrantClub:      {Min: 32, Max: 58},
+	ReinforcedMace:  {Min: 41, Max: 49},
+	DevilStar:       {Min: 42, Max: 53},
+	Scourge:         {Min: 3, Max: 80},
+	LegendaryMallet: {Min: 50, Max: 61},
+	OgreMaul:        {Min: 77, Max: 106},
+	ThunderMaul:     {Min: 33, Max: 180},
 
-	//Polearms
-	"bar": {TwoMin: 1, TwoMax: 27},
-	"vou": {TwoMin: 6, TwoMax: 21},
-	"scy": {TwoMin: 8, TwoMax: 20},
-	"pax": {TwoMin: 18, TwoMax: 39},
-	"hal": {TwoMin: 21, TwoMax: 45},
-	"wsc": {TwoMin: 15, TwoMax: 36},
-	"9b7": {TwoMin: 6, TwoMax: 58},
-	"9vo": {TwoMin: 14, TwoMax: 53},
-	"9s8": {TwoMin: 18, TwoMax: 45},
-	"9pa": {TwoMin: 34, TwoMax: 75},
-	"9h9": {TwoMin: 13, TwoMax: 85},
-	"9wc": {TwoMin: 30, TwoMax: 70},
-	"7o7": {TwoMin: 28, TwoMax: 145},
-	"7vo": {TwoMin: 17, TwoMax: 165},
-	"7s8": {TwoMin: 12, TwoMax: 141},
-	"7pa": {TwoMin: 33, TwoMax: 150},
-	"7h7": {TwoMin: 46, TwoMax: 127},
-	"7wc": {TwoMin: 40, TwoMax: 127},
+	// Polearms
+	Bardiche:       {TwoMin: 1, TwoMax: 27},
+	Voulge:         {TwoMin: 6, TwoMax: 21},
+	Scythe:         {TwoMin: 8, TwoMax: 20},
+	Poleaxe:        {TwoMin: 18, TwoMax: 39},
+	Halberd:        {TwoMin: 21, TwoMax: 45},
+	WarScythe:      {TwoMin: 15, TwoMax: 36},
+	LochaberAxe:    {TwoMin: 6, TwoMax: 58},
+	Bill:           {TwoMin: 14, TwoMax: 53},
+	BattleScythe:   {TwoMin: 18, TwoMax: 45},
+	Partizan:       {TwoMin: 34, TwoMax: 75},
+	BecDeCorbin:    {TwoMin: 13, TwoMax: 85},
+	GrimScythe:     {TwoMin: 30, TwoMax: 70},
+	OgreAxe:        {TwoMin: 28, TwoMax: 145},
+	ColossusVoulge: {TwoMin: 17, TwoMax: 165},
+	Thresher:       {TwoMin: 12, TwoMax: 141},
+	CrypticAxe:     {TwoMin: 33, TwoMax: 150},
+	GreatPoleaxe:   {TwoMin: 46, TwoMax: 127},
+	GiantThresher:  {TwoMin: 40, TwoMax: 127},
 
-	//Swords
-	"ssd": {Min: 2, Max: 7},
-	"scm": {Min: 2, Max: 6},
-	"sbr": {Min: 3, Max: 8},
-	"flc": {Min: 9, Max: 17},
-	"crs": {Min: 5, Max: 15},
-	"bsd": {Min: 7, Max: 14},
-	"lsd": {Min: 3, Max: 19},
-	"wsd": {Min: 8, Max: 20},
-	"9ss": {Min: 8, Max: 22},
-	"9sm": {Min: 8, Max: 21},
-	"9sb": {Min: 10, Max: 24},
-	"9fc": {Min: 16, Max: 35},
-	"9cr": {Min: 13, Max: 35},
-	"9bs": {Min: 16, Max: 34},
-	"9ls": {Min: 10, Max: 42},
-	"9wd": {Min: 18, Max: 43},
-	"7ss": {Min: 31, Max: 59},
-	"7sm": {Min: 26, Max: 46},
-	"7sb": {Min: 33, Max: 45},
-	"7fc": {Min: 28, Max: 68},
-	"7cr": {Min: 31, Max: 35},
-	"7bs": {Min: 37, Max: 53},
-	"7ls": {Min: 5, Max: 77},
-	"7wd": {Min: 40, Max: 50},
+	// Swords
+	ShortSword:       {Min: 2, Max: 7},
+	Scimitar:         {Min: 2, Max: 6},
+	Sabre:            {Min: 3, Max: 8},
+	Falchion:         {Min: 9, Max: 17},
+	CrystalSword:     {Min: 5, Max: 15},
+	BroadSword:       {Min: 7, Max: 14},
+	LongSword:        {Min: 3, Max: 19},
+	WarSword:         {Min: 8, Max: 20},
+	Gladius:          {Min: 8, Max: 22},
+	Cutlass:          {Min: 8, Max: 21},
+	Shamshir:         {Min: 10, Max: 24},
+	Tulwar:           {Min: 16, Max: 35},
+	DimensionalBlade: {Min: 13, Max: 35},
+	BattleSword:      {Min: 16, Max: 34},
+	RuneSword:        {Min: 10, Max: 42},
+	AncientSword:     {Min: 18, Max: 43},
+	Falcata:          {Min: 31, Max: 59},
+	Ataghan:          {Min: 26, Max: 46},
+	ElegantBlade:     {Min: 33, Max: 45},
+	HydraEdge:        {Min: 28, Max: 68},
+	PhaseBlade:       {Min: 31, Max: 35},
+	ConquestSword:    {Min: 37, Max: 53},
+	CrypticSword:     {Min: 5, Max: 77},
+	MythicalSword:    {Min: 40, Max: 50},
 
-	// Two handed swords
-	"2hs": {Min: 2, Max: 9, TwoMin: 5, TwoMax: 17},
-	"clm": {Min: 5, Max: 12, TwoMin: 13, TwoMax: 30},
-	"gis": {Min: 3, Max: 16, TwoMin: 9, TwoMax: 28},
-	"bsw": {Min: 7, Max: 19, TwoMin: 20, TwoMax: 28},
-	"flb": {Min: 9, Max: 15, TwoMin: 13, TwoMax: 26},
-	"gsd": {Min: 12, Max: 20, TwoMin: 25, TwoMax: 42},
-	"92h": {Min: 8, Max: 26, TwoMin: 18, TwoMax: 40},
-	"9cm": {Min: 13, Max: 30, TwoMin: 26, TwoMax: 61},
-	"9gs": {Min: 10, Max: 37, TwoMin: 19, TwoMax: 58},
-	"9b9": {Min: 14, Max: 40, TwoMin: 39, TwoMax: 60},
-	"9fb": {Min: 19, Max: 35, TwoMin: 29, TwoMax: 54},
-	"9gd": {Min: 24, Max: 40, TwoMin: 47, TwoMax: 80},
-	"7sh": {Min: 22, Max: 56, TwoMin: 50, TwoMax: 94},
-	"7cm": {Min: 22, Max: 62, TwoMin: 67, TwoMax: 96},
-	"7gs": {Min: 15, Max: 75, TwoMin: 55, TwoMax: 118},
-	"7b7": {Min: 24, Max: 54, TwoMin: 71, TwoMax: 83},
-	"7fb": {Min: 26, Max: 70, TwoMin: 61, TwoMax: 121},
-	"7gd": {Min: 25, Max: 65, TwoMin: 58, TwoMax: 115},
+	// Two-handed swords
+	TwoHandedSword:   {Min: 2, Max: 9, TwoMin: 5, TwoMax: 17},
+	Claymore:         {Min: 5, Max: 12, TwoMin: 13, TwoMax: 30},
+	GiantSword:       {Min: 3, Max: 16, TwoMin: 9, TwoMax: 28},
+	BastardSword:     {Min: 7, Max: 19, TwoMin: 20, TwoMax: 28},
+	Flamberge:        {Min: 9, Max: 15, TwoMin: 13, TwoMax: 26},
+	GreatSword:       {Min: 12, Max: 20, TwoMin: 25, TwoMax: 42},
+	Espadon:          {Min: 8, Max: 26, TwoMin: 18, TwoMax: 40},
+	DacianFalx:       {Min: 13, Max: 30, TwoMin: 26, TwoMax: 61},
+	TuskSword:        {Min: 10, Max: 37, TwoMin: 19, TwoMax: 58},
+	GothicSword:      {Min: 14, Max: 40, TwoMin: 39, TwoMax: 60},
+	Zweihander:       {Min: 19, Max: 35, TwoMin: 29, TwoMax: 54},
+	ExecutionerSword: {Min: 24, Max: 40, TwoMin: 47, TwoMax: 80},
+	"7sh":            {Min: 22, Max: 56, TwoMin: 50, TwoMax: 94},
+	HighlandBlade:    {Min: 22, Max: 62, TwoMin: 67, TwoMax: 96},
+	BalrogBlade:      {Min: 15, Max: 75, TwoMin: 55, TwoMax: 118},
+	ChampionSword:    {Min: 24, Max: 54, TwoMin: 71, TwoMax: 83},
+	ColossalSword:    {Min: 26, Max: 70, TwoMin: 61, TwoMax: 121},
+	ColossalBlade:    {Min: 25, Max: 65, TwoMin: 58, TwoMax: 115},
 
-	//Bows
-	"sbw": {TwoMin: 1, TwoMax: 4},
-	"hbw": {TwoMin: 2, TwoMax: 6},
-	"lbw": {TwoMin: 3, TwoMax: 10},
-	"cbw": {TwoMin: 4, TwoMax: 8},
-	"sbb": {TwoMin: 3, TwoMax: 18},
-	"swb": {TwoMin: 6, TwoMax: 14},
-	"lwb": {TwoMin: 3, TwoMax: 23},
-	"8sb": {TwoMin: 6, TwoMax: 19},
-	"8hb": {TwoMin: 8, TwoMax: 22},
-	"8lb": {TwoMin: 10, TwoMax: 29},
-	"8cb": {TwoMin: 11, TwoMax: 26},
-	"8s8": {TwoMin: 13, TwoMax: 30},
-	"8l8": {TwoMin: 10, TwoMax: 42},
-	"8sw": {TwoMin: 14, TwoMax: 35},
-	"8lw": {TwoMin: 10, TwoMax: 50},
-	"6sb": {TwoMin: 23, TwoMax: 50},
-	"6hb": {TwoMin: 21, TwoMax: 41},
-	"6lb": {TwoMin: 15, TwoMax: 59},
-	"6cb": {TwoMin: 12, TwoMax: 52},
-	"6s7": {TwoMin: 33, TwoMax: 40},
-	"6l7": {TwoMin: 15, TwoMax: 63},
-	"6sw": {TwoMin: 20, TwoMax: 53},
-	"6lw": {TwoMin: 10, TwoMax: 68},
+	// Bows
+	ShortBow:       {TwoMin: 1, TwoMax: 4},
+	HuntersBow:     {TwoMin: 2, TwoMax: 6},
+	LongBow:        {TwoMin: 3, TwoMax: 10},
+	CompositeBow:   {TwoMin: 4, TwoMax: 8},
+	ShortBattleBow: {TwoMin: 3, TwoMax: 18},
+	ShortWarBow:    {TwoMin: 6, TwoMax: 14},
+	LongWarBow:     {TwoMin: 3, TwoMax: 23},
+	EdgeBow:        {TwoMin: 6, TwoMax: 19},
+	RazorBow:       {TwoMin: 8, TwoMax: 22},
+	CedarBow:       {TwoMin: 10, TwoMax: 29},
+	DoubleBow:      {TwoMin: 11, TwoMax: 26},
+	ShortSiegeBow:  {TwoMin: 13, TwoMax: 30},
+	LongSiegeBow:   {TwoMin: 10, TwoMax: 42},
+	RuneBow:        {TwoMin: 14, TwoMax: 35},
+	GothicBow:      {TwoMin: 10, TwoMax: 50},
+	SpiderBow:      {TwoMin: 23, TwoMax: 50},
+	BladeBow:       {TwoMin: 21, TwoMax: 41},
+	ShadowBow:      {TwoMin: 15, TwoMax: 59},
+	GreatBow:       {TwoMin: 12, TwoMax: 52},
+	DiamondBow:     {TwoMin: 33, TwoMax: 40},
+	CrusaderBow:    {TwoMin: 15, TwoMax: 63},
+	WardBow:        {TwoMin: 20, TwoMax: 53},
+	HydraBow:       {TwoMin: 10, TwoMax: 68},
 
-	//Crossbows
-	"lxb": {TwoMin: 6, TwoMax: 9},
-	"mxb": {TwoMin: 9, TwoMax: 16},
-	"hxb": {TwoMin: 14, TwoMax: 26},
-	"rxb": {TwoMin: 6, TwoMax: 12},
-	"8lx": {TwoMin: 14, TwoMax: 27},
-	"8mx": {TwoMin: 20, TwoMax: 42},
-	"8hx": {TwoMin: 33, TwoMax: 55},
-	"8rx": {TwoMin: 14, TwoMax: 32},
-	"6lx": {TwoMin: 28, TwoMax: 73},
-	"6mx": {TwoMin: 25, TwoMax: 87},
-	"6hx": {TwoMin: 32, TwoMax: 91},
-	"6rx": {TwoMin: 26, TwoMax: 40},
+	// Crossbows
+	LightCrossbow:     {TwoMin: 6, TwoMax: 9},
+	Crossbow:          {TwoMin: 9, TwoMax: 16},
+	HeavyCrossbow:     {TwoMin: 14, TwoMax: 26},
+	RepeatingCrossbow: {TwoMin: 6, TwoMax: 12},
+	Arbalest:          {TwoMin: 14, TwoMax: 27},
+	SiegeCrossbow:     {TwoMin: 20, TwoMax: 42},
+	Balista:           {TwoMin: 33, TwoMax: 55},
+	ChuKoNu:           {TwoMin: 14, TwoMax: 32},
+	PelletBow:         {TwoMin: 28, TwoMax: 73},
+	GorgonCrossbow:    {TwoMin: 25, TwoMax: 87},
+	ColossusCrossbow:  {TwoMin: 32, TwoMax: 91},
+	DemonCrossbow:     {TwoMin: 26, TwoMax: 40},
 
-	//Javelins (throw damage, should update fields)
-	"jav": {Min: 6, Max: 14},
-	"pil": {Min: 7, Max: 20},
-	"ssp": {Min: 10, Max: 22},
-	"glv": {Min: 16, Max: 22},
-	"tsp": {Min: 12, Max: 30},
-	"9ja": {Min: 14, Max: 32},
-	"9pi": {Min: 16, Max: 42},
-	"9s9": {Min: 27, Max: 50},
-	"9gl": {Min: 32, Max: 60},
-	"9ts": {Min: 18, Max: 54},
-	"7ja": {Min: 28, Max: 55},
-	"7pi": {Min: 21, Max: 75},
-	"7s7": {Min: 40, Max: 62},
-	"7gl": {Min: 30, Max: 85},
-	"7ts": {Min: 11, Max: 77},
+	// Javelins (throw damage, should update fields)
+	Javelin:         {Min: 6, Max: 14},
+	Pilum:           {Min: 7, Max: 20},
+	ShortSpear:      {Min: 10, Max: 22},
+	Glaive:          {Min: 16, Max: 22},
+	ThrowingSpear:   {Min: 12, Max: 30},
+	WarJavelin:      {Min: 14, Max: 32},
+	GreatPilum:      {Min: 16, Max: 42},
+	Simbilan:        {Min: 27, Max: 50},
+	Spiculum:        {Min: 32, Max: 60},
+	Harpoon:         {Min: 18, Max: 54},
+	HyperionJavelin: {Min: 28, Max: 55},
+	StygianPilum:    {Min: 21, Max: 75},
+	BalrogSpear:     {Min: 40, Max: 62},
+	GhostGlaive:     {Min: 30, Max: 85},
+	WingedHarpoon:   {Min: 11, Max: 77},
 
 	// Amazon-only Weapons (throw damage, should update fields)
-	"am1": {Min: 7, Max: 12},
-	"am2": {Min: 9, Max: 19},
-	"am3": {Min: 18, Max: 24},
-	"am4": {Min: 23, Max: 55},
-	"am5": {Min: 6, Max: 22},
-	"am6": {Min: 16, Max: 29},
-	"am7": {Min: 19, Max: 41},
-	"am8": {Min: 34, Max: 51},
-	"am9": {Min: 42, Max: 101},
-	"ama": {Min: 18, Max: 54},
-	"amb": {Min: 20, Max: 47},
-	"amc": {Min: 14, Max: 72},
-	"amd": {Min: 65, Max: 95},
-	"ame": {Min: 37, Max: 153},
-	"amf": {Min: 35, Max: 66},
+	StagBow:            {Min: 7, Max: 12},
+	ReflexBow:          {Min: 9, Max: 19},
+	MaidenSpear:        {Min: 18, Max: 24},
+	MaidenPike:         {Min: 23, Max: 55},
+	MaidenJavelin:      {Min: 6, Max: 22},
+	AshwoodBow:         {Min: 16, Max: 29},
+	CeremonialBow:      {Min: 19, Max: 41},
+	CeremonialSpear:    {Min: 34, Max: 51},
+	CeremonialPike:     {Min: 42, Max: 101},
+	CeremonialJavelin:  {Min: 18, Max: 54},
+	MatriarchalBow:     {Min: 20, Max: 47},
+	GrandMatronBow:     {Min: 14, Max: 72},
+	MatriarchalSpear:   {Min: 65, Max: 95},
+	MatriarchalPike:    {Min: 37, Max: 153},
+	MatriarchalJavelin: {Min: 35, Max: 66},
 
-	//Scepters
-	"scp": {Min: 6, Max: 11},
-	"gsc": {Min: 8, Max: 18},
-	"wsp": {Min: 10, Max: 17},
-	"9sc": {Min: 13, Max: 24},
-	"9qs": {Min: 14, Max: 36},
-	"9ws": {Min: 16, Max: 38},
-	"7sc": {Min: 40, Max: 52},
-	"7qs": {Min: 45, Max: 54},
-	"7ws": {Min: 37, Max: 43},
+	// Scepters
+	Scepter:            {Min: 6, Max: 11},
+	GrandScepter:       {Min: 8, Max: 18},
+	WarScepter:         {Min: 10, Max: 17},
+	RuneScepter:        {Min: 13, Max: 24},
+	HolyWaterSprinkler: {Min: 14, Max: 36},
+	DivineScepter:      {Min: 16, Max: 38},
+	MightyScepter:      {Min: 40, Max: 52},
+	SeraphRod:          {Min: 45, Max: 54},
+	Caduceus:           {Min: 37, Max: 43},
 
-	//Spears
-	"spr": {TwoMin: 3, TwoMax: 15},
-	"tri": {TwoMin: 9, TwoMax: 15},
-	"brn": {TwoMin: 7, TwoMax: 17},
-	"spt": {TwoMin: 15, TwoMax: 23},
-	"pik": {TwoMin: 14, TwoMax: 63},
-	"9sr": {TwoMin: 10, TwoMax: 37},
-	"9tr": {TwoMin: 19, TwoMax: 37},
-	"9br": {TwoMin: 16, TwoMax: 40},
-	"9st": {TwoMin: 29, TwoMax: 59},
-	"9p9": {TwoMin: 27, TwoMax: 114},
-	"7sr": {TwoMin: 35, TwoMax: 119},
-	"7tr": {TwoMin: 29, TwoMax: 144},
-	"7br": {TwoMin: 42, TwoMax: 92},
-	"7st": {TwoMin: 18, TwoMax: 155},
-	"7p7": {TwoMin: 33, TwoMax: 178},
+	// Spears
+	Spear:         {TwoMin: 3, TwoMax: 15},
+	Trident:       {TwoMin: 9, TwoMax: 15},
+	Brandistock:   {TwoMin: 7, TwoMax: 17},
+	Spetum:        {TwoMin: 15, TwoMax: 23},
+	Pike:          {TwoMin: 14, TwoMax: 63},
+	WarSpear:      {TwoMin: 10, TwoMax: 37},
+	Fuscina:       {TwoMin: 19, TwoMax: 37},
+	WarFork:       {TwoMin: 16, TwoMax: 40},
+	Yari:          {TwoMin: 29, TwoMax: 59},
+	Lance:         {TwoMin: 27, TwoMax: 114},
+	HyperionSpear: {TwoMin: 35, TwoMax: 119},
+	StygianPike:   {TwoMin: 29, TwoMax: 144},
+	Mancatcher:    {TwoMin: 42, TwoMax: 92},
+	GhostSpear:    {TwoMin: 18, TwoMax: 155},
+	WarPike:       {TwoMin: 33, TwoMax: 178},
 
-	//Throwing
-	"tkf": {Min: 4, Max: 9},
-	"tax": {Min: 6, Max: 11},
-	"bkf": {Min: 8, Max: 12},
-	"bal": {Min: 12, Max: 15},
-	"9tk": {Min: 11, Max: 24},
-	"9ta": {Min: 14, Max: 27},
-	"9bk": {Min: 18, Max: 33},
-	"9b8": {Min: 24, Max: 34},
-	"7tk": {Min: 23, Max: 54},
-	"7bk": {Min: 23, Max: 39},
-	"7ta": {Min: 15, Max: 66},
-	"7b8": {Min: 7, Max: 60},
+	// Throwing
+	ThrowingKnife: {Min: 4, Max: 9},
+	ThrowingAxe:   {Min: 6, Max: 11},
+	BalancedKnife: {Min: 8, Max: 12},
+	BalancedAxe:   {Min: 12, Max: 15},
+	BattleDart:    {Min: 11, Max: 24},
+	Francisca:     {Min: 14, Max: 27},
+	WarDart:       {Min: 18, Max: 33},
+	Hurlbat:       {Min: 24, Max: 34},
+	FlyingKnife:   {Min: 23, Max: 54},
+	WingedKnife:   {Min: 23, Max: 39},
+	FlyingAxe:     {Min: 15, Max: 66},
+	WingedAxe:     {Min: 7, Max: 60},
 
-	//Daggers
-	"dgr": {Min: 1, Max: 4},
-	"dir": {Min: 3, Max: 9},
-	"kri": {Min: 2, Max: 11},
-	"bld": {Min: 4, Max: 15},
-	"9dg": {Min: 6, Max: 18},
-	"9di": {Min: 10, Max: 26},
-	"9kr": {Min: 15, Max: 31},
-	"9bl": {Min: 19, Max: 36},
-	"7dg": {Min: 23, Max: 49},
-	"7di": {Min: 37, Max: 53},
-	"7kr": {Min: 15, Max: 57},
-	"7bl": {Min: 32, Max: 47},
+	// Daggers
+	Dagger:       {Min: 1, Max: 4},
+	Dirk:         {Min: 3, Max: 9},
+	Kriss:        {Min: 2, Max: 11},
+	Blade:        {Min: 4, Max: 15},
+	Poignard:     {Min: 6, Max: 18},
+	Rondel:       {Min: 10, Max: 26},
+	Cinquedeas:   {Min: 15, Max: 31},
+	Stilleto:     {Min: 19, Max: 36},
+	BoneKnife:    {Min: 23, Max: 49},
+	MithralPoint: {Min: 37, Max: 53},
+	FangedKnife:  {Min: 15, Max: 57},
+	LegendSpike:  {Min: 32, Max: 47},
 
-	//Staves
-	"sst": {TwoMin: 1, TwoMax: 5},
-	"lst": {TwoMin: 2, TwoMax: 8},
-	"cst": {TwoMin: 4, TwoMax: 12},
-	"bst": {TwoMin: 6, TwoMax: 13},
-	"wst": {TwoMin: 12, TwoMax: 28},
-	"8ss": {TwoMin: 6, TwoMax: 21},
-	"8ls": {TwoMin: 8, TwoMax: 26},
-	"8cs": {TwoMin: 11, TwoMax: 32},
-	"8bs": {TwoMin: 14, TwoMax: 34},
-	"8ws": {TwoMin: 24, TwoMax: 58},
-	"6ss": {TwoMin: 69, TwoMax: 85},
-	"6ls": {TwoMin: 75, TwoMax: 107},
-	"6cs": {TwoMin: 80, TwoMax: 93},
-	"6bs": {TwoMin: 65, TwoMax: 108},
-	"6ws": {TwoMin: 83, TwoMax: 99},
+	// Staves
+	ShortStaff:   {TwoMin: 1, TwoMax: 5},
+	LongStaff:    {TwoMin: 2, TwoMax: 8},
+	GnarledStaff: {TwoMin: 4, TwoMax: 12},
+	BattleStaff:  {TwoMin: 6, TwoMax: 13},
+	WarStaff:     {TwoMin: 12, TwoMax: 28},
+	JoStaff:      {TwoMin: 6, TwoMax: 21},
+	QuarterStaff: {TwoMin: 8, TwoMax: 26},
+	CedarStaff:   {TwoMin: 11, TwoMax: 32},
+	GothicStaff:  {TwoMin: 14, TwoMax: 34},
+	RuneStaff:    {TwoMin: 24, TwoMax: 58},
+	WalkingStick: {TwoMin: 69, TwoMax: 85},
+	Stalagmite:   {TwoMin: 75, TwoMax: 107},
+	ElderStaff:   {TwoMin: 80, TwoMax: 93},
+	Shillelah:    {TwoMin: 65, TwoMax: 108},
+	ArchonStaff:  {TwoMin: 83, TwoMax: 99},
 
-	//Wands
-	"wnd": {Min: 2, Max: 4},
-	"ywn": {Min: 2, Max: 8},
-	"bwn": {Min: 3, Max: 7},
-	"gwn": {Min: 5, Max: 11},
-	"9wn": {Min: 8, Max: 18},
-	"9yw": {Min: 8, Max: 24},
-	"9bw": {Min: 10, Max: 22},
-	"9gw": {Min: 13, Max: 29},
-	"7wn": {Min: 18, Max: 33},
-	"7yw": {Min: 20, Max: 40},
-	"7bw": {Min: 10, Max: 31},
-	"7gw": {Min: 22, Max: 28},
+	// Wands
+	Wand:          {Min: 2, Max: 4},
+	YewWand:       {Min: 2, Max: 8},
+	BoneWand:      {Min: 3, Max: 7},
+	GrimWand:      {Min: 5, Max: 11},
+	BurntWand:     {Min: 8, Max: 18},
+	PetrifiedWand: {Min: 8, Max: 24},
+	TombWand:      {Min: 10, Max: 22},
+	GraveWand:     {Min: 13, Max: 29},
+	PolishedWand:  {Min: 18, Max: 33},
+	GhostWand:     {Min: 20, Max: 40},
+	LichWand:      {Min: 10, Max: 31},
+	UnearthedWand: {Min: 22, Max: 28},
 
-	//Orbs
-	"ob1": {Min: 2, Max: 5},
-	"ob2": {Min: 3, Max: 8},
-	"ob3": {Min: 4, Max: 10},
-	"ob4": {Min: 5, Max: 12},
-	"ob5": {Min: 8, Max: 18},
-	"ob6": {Min: 8, Max: 21},
-	"ob7": {Min: 10, Max: 26},
-	"ob8": {Min: 11, Max: 29},
-	"ob9": {Min: 13, Max: 32},
-	"oba": {Min: 18, Max: 42},
-	"obb": {Min: 21, Max: 46},
-	"obc": {Min: 18, Max: 50},
-	"obd": {Min: 23, Max: 55},
-	"obe": {Min: 12, Max: 66},
-	"obf": {Min: 30, Max: 53},
+	// Orbs
+	EableOrb:         {Min: 2, Max: 5},
+	SacredGlobe:      {Min: 3, Max: 8},
+	SmokedSphere:     {Min: 4, Max: 10},
+	ClaspedOrb:       {Min: 5, Max: 12},
+	DragonStone:      {Min: 8, Max: 18},
+	GlowingOrb:       {Min: 8, Max: 21},
+	CrystallineGlobe: {Min: 10, Max: 26},
+	CloudySphere:     {Min: 11, Max: 29},
+	SparklingBall:    {Min: 13, Max: 32},
+	SwirlingCrystal:  {Min: 18, Max: 42},
+	HeavenlyStone:    {Min: 21, Max: 46},
+	EldritchOrb:      {Min: 18, Max: 50},
+	DemonHeart:       {Min: 23, Max: 55},
+	VortexOrb:        {Min: 12, Max: 66},
+	DimensionalShard: {Min: 30, Max: 53},
 
 	// Assassin Claws
-	"ktr": {Min: 4, Max: 7},
-	"wrb": {Min: 5, Max: 9},
-	"axf": {Min: 2, Max: 15},
-	"ces": {Min: 7, Max: 15},
-	"clw": {Min: 8, Max: 15},
-	"btl": {Min: 10, Max: 14},
-	"skr": {Min: 9, Max: 17},
-	"9ar": {Min: 11, Max: 24},
-	"9wb": {Min: 13, Max: 27},
-	"9xf": {Min: 8, Max: 37},
-	"9cs": {Min: 16, Max: 37},
-	"9lw": {Min: 18, Max: 37},
-	"9tw": {Min: 21, Max: 35},
-	"9qr": {Min: 19, Max: 40},
-	"7ar": {Min: 39, Max: 52},
-	"7wb": {Min: 34, Max: 45},
-	"7xf": {Min: 44, Max: 53},
-	"7cs": {Min: 36, Max: 42},
-	"7lw": {Min: 22, Max: 53},
-	"7tw": {Min: 24, Max: 44},
-	"7qr": {Min: 40, Max: 51},
+	Katar:            {Min: 4, Max: 7},
+	WristBlade:       {Min: 5, Max: 9},
+	HatchetHands:     {Min: 2, Max: 15},
+	Cestus:           {Min: 7, Max: 15},
+	Claws:            {Min: 8, Max: 15},
+	BladeTalons:      {Min: 10, Max: 14},
+	ScissorsKatar:    {Min: 9, Max: 17},
+	Quhab:            {Min: 11, Max: 24},
+	WristSpike:       {Min: 13, Max: 27},
+	Fascia:           {Min: 8, Max: 37},
+	HandScythe:       {Min: 16, Max: 37},
+	GreaterClaws:     {Min: 18, Max: 37},
+	GreaterTalons:    {Min: 21, Max: 35},
+	ScissorsQuhab:    {Min: 19, Max: 40},
+	Suwayyah:         {Min: 39, Max: 52},
+	WristSword:       {Min: 34, Max: 45},
+	WarFist:          {Min: 44, Max: 53},
+	BattleCestus:     {Min: 36, Max: 42},
+	FeralClaws:       {Min: 22, Max: 53},
+	RunicTalons:      {Min: 24, Max: 44},
+	ScissorsSuwayyah: {Min: 40, Max: 51},
 }
 
 // Item types, used to decide what attribute to give an item socketed with
@@ -490,61 +1159,61 @@ var setReqIDsMap = map[uint64][]uint64{
 // when they exist, or we'll ruin the rest of the bit offsets for the item.
 var quantityMap = map[string]bool{
 	//Misc
-	"tbk": true,
-	"ibk": true,
-	"key": true,
-	"gps": true,
-	"ops": true,
-	"gpm": true,
-	"opm": true,
-	"gpl": true,
-	"opl": true,
-	"aqv": true,
-	"cqv": true,
+	TownPortalBook:      true,
+	IdentifyBook:        true,
+	SkeletonKey:         true,
+	RancidGasPotion:     true,
+	OilPotion:           true,
+	ChokingGasPotion:    true,
+	ExplodingPotion:     true,
+	StranglingGasPotion: true,
+	FulmatingPotion:     true,
+	Arrows:              true,
+	Bolts:               true,
 
 	//Throwables
-	"tkf": true,
-	"tax": true,
-	"bkf": true,
-	"bal": true,
-	"9tk": true,
-	"9ta": true,
-	"9bk": true,
-	"9b8": true,
-	"7tk": true,
-	"7ta": true,
-	"7bk": true,
-	"7b8": true,
+	ThrowingKnife: true,
+	ThrowingAxe:   true,
+	BalancedKnife: true,
+	BalancedAxe:   true,
+	BattleDart:    true,
+	Francisca:     true,
+	WarDart:       true,
+	Hurlbat:       true,
+	FlyingKnife:   true,
+	FlyingAxe:     true,
+	WingedKnife:   true,
+	WingedAxe:     true,
 
 	//Javelins
-	"jav": true,
-	"pil": true,
-	"ssp": true,
-	"glv": true,
-	"tsp": true,
-	"9ja": true,
-	"9pi": true,
-	"9s9": true,
-	"9gl": true,
-	"9ts": true,
-	"7ja": true,
-	"7pi": true,
-	"7s7": true,
-	"7gl": true,
-	"7ts": true,
-	"am5": true,
-	"ama": true,
-	"amf": true,
+	Javelin:            true,
+	Pilum:              true,
+	ShortSpear:         true,
+	Glaive:             true,
+	ThrowingSpear:      true,
+	WarJavelin:         true,
+	GreatPilum:         true,
+	Simbilan:           true,
+	Spiculum:           true,
+	Harpoon:            true,
+	HyperionJavelin:    true,
+	StygianPilum:       true,
+	BalrogSpear:        true,
+	GhostGlaive:        true,
+	WingedHarpoon:      true,
+	MaidenJavelin:      true,
+	CeremonialJavelin:  true,
+	MatriarchalJavelin: true,
 }
 
 // Items that are tomes contain 5 extra bits, so we need to keep track of what
 // items are tomes, and read the bits accordingly.
 var tomeMap = map[string]bool{
-	"tbk": true,
-	"ibk": true,
+	TownPortalBook: true,
+	IdentifyBook:   true,
 }
 
-var magicalProperties = map[uint64]magicalProperty{
+var magicalProperties = map[uint64]MagicalProperty{
 	0:  {Bits: []uint{8}, Bias: 32, Name: "+{0} to Strength"},
 	1:  {Bits: []uint{7}, Bias: 32, Name: "+{0} to Energy"},
 	2:  {Bits: []uint{7}, Bias: 32, Name: "+{0} to Dexterity"},
@@ -846,667 +1515,668 @@ var magicalProperties = map[uint64]magicalProperty{
 	356: {Bits: []uint{2}, Name: "Quest Item Difficulty +{0} (Invisible)"},
 }
 
-// Shield codes
+// Shield item codes mapped to their in game, human-friendly, readable name.
 var shieldCodes = map[string]string{
-	"uow": "Aegis",
-	"pa4": "Aerin Shield",
-	"pa7": "Akaran Rondache",
-	"pa6": "Akaran Targe",
-	"pad": "Kurast Shield",
-	"xts": "Ancient Shield",
-	"xpk": "Barbed Shield",
-	"upk": "Blade Barrier",
-	"nef": "Bloodlord Skull",
-	"bsh": "Bone Shield",
-	"buc": "Buckler",
-	"ne9": "Cantor Trophy",
-	"pa5": "Crown Shield",
-	"xuc": "Defender",
-	"ne5": "Demon Head",
-	"xit": "Dragon Shield",
-	"ne7": "Fetish Trophy",
-	"ne4": "Gargoyle Head",
-	"gts": "Gothic Shield",
-	"xsh": "Grim Shield",
-	"pa9": "Gilded Shield",
-	"nea": "Heirophant Trophy",
-	"uuc": "Heater",
-	"neg": "Hellspawn Skull",
-	"pa3": "Heraldic Shield",
-	"kit": "Kite Shield",
-	"lrg": "Large Shield",
-	"uml": "Luna",
-	"neb": "Minion Skull",
-	"uit": "Monarch",
-	"ne6": "Mummified Trophy",
-	"ned": "Overseer Skull",
-	"xow": "Pavise",
-	"ne1": "Preserved Head",
-	"pa8": "Protector Shield",
-	"pa2": "Rondache",
-	"xml": "Round Shield",
-	"paa": "Royal Shield",
-	"pac": "Sacred Rondache",
-	"pab": "Sacred Targe",
-	"xrg": "Scutum",
-	"ne8": "Sexton Trophy",
-	"sml": "Small Shield",
-	"spk": "Spiked Shield",
-	"nee": "Succubus Skull",
-	"pa1": "Targe",
-	"tow": "Tower Shield",
-	"ush": "Troll Nest",
-	"ne3": "Unraveller Head",
-	"paf": "Vortex Shield",
-	"uts": "Ward",
-	"pae": "Zakarum Shield",
-	"ne2": "Zombie Head",
+	Aegis:            "Aegis",
+	AerinShield:      "Aerin Shield",
+	AkaranRondache:   "Akaran Rondache",
+	AkaranTarge:      "Akaran Targe",
+	KurastShield:     "Kurast Shield",
+	AncientShield:    "Ancient Shield",
+	BarbedShield:     "Barbed Shield",
+	BladeBarrier:     "Blade Barrier",
+	BloodlordSkull:   "Bloodlord Skull",
+	BoneShield:       "Bone Shield",
+	Buckler:          "Buckler",
+	CantorTrophy:     "Cantor Trophy",
+	CrownShield:      "Crown Shield",
+	Defender:         "Defender",
+	DemonHead:        "Demon Head",
+	DragonShield:     "Dragon Shield",
+	FetishTrophy:     "Fetish Trophy",
+	GargoyleHead:     "Gargoyle Head",
+	GothicShield:     "Gothic Shield",
+	GrimShield:       "Grim Shield",
+	GildedShield:     "Gilded Shield",
+	HeirophantTrophy: "Heirophant Trophy",
+	Heater:           "Heater",
+	HellspawnSkull:   "Hellspawn Skull",
+	HeraldicShield:   "Heraldic Shield",
+	KiteShield:       "Kite Shield",
+	LargeShield:      "Large Shield",
+	Luna:             "Luna",
+	MinionSkull:      "Minion Skull",
+	Monarch:          "Monarch",
+	MummifiedTrophy:  "Mummified Trophy",
+	OverseerSkull:    "Overseer Skull",
+	Pavise:           "Pavise",
+	PreservedHead:    "Preserved Head",
+	ProtectorShield:  "Protector Shield",
+	Rondache:         "Rondache",
+	RoundShield:      "Round Shield",
+	RoyalShield:      "Royal Shield",
+	SacredRondache:   "Sacred Rondache",
+	SacredTarge:      "Sacred Targe",
+	Scutum:           "Scutum",
+	SextonTrophy:     "Sexton Trophy",
+	SmallShield:      "Small Shield",
+	SpikedShield:     "Spiked Shield",
+	SuccubusSkull:    "Succubus Skull",
+	Targe:            "Targe",
+	TowerShield:      "Tower Shield",
+	TrollNest:        "Troll Nest",
+	UnravellerHead:   "Unraveller Head",
+	VortexShield:     "Vortex Shield",
+	Ward:             "Ward",
+	ZakarumShield:    "Zakarum Shield",
+	ZombieHead:       "Zombie Head",
 }
 
-// Armor codes.
+// Armor item codes mapped to their in game, human-friendly, readable name.
 var armorCodes = map[string]string{
-	"dr6": "Alpha Helm",
-	"aar": "Ancient Armor",
-	"dr3": "Antlers",
-	"utp": "Archon Plate",
-	"ulm": "Armet",
-	"ba4": "Assault Helmet",
-	"ba5": "Avenger Guard",
-	"upl": "Balrog Skin",
-	"xhl": "Basinet",
-	"ztb": "Battle Belt",
-	"xtb": "Battle Boots",
-	"xtg": "Battle Gauntlets",
-	"mbl": "Belt",
-	"drb": "Blood Spirit",
-	"bhm": "Bone Helm",
-	"uh9": "Bone Visage",
-	"uhn": "Boneweave",
-	"umb": "Boneweave Boots",
-	"mgl": "Bracers",
-	"ulg": "Bramble Mitts",
-	"brs": "Breast Plate",
-	"cap": "Cap",
-	"bab": "Carnage Helm",
-	"xlm": "Casque",
-	"mbt": "Chain Boots",
-	"chn": "Chain Mail",
-	"xul": "Chaos Armor",
-	"ci0": "Circlet",
-	"uhc": "Colossus Girdle",
-	"bae": "Conqueror Crown",
-	"urn": "Corona",
-	"ci1": "Coronet",
-	"crn": "Crown",
-	"utg": "Crusader Gauntlets",
-	"xrs": "Cuirass",
-	"xsk": "Death Mask",
-	"usk": "Demonhead",
-	"xla": "Demonhide Armor",
-	"xlb": "Demonhide Boots",
-	"xlg": "Demonhide Gloves",
-	"zlb": "Demonhide Sash",
-	"bad": "Destroyer Helm",
-	"ci3": "Diadem",
-	"ung": "Diamond Mail",
-	"drf": "Dream Spirit",
-	"uui": "Dusk Shroud",
-	"drd": "Earth Spirit",
-	"xth": "Embossed Plate",
-	"dr4": "Falcon Mask",
-	"ba2": "Fanged Helm",
-	"fld": "Field Plate",
-	"fhl": "Full Helm",
-	"plt": "Plate Mail",
-	"ful": "Full Plate Mail",
-	"bac": "Fury Visor",
-	"hgl": "Gauntlets",
-	"xui": "Ghost Armor",
-	"uhl": "Giant Conch",
-	"hbl": "Girdle",
-	"lgl": "Gloves",
-	"gth": "Gothic Plate",
-	"xrn": "Grand Crown",
-	"urs": "Great Hauberk",
-	"ghm": "Great Helm",
-	"dr7": "Griffon Headress",
-	"xh9": "Grim Helm",
-	"baf": "Guardian Crown",
-	"hla": "Hard Leather Armor",
-	"dr2": "Hawk Helm",
-	"tbl": "Heavy Belt",
-	"vbt": "Heavy Boots",
-	"xmg": "Heavy Bracers",
-	"vgl": "Heavy Gloves",
-	"ult": "Hellforged Plate",
-	"hlm": "Helm",
-	"ba3": "Horned Helm",
-	"dr8": "Hunter's Guise",
-	"ukp": "Hydraskull",
-	"urg": "Hyperion",
-	"ba1": "Jawbone Cap",
-	"ba6": "Jawbone Visor",
-	"uld": "Kraken Shell",
-	"uth": "Lacquered Plate",
-	"lea": "Leather Armor",
-	"lbt": "Leather Boots",
-	"vbl": "Light Belt",
-	"tgl": "Light Gauntlets",
-	"ltp": "Light Plate",
-	"tbt": "Light Plated Boots",
-	"xng": "Linked Mail",
-	"ba7": "Lion Helm",
-	"ucl": "Loricated Mail",
-	"xtp": "Mage Plate",
-	"msk": "Mask",
-	"xhn": "Mesh Armor",
-	"zmb": "Mesh Belt",
-	"xmb": "Mesh Boots",
-	"utb": "Mirrored Boots",
-	"umc": "Mithril Coil",
-	"uhb": "Myrmidon Greaves",
-	"uhg": "Ogre Gauntlets",
-	"xar": "Ornate Plate",
-	"hbt": "Plate Boots",
-	"qui": "Quilted Armor",
-	"ba8": "Rage Mask",
-	"rng": "Ring Mail",
-	"xpl": "Russet Armor",
-	"uar": "Sacred Armor",
-	"dr9": "Sacred Feathers",
-	"xkp": "Sallet",
-	"lbl": "Sash",
-	"ba9": "Savage Helmet",
-	"scl": "Scale Mail",
-	"ula": "Scarab Husk",
-	"uvb": "Scarabshell Boots",
-	"xea": "Serpentskin Armor",
-	"uul": "Shadow Plate",
-	"uap": "Shako",
-	"zvb": "Sharkskin Belt",
-	"xvb": "Sharkskin Boots",
-	"xvg": "Sharkskin Gloves",
-	"xld": "Sharktooth Armor",
-	"skp": "Skull Cap",
-	"dre": "Sky Spirit",
-	"baa": "Slayer Guard",
-	"ulc": "Spiderweb Sash",
-	"uhm": "Spired Helm",
-	"dr5": "Spirit Mask",
-	"spl": "Splint Mail",
-	"stu": "Studded Leather",
-	"drc": "Sun Spirit",
-	"xlt": "Templar Coat",
-	"ci2": "Tiara",
-	"xcl": "Tigulated Mail",
-	"dra": "Totemic Mask",
-	"xtu": "Trellised Armor",
-	"utc": "Troll Belt",
-	"umg": "Vambraces",
-	"uvg": "Vampirebone Gloves",
-	"uvc": "Vampirefang Belt",
-	"zhb": "War Belt",
-	"xhb": "War Boots",
-	"xhg": "War Gauntlets",
-	"xap": "War Hat",
-	"xhm": "Winged Helm",
-	"utu": "Wire Fleece",
-	"dr1": "Wolf Head",
-	"uea": "Wyrmhide",
-	"ulb": "Wyrmhide Boots",
+	AlphaHelm:         "Alpha Helm",
+	AncientArmor:      "Ancient Armor",
+	Antlers:           "Antlers",
+	ArchonPlate:       "Archon Plate",
+	Armet:             "Armet",
+	AssaultHelmet:     "Assault Helmet",
+	AvengerGuard:      "Avenger Guard",
+	BalrogSkin:        "Balrog Skin",
+	Basinet:           "Basinet",
+	BattleBelt:        "Battle Belt",
+	BattleBoots:       "Battle Boots",
+	BattleGauntlets:   "Battle Gauntlets",
+	Belt:              "Belt",
+	BloodSpirit:       "Blood Spirit",
+	BoneHelm:          "Bone Helm",
+	BoneVisage:        "Bone Visage",
+	Boneweave:         "Boneweave",
+	BoneweaveBoots:    "Boneweave Boots",
+	Bracers:           "Bracers",
+	BrambleMitts:      "Bramble Mitts",
+	BreastPlate:       "Breast Plate",
+	Cap:               "Cap",
+	CarnageHelm:       "Carnage Helm",
+	Casque:            "Casque",
+	ChainBoots:        "Chain Boots",
+	ChainMail:         "Chain Mail",
+	ChaosArmor:        "Chaos Armor",
+	Circlet:           "Circlet",
+	ColossusGirdle:    "Colossus Girdle",
+	ConquerorCrown:    "Conqueror Crown",
+	Corona:            "Corona",
+	Coronet:           "Coronet",
+	Crown:             "Crown",
+	CrusaderGauntlets: "Crusader Gauntlets",
+	Cuirass:           "Cuirass",
+	DeathMask:         "Death Mask",
+	Demonhead:         "Demonhead",
+	DemonhideArmor:    "Demonhide Armor",
+	DemonhideBoots:    "Demonhide Boots",
+	DemonhideGloves:   "Demonhide Gloves",
+	DemonhideSash:     "Demonhide Sash",
+	DestroyerHelm:     "Destroyer Helm",
+	Diadem:            "Diadem",
+	DiamondMail:       "Diamond Mail",
+	DreamSpirit:       "Dream Spirit",
+	DuskShroud:        "Dusk Shroud",
+	EarthSpirit:       "Earth Spirit",
+	EmbossedPlate:     "Embossed Plate",
+	FalconMask:        "Falcon Mask",
+	FangedHelm:        "Fanged Helm",
+	FieldPlate:        "Field Plate",
+	FullHelm:          "Full Helm",
+	PlateMail:         "Plate Mail",
+	FullPlateMail:     "Full Plate Mail",
+	FuryVisor:         "Fury Visor",
+	Gauntlets:         "Gauntlets",
+	GhostArmor:        "Ghost Armor",
+	GiantConch:        "Giant Conch",
+	Girdle:            "Girdle",
+	Gloves:            "Gloves",
+	GothicPlate:       "Gothic Plate",
+	GrandCrown:        "Grand Crown",
+	GreatHauberk:      "Great Hauberk",
+	GreatHelm:         "Great Helm",
+	GriffonHeadress:   "Griffon Headress",
+	GrimHelm:          "Grim Helm",
+	GuardianCrown:     "Guardian Crown",
+	HardLeatherArmor:  "Hard Leather Armor",
+	HawkHelm:          "Hawk Helm",
+	HeavyBelt:         "Heavy Belt",
+	HeavyBoots:        "Heavy Boots",
+	HeavyBracers:      "Heavy Bracers",
+	HeavyGloves:       "Heavy Gloves",
+	HellforgedPlate:   "Hellforged Plate",
+	Helm:              "Helm",
+	HornedHelm:        "Horned Helm",
+	HuntersGuise:      "Hunter's Guise",
+	Hydraskull:        "Hydraskull",
+	Hyperion:          "Hyperion",
+	JawboneCap:        "Jawbone Cap",
+	JawboneVisor:      "Jawbone Visor",
+	KrakenShell:       "Kraken Shell",
+	LacqueredPlate:    "Lacquered Plate",
+	LeatherArmor:      "Leather Armor",
+	LeatherBoots:      "Leather Boots",
+	LightBelt:         "Light Belt",
+	LightGauntlets:    "Light Gauntlets",
+	LightPlate:        "Light Plate",
+	LightPlatedBoots:  "Light Plated Boots",
+	LinkedMail:        "Linked Mail",
+	LionHelm:          "Lion Helm",
+	LoricatedMail:     "Loricated Mail",
+	MagePlate:         "Mage Plate",
+	Mask:              "Mask",
+	MeshArmor:         "Mesh Armor",
+	MeshBelt:          "Mesh Belt",
+	MeshBoots:         "Mesh Boots",
+	MirroredBoots:     "Mirrored Boots",
+	MithrilCoil:       "Mithril Coil",
+	MyrmidonGreaves:   "Myrmidon Greaves",
+	OgreGauntlets:     "Ogre Gauntlets",
+	OrnatePlate:       "Ornate Plate",
+	PlateBoots:        "Plate Boots",
+	QuiltedArmor:      "Quilted Armor",
+	RageMask:          "Rage Mask",
+	RingMail:          "Ring Mail",
+	RussetArmor:       "Russet Armor",
+	SacredArmor:       "Sacred Armor",
+	SacredFeathers:    "Sacred Feathers",
+	Sallet:            "Sallet",
+	Sash:              "Sash",
+	SavageHelmet:      "Savage Helmet",
+	ScaleMail:         "Scale Mail",
+	ScarabHusk:        "Scarab Husk",
+	ScarabshellBoots:  "Scarabshell Boots",
+	SerpentskinArmor:  "Serpentskin Armor",
+	ShadowPlate:       "Shadow Plate",
+	Shako:             "Shako",
+	SharkskinBelt:     "Sharkskin Belt",
+	SharkskinBoots:    "Sharkskin Boots",
+	SharkskinGloves:   "Sharkskin Gloves",
+	SharktoothArmor:   "Sharktooth Armor",
+	SkullCap:          "Skull Cap",
+	SkySpirit:         "Sky Spirit",
+	SlayerGuard:       "Slayer Guard",
+	SpiderwebSash:     "Spiderweb Sash",
+	SpiredHelm:        "Spired Helm",
+	SpiritMask:        "Spirit Mask",
+	SplintMail:        "Splint Mail",
+	StuddedLeather:    "Studded Leather",
+	SunSpirit:         "Sun Spirit",
+	TemplarCoat:       "Templar Coat",
+	Tiara:             "Tiara",
+	TigulatedMail:     "Tigulated Mail",
+	TotemicMask:       "Totemic Mask",
+	TrellisedArmor:    "Trellised Armor",
+	TrollBelt:         "Troll Belt",
+	Vambraces:         "Vambraces",
+	VampireboneGloves: "Vampirebone Gloves",
+	VampirefangBelt:   "Vampirefang Belt",
+	WarBelt:           "War Belt",
+	WarBoots:          "War Boots",
+	WarGauntlets:      "War Gauntlets",
+	WarHat:            "War Hat",
+	WingedHelm:        "Winged Helm",
+	WireFleece:        "Wire Fleece",
+	WolfHead:          "Wolf Head",
+	Wyrmhide:          "Wyrmhide",
+	WyrmhideBoots:     "Wyrmhide Boots",
 }
 
-// Weapon Codes.
+// Weapon item codes mapped to their in game, human-friendly, readable name.
 var weaponCodes = map[string]string{
-	"9gi": "Ancient Axe",
-	"9wd": "Ancient Sword",
-	"8lx": "Arbalest",
-	"6ws": "Archon Staff",
-	"am6": "Ashwood Bow",
-	"7sm": "Ataghan",
-	"axe": "Axe",
-	"bal": "Balanced Axe",
-	"bkf": "Balanced Knife",
-	"8hx": "Balista",
-	"7gs": "Balrog Blade",
-	"7s7": "Balrog Spear",
-	"9sp": "Barbed Club",
-	"bar": "Bardiche",
-	"bsw": "Bastard Sword",
-	"btx": "Battle Axe",
-	"7cs": "Battle Cestus",
-	"9tk": "Battle Dart",
-	"9wh": "Battle Hammer",
-	"9s8": "Battle Scythe",
-	"bst": "Battle Staff",
-	"9bs": "Battle Sword",
-	"9ba": "Bearded Axe",
-	"9h9": "Bec De Corbin",
-	"7wa": "Berserker Axe",
-	"9vo": "Bill",
-	"bld": "Blade",
-	"6hb": "Blade Bow",
-	"btl": "Blade Talons",
-	"7dg": "Bone Knife",
-	"bwn": "Bone Wand",
-	"brn": "Brandistock",
-	"bax": "Broad Axe",
-	"bsd": "Broad Sword",
-	"9wn": "Burnt Wand",
-	"7ws": "Caduceus",
-	"8lb": "Cedar Bow",
-	"8cs": "Cedar Staff",
-	"am7": "Ceremonial Bow",
-	"ama": "Ceremonial Javelin",
-	"am9": "Ceremonial Pike",
-	"am8": "Ceremonial Spear",
-	"ces": "Cestus",
-	"7ga": "Champion Axe",
-	"7b7": "Champion Sword",
-	"gpm": "Choking Gas Potion",
-	"8rx": "Chu-Ko-Nu",
-	"9kr": "Cinquedeas",
-	"ob4": "Clasped Orb",
-	"clw": "Claws",
-	"clm": "Claymore",
-	"9ax": "Cleaver",
-	"ob8": "Cloudy Sphere",
-	"clb": "Club",
-	"7fb": "Colossal Sword",
-	"7gd": "Colossal Blade",
-	"6hx": "Colossus Crossbow",
-	"7vo": "Colossus Voulge",
-	"cbw": "Composite Bow",
-	"7bs": "Conquest Sword",
-	"mxb": "Crossbow",
-	"9mp": "Crowbill",
-	"6l7": "Crusader Bow",
-	"7pa": "Cryptic Axe",
-	"7ls": "Cryptic Sword",
-	"crs": "Crystal Sword",
-	"ob7": "Crystalline Globe",
-	"9cl": "Cudgel",
-	"9sm": "Cutlass",
-	"9cm": "Dacian Falx",
-	"dgr": "Dagger",
-	"7bt": "Decapitator",
-	"d33": "Decoy Dagger",
-	"6rx": "Demon Crossbow",
-	"obd": "Demon Heart",
-	"7mt": "Devil Star",
-	"6s7": "Diamond Bow",
-	"9cr": "Dimensional Blade",
-	"obf": "Dimensional Shard",
-	"dir": "Dirk",
-	"9ws": "Divine Scepter",
-	"2ax": "Double Axe",
-	"8cb": "Double Bow",
-	"ob5": "Dragon Stone",
-	"ob1": "Eable Orb",
-	"8sb": "Edge Bow",
-	"6cs": "Elder Staff",
-	"obc": "Eldritch Orb",
-	"7sb": "Elegant Blade",
-	"92h": "Espadon",
-	"72a": "Ettin Axe",
-	"9gd": "Executioner Sword",
-	"opm": "Exploding Potion",
-	"7ss": "Falcata",
-	"flc": "Falchion",
-	"7kr": "Fanged Knife",
-	"9xf": "Fascia",
-	"7la": "Feral Axe",
-	"7lw": "Feral Claws",
-	"fla": "Flail",
-	"flb": "Flamberge",
-	"9ma": "Flanged Mace",
-	"7ta": "Flying Axe",
-	"7tk": "Flying Knife",
-	"9ta": "Francisca",
-	"opl": "Fulmating Potion",
-	"9tr": "Fuscina",
-	"7gl": "Ghost Glaive",
-	"7st": "Ghost Spear",
-	"7yw": "Ghost Wand",
-	"gix": "Giant Axe",
-	"gis": "Giant Sword",
-	"7wc": "Giant Thresher",
-	"g33": "Gidbinn",
-	"9ss": "Gladius",
-	"glv": "Glaive",
-	"7gi": "Glorious Axe",
-	"ob6": "Glowing Orb",
-	"cst": "Gnarled Staff",
-	"6mx": "Gorgon Crossbow",
-	"9ga": "Gothic Axe",
-	"8lw": "Gothic Bow",
-	"8bs": "Gothic Staff",
-	"9b9": "Gothic Sword",
-	"amc": "Grand Matron Bow",
-	"gsc": "Grand Scepter",
-	"9gw": "Grave Wand",
-	"gax": "Great Axe",
-	"6cb": "Great Bow",
-	"gma": "Great Maul",
-	"9pi": "Great Pilum",
-	"7h7": "Great Poleaxe",
-	"gsd": "Great Sword",
-	"9lw": "Greater Claws",
-	"9tw": "Greater Talons",
-	"9wc": "Grim Scythe",
-	"gwn": "Grim Wand",
-	"hal": "Halberd",
-	"hax": "Hand Axe",
-	"9cs": "Hand Scythe",
-	"9ts": "Harpoon",
-	"9ha": "Hatchet",
-	"axf": "HatchetHands",
-	"obb": "Heavenly Stone",
-	"hxb": "Heavy Crossbow",
-	"hfh": "Hellforge Hammer",
-	"7cm": "Highland Blade",
-	"9qs": "Holy Water Sprinkler",
-	"hdm": "Horadric Malus",
-	"hst": "Horadric Staff",
-	"hbw": "Hunters Bow",
-	"9b8": "Hurlbat",
-	"6lw": "Hydra Bow",
-	"7fc": "Hydra Edge",
-	"7ja": "Hyperion Javelin",
-	"7sr": "Hyperion Spear",
-	"9mt": "Jagged Star",
-	"jav": "Javelin",
-	"8ss": "Jo Staff",
-	"ktr": "Katar",
-	"qf1": "Khalim Flail",
-	"9fl": "Knout",
-	"kri": "Kriss",
-	"9p9": "Lance",
-	"lax": "Large Axe",
-	"7bl": "Legend Spike",
-	"72h": "Legend Sword",
-	"7wh": "Legendary Mallet",
-	"7bw": "Lich Wand",
-	"lxb": "Light Crossbow",
-	"9b7": "Lochaber Axe",
-	"lbb": "Long Battle Bow",
-	"lbw": "Long Bow",
-	"8l8": "Long Siege Bow",
-	"lst": "Long Staff",
-	"lsd": "Long Sword",
-	"lwb": "Long War Bow",
-	"mac": "Mace",
-	"am5": "Maiden Javelin",
-	"am4": "Maiden Pike",
-	"am3": "Maiden Spear",
-	"7br": "Mancatcher",
-	"9gm": "Martel de Fer",
-	"amb": "Matriarchal Bow",
-	"ame": "Matriarchal Pike",
-	"amd": "Matriarchal Spear",
-	"amf": "Matriarchal Javelin",
-	"mau": "Maul",
-	"7sc": "Mighty Scepter",
-	"9la": "Military Axe",
-	"mpi": "Military Pick",
-	"7di": "Mithral Point",
-	"mst": "Morning Star",
-	"7wd": "Mythical Sword",
-	"9wa": "Naga",
-	"7o7": "Ogre Axe",
-	"7m7": "Ogre Maul",
-	"ops": "Oil Potion",
-	"9pa": "Partizan",
-	"6lx": "Pellet Bow",
-	"9yw": "Petrified Wand",
-	"7cr": "Phase Blade",
-	"pik": "Pike",
-	"pil": "Pilum",
-	"9dg": "Poignard",
-	"pax": "Poleaxe",
-	"7wn": "Polished Wand",
-	"8ls": "Quarter Staff",
-	"9ar": "Quhab",
-	"gps": "Rancid Gas Potion",
-	"8hb": "Razor Bow",
-	"am2": "Reflex Bow",
-	"7ma": "Reinforced Mace",
-	"rxb": "Repeating Crossbow",
-	"9di": "Rondel",
-	"8sw": "Rune Bow",
-	"9sc": "Rune Scepter",
-	"8ws": "Rune Staff",
-	"9ls": "Rune Sword",
-	"7tw": "Runic Talons",
-	"sbr": "Sabre",
-	"ob2": "Sacred Globe",
-	"scp": "Scepter",
-	"scm": "Scimitar",
-	"skr": "Scissors Katar",
-	"9qr": "Scissors Quhab",
-	"7qr": "Scissors Suwayyah",
-	"7fl": "Scourge",
-	"scy": "Scythe",
-	"7qs": "Seraph Rod",
-	"6lb": "Shadow Bow",
-	"9sb": "Shamshir",
-	"6bs": "Shillelah",
-	"sbb": "Short Battle Bow",
-	"sbw": "Short Bow",
-	"8s8": "Short Siege Bow",
-	"ssp": "Short Spear",
-	"sst": "Short Staff",
-	"ssd": "Short Sword",
-	"swb": "Short War Bow",
-	"8mx": "Siege Crossbow",
-	"7ba": "Silver Edged Axe",
-	"9s9": "Simbilan",
-	"7ax": "Small Crescent",
-	"ob3": "Smoked Sphere",
-	"ob9": "Sparkling Ball",
-	"spr": "Spear",
-	"spt": "Spetum",
-	"9gl": "Spiculum",
-	"6sb": "Spider Bow",
-	"spc": "Spiked Club",
-	"msf": "Staff Of The Kings",
-	"am1": "Stag Bow",
-	"6ls": "Stalagmite",
-	"9bl": "Stilleto",
-	"gpl": "Strangling Gas Potion",
-	"7tr": "Stygian Pike",
-	"7pi": "Stygian Pilum",
-	"qf2": "Super Khalim Flail",
-	"7ar": "Suwayyah",
-	"oba": "Swirling Crystal",
-	"9bt": "Tabar",
-	"7s8": "Thresher",
-	"tax": "Throwing Axe",
-	"tkf": "Throwing Knife",
-	"tsp": "Throwing Spear",
-	"7gm": "Thunder Maul",
-	"7ha": "Tomahawk",
-	"9bw": "Tomb Wand",
-	"tri": "Trident",
-	"7cl": "Truncheon",
-	"9fc": "Tulwar",
-	"9gs": "Tusk Sword",
-	"92a": "Twin Axe",
-	"2hs": "Two Handed Sword",
-	"7sp": "Tyrant Club",
-	"7gw": "Unearthed Wand",
-	"obe": "Vortex Orb",
-	"vou": "Voulge",
-	"6ss": "Walking Stick",
-	"wnd": "Wand",
-	"wax": "War Axe",
-	"9m9": "War Club",
-	"9bk": "War Dart",
-	"7xf": "War Fist",
-	"9br": "War Fork",
-	"whm": "War Hammer",
-	"9ja": "War Javelin",
-	"7p7": "War Pike",
-	"wsp": "War Scepter",
-	"wsc": "War Scythe",
-	"9sr": "War Spear",
-	"7mp": "War Spike",
-	"wst": "War Staff",
-	"wsd": "War Sword",
-	"6sw": "Ward Bow",
-	"7b8": "Winged Axe",
-	"7ts": "Winged Harpoon",
-	"7bk": "Winged Knife",
-	"leg": "Wirts Leg",
-	"wrb": "Wrist Blade",
-	"9wb": "Wrist Spike",
-	"7wb": "Wrist Sword",
-	"9st": "Yari",
-	"ywn": "Yew Wand",
-	"9fb": "Zweihander",
+	AncientAxe:          "Ancient Axe",
+	AncientSword:        "Ancient Sword",
+	Arbalest:            "Arbalest",
+	ArchonStaff:         "Archon Staff",
+	AshwoodBow:          "Ashwood Bow",
+	Ataghan:             "Ataghan",
+	Axe:                 "Axe",
+	BalancedAxe:         "Balanced Axe",
+	BalancedKnife:       "Balanced Knife",
+	Balista:             "Balista",
+	BalrogBlade:         "Balrog Blade",
+	BalrogSpear:         "Balrog Spear",
+	BarbedClub:          "Barbed Club",
+	Bardiche:            "Bardiche",
+	BastardSword:        "Bastard Sword",
+	BattleAxe:           "Battle Axe",
+	BattleCestus:        "Battle Cestus",
+	BattleDart:          "Battle Dart",
+	BattleHammer:        "Battle Hammer",
+	BattleScythe:        "Battle Scythe",
+	BattleStaff:         "Battle Staff",
+	BattleSword:         "Battle Sword",
+	BeardedAxe:          "Bearded Axe",
+	BecDeCorbin:         "Bec De Corbin",
+	BerserkerAxe:        "Berserker Axe",
+	Bill:                "Bill",
+	Blade:               "Blade",
+	BladeBow:            "Blade Bow",
+	BladeTalons:         "Blade Talons",
+	BoneKnife:           "Bone Knife",
+	BoneWand:            "Bone Wand",
+	Brandistock:         "Brandistock",
+	BroadAxe:            "Broad Axe",
+	BroadSword:          "Broad Sword",
+	BurntWand:           "Burnt Wand",
+	Caduceus:            "Caduceus",
+	CedarBow:            "Cedar Bow",
+	CedarStaff:          "Cedar Staff",
+	CeremonialBow:       "Ceremonial Bow",
+	CeremonialJavelin:   "Ceremonial Javelin",
+	CeremonialPike:      "Ceremonial Pike",
+	CeremonialSpear:     "Ceremonial Spear",
+	Cestus:              "Cestus",
+	ChampionAxe:         "Champion Axe",
+	ChampionSword:       "Champion Sword",
+	ChokingGasPotion:    "Choking Gas Potion",
+	ChuKoNu:             "Chu-Ko-Nu",
+	Cinquedeas:          "Cinquedeas",
+	ClaspedOrb:          "Clasped Orb",
+	Claws:               "Claws",
+	Claymore:            "Claymore",
+	Cleaver:             "Cleaver",
+	CloudySphere:        "Cloudy Sphere",
+	Club:                "Club",
+	ColossalSword:       "Colossal Sword",
+	ColossalBlade:       "Colossal Blade",
+	ColossusCrossbow:    "Colossus Crossbow",
+	ColossusVoulge:      "Colossus Voulge",
+	CompositeBow:        "Composite Bow",
+	ConquestSword:       "Conquest Sword",
+	Crossbow:            "Crossbow",
+	Crowbill:            "Crowbill",
+	CrusaderBow:         "Crusader Bow",
+	CrypticAxe:          "Cryptic Axe",
+	CrypticSword:        "Cryptic Sword",
+	CrystalSword:        "Crystal Sword",
+	CrystallineGlobe:    "Crystalline Globe",
+	Cudgel:              "Cudgel",
+	Cutlass:             "Cutlass",
+	DacianFalx:          "Dacian Falx",
+	Dagger:              "Dagger",
+	Decapitator:         "Decapitator",
+	DecoyDagger:         "Decoy Dagger",
+	DemonCrossbow:       "Demon Crossbow",
+	DemonHeart:          "Demon Heart",
+	DevilStar:           "Devil Star",
+	DiamondBow:          "Diamond Bow",
+	DimensionalBlade:    "Dimensional Blade",
+	DimensionalShard:    "Dimensional Shard",
+	Dirk:                "Dirk",
+	DivineScepter:       "Divine Scepter",
+	DoubleAxe:           "Double Axe",
+	DoubleBow:           "Double Bow",
+	DragonStone:         "Dragon Stone",
+	EableOrb:            "Eable Orb",
+	EdgeBow:             "Edge Bow",
+	ElderStaff:          "Elder Staff",
+	EldritchOrb:         "Eldritch Orb",
+	ElegantBlade:        "Elegant Blade",
+	Espadon:             "Espadon",
+	EttinAxe:            "Ettin Axe",
+	ExecutionerSword:    "Executioner Sword",
+	ExplodingPotion:     "Exploding Potion",
+	Falcata:             "Falcata",
+	Falchion:            "Falchion",
+	FangedKnife:         "Fanged Knife",
+	Fascia:              "Fascia",
+	FeralAxe:            "Feral Axe",
+	FeralClaws:          "Feral Claws",
+	Flail:               "Flail",
+	Flamberge:           "Flamberge",
+	FlangedMace:         "Flanged Mace",
+	FlyingAxe:           "Flying Axe",
+	FlyingKnife:         "Flying Knife",
+	Francisca:           "Francisca",
+	FulmatingPotion:     "Fulmating Potion",
+	Fuscina:             "Fuscina",
+	GhostGlaive:         "Ghost Glaive",
+	GhostSpear:          "Ghost Spear",
+	GhostWand:           "Ghost Wand",
+	GiantAxe:            "Giant Axe",
+	GiantSword:          "Giant Sword",
+	GiantThresher:       "Giant Thresher",
+	Gidbinn:             "Gidbinn",
+	Gladius:             "Gladius",
+	Glaive:              "Glaive",
+	GloriousAxe:         "Glorious Axe",
+	GlowingOrb:          "Glowing Orb",
+	GnarledStaff:        "Gnarled Staff",
+	GorgonCrossbow:      "Gorgon Crossbow",
+	GothicAxe:           "Gothic Axe",
+	GothicBow:           "Gothic Bow",
+	GothicStaff:         "Gothic Staff",
+	GothicSword:         "Gothic Sword",
+	GrandMatronBow:      "Grand Matron Bow",
+	GrandScepter:        "Grand Scepter",
+	GraveWand:           "Grave Wand",
+	GreatAxe:            "Great Axe",
+	GreatBow:            "Great Bow",
+	GreatMaul:           "Great Maul",
+	GreatPilum:          "Great Pilum",
+	GreatPoleaxe:        "Great Poleaxe",
+	GreatSword:          "Great Sword",
+	GreaterClaws:        "Greater Claws",
+	GreaterTalons:       "Greater Talons",
+	GrimScythe:          "Grim Scythe",
+	GrimWand:            "Grim Wand",
+	Halberd:             "Halberd",
+	HandAxe:             "Hand Axe",
+	HandScythe:          "Hand Scythe",
+	Harpoon:             "Harpoon",
+	Hatchet:             "Hatchet",
+	HatchetHands:        "HatchetHands",
+	HeavenlyStone:       "Heavenly Stone",
+	HeavyCrossbow:       "Heavy Crossbow",
+	HellforgeHammer:     "Hellforge Hammer",
+	HighlandBlade:       "Highland Blade",
+	HolyWaterSprinkler:  "Holy Water Sprinkler",
+	HoradricMalus:       "Horadric Malus",
+	HoradricStaff:       "Horadric Staff",
+	HuntersBow:          "Hunters Bow",
+	Hurlbat:             "Hurlbat",
+	HydraBow:            "Hydra Bow",
+	HydraEdge:           "Hydra Edge",
+	HyperionJavelin:     "Hyperion Javelin",
+	HyperionSpear:       "Hyperion Spear",
+	JaggedStar:          "Jagged Star",
+	Javelin:             "Javelin",
+	JoStaff:             "Jo Staff",
+	Katar:               "Katar",
+	KhalimFlail:         "Khalim Flail",
+	Knout:               "Knout",
+	Kriss:               "Kriss",
+	Lance:               "Lance",
+	LargeAxe:            "Large Axe",
+	LegendSpike:         "Legend Spike",
+	LegendSword:         "Legend Sword",
+	LegendaryMallet:     "Legendary Mallet",
+	LichWand:            "Lich Wand",
+	LightCrossbow:       "Light Crossbow",
+	LochaberAxe:         "Lochaber Axe",
+	LongBattleBow:       "Long Battle Bow",
+	LongBow:             "Long Bow",
+	LongSiegeBow:        "Long Siege Bow",
+	LongStaff:           "Long Staff",
+	LongSword:           "Long Sword",
+	LongWarBow:          "Long War Bow",
+	Mace:                "Mace",
+	MaidenJavelin:       "Maiden Javelin",
+	MaidenPike:          "Maiden Pike",
+	MaidenSpear:         "Maiden Spear",
+	Mancatcher:          "Mancatcher",
+	MarteldeFer:         "Martel de Fer",
+	MatriarchalBow:      "Matriarchal Bow",
+	MatriarchalPike:     "Matriarchal Pike",
+	MatriarchalSpear:    "Matriarchal Spear",
+	MatriarchalJavelin:  "Matriarchal Javelin",
+	Maul:                "Maul",
+	MightyScepter:       "Mighty Scepter",
+	MilitaryAxe:         "Military Axe",
+	MilitaryPick:        "Military Pick",
+	MithralPoint:        "Mithral Point",
+	MorningStar:         "Morning Star",
+	MythicalSword:       "Mythical Sword",
+	Naga:                "Naga",
+	OgreAxe:             "Ogre Axe",
+	OgreMaul:            "Ogre Maul",
+	OilPotion:           "Oil Potion",
+	Partizan:            "Partizan",
+	PelletBow:           "Pellet Bow",
+	PetrifiedWand:       "Petrified Wand",
+	PhaseBlade:          "Phase Blade",
+	Pike:                "Pike",
+	Pilum:               "Pilum",
+	Poignard:            "Poignard",
+	Poleaxe:             "Poleaxe",
+	PolishedWand:        "Polished Wand",
+	QuarterStaff:        "Quarter Staff",
+	Quhab:               "Quhab",
+	RancidGasPotion:     "Rancid Gas Potion",
+	RazorBow:            "Razor Bow",
+	ReflexBow:           "Reflex Bow",
+	ReinforcedMace:      "Reinforced Mace",
+	RepeatingCrossbow:   "Repeating Crossbow",
+	Rondel:              "Rondel",
+	RuneBow:             "Rune Bow",
+	RuneScepter:         "Rune Scepter",
+	RuneStaff:           "Rune Staff",
+	RuneSword:           "Rune Sword",
+	RunicTalons:         "Runic Talons",
+	Sabre:               "Sabre",
+	SacredGlobe:         "Sacred Globe",
+	Scepter:             "Scepter",
+	Scimitar:            "Scimitar",
+	ScissorsKatar:       "Scissors Katar",
+	ScissorsQuhab:       "Scissors Quhab",
+	ScissorsSuwayyah:    "Scissors Suwayyah",
+	Scourge:             "Scourge",
+	Scythe:              "Scythe",
+	SeraphRod:           "Seraph Rod",
+	ShadowBow:           "Shadow Bow",
+	Shamshir:            "Shamshir",
+	Shillelah:           "Shillelah",
+	ShortBattleBow:      "Short Battle Bow",
+	ShortBow:            "Short Bow",
+	ShortSiegeBow:       "Short Siege Bow",
+	ShortSpear:          "Short Spear",
+	ShortStaff:          "Short Staff",
+	ShortSword:          "Short Sword",
+	ShortWarBow:         "Short War Bow",
+	SiegeCrossbow:       "Siege Crossbow",
+	SilverEdgedAxe:      "Silver Edged Axe",
+	Simbilan:            "Simbilan",
+	SmallCrescent:       "Small Crescent",
+	SmokedSphere:        "Smoked Sphere",
+	SparklingBall:       "Sparkling Ball",
+	Spear:               "Spear",
+	Spetum:              "Spetum",
+	Spiculum:            "Spiculum",
+	SpiderBow:           "Spider Bow",
+	SpikedClub:          "Spiked Club",
+	StaffOfTheKings:     "Staff Of The Kings",
+	StagBow:             "Stag Bow",
+	Stalagmite:          "Stalagmite",
+	Stilleto:            "Stilleto",
+	StranglingGasPotion: "Strangling Gas Potion",
+	StygianPike:         "Stygian Pike",
+	StygianPilum:        "Stygian Pilum",
+	SuperKhalimFlail:    "Super Khalim Flail",
+	Suwayyah:            "Suwayyah",
+	SwirlingCrystal:     "Swirling Crystal",
+	Tabar:               "Tabar",
+	Thresher:            "Thresher",
+	ThrowingAxe:         "Throwing Axe",
+	ThrowingKnife:       "Throwing Knife",
+	ThrowingSpear:       "Throwing Spear",
+	ThunderMaul:         "Thunder Maul",
+	Tomahawk:            "Tomahawk",
+	TombWand:            "Tomb Wand",
+	Trident:             "Trident",
+	Truncheon:           "Truncheon",
+	Tulwar:              "Tulwar",
+	TuskSword:           "Tusk Sword",
+	TwinAxe:             "Twin Axe",
+	TwoHandedSword:      "Two Handed Sword",
+	TyrantClub:          "Tyrant Club",
+	UnearthedWand:       "Unearthed Wand",
+	VortexOrb:           "Vortex Orb",
+	Voulge:              "Voulge",
+	WalkingStick:        "Walking Stick",
+	Wand:                "Wand",
+	WarAxe:              "War Axe",
+	WarClub:             "War Club",
+	WarDart:             "War Dart",
+	WarFist:             "War Fist",
+	WarFork:             "War Fork",
+	WarHammer:           "War Hammer",
+	WarJavelin:          "War Javelin",
+	WarPike:             "War Pike",
+	WarScepter:          "War Scepter",
+	WarScythe:           "War Scythe",
+	WarSpear:            "War Spear",
+	WarSpike:            "War Spike",
+	WarStaff:            "War Staff",
+	WarSword:            "War Sword",
+	WardBow:             "Ward Bow",
+	WingedAxe:           "Winged Axe",
+	WingedHarpoon:       "Winged Harpoon",
+	WingedKnife:         "Winged Knife",
+	WirtsLeg:            "Wirts Leg",
+	WristBlade:          "Wrist Blade",
+	WristSpike:          "Wrist Spike",
+	WristSword:          "Wrist Sword",
+	Yari:                "Yari",
+	YewWand:             "Yew Wand",
+	Zweihander:          "Zweihander",
 }
 
-// Misc codes, like jewelry, gems, potions and runes.
+// Misc items codes, like jewelry, gems, potions and runes, mapped to their in
+// game, human-friendly, readable name.
 var miscCodes = map[string]string{
-	"gsv": "Amethyst",
-	"r11": "Amn Rune",
-	"amu": "Amulet",
-	"yps": "Antidote Potion",
-	"aqv": "Arrows",
-	"bey": "Baal's Eye",
-	"bks": "Bark Scroll",
-	"r30": "Ber Rune",
-	"cqv": "Bolts",
-	"ass": "Book of Skill",
-	"bet": "Burning Essence of Terror",
-	"r32": "Cham Rune",
-	"ceh": "Charged Essence of Hatred",
-	"cm3": "Grand Charm",
-	"cm2": "Large Charm",
-	"cm1": "Small Charm",
-	"gcv": "Chipped Amethyst",
-	"gcw": "Chipped Diamond",
-	"gcg": "Chipped Emerald",
-	"gcr": "Chipped Ruby",
-	"gcb": "Chipped Sapphire",
-	"skc": "Chipped Skull",
-	"gcy": "Chipped Topaz",
-	"bkd": "Deciphered Bark Scroll",
-	"dhn": "Diablo's Horn",
-	"gsw": "Diamond",
-	"r14": "Dol Rune",
-	"r01": "El Rune",
-	"r02": "Eld Rune",
-	"elx": "Elixir",
-	"gsg": "Emerald",
-	"r05": "Eth Rune",
-	"r19": "Fal Rune",
-	"fed": "Festering Essence of Destruction",
-	"gfv": "Flawed Amethyst",
-	"gfw": "Flawed Diamond",
-	"gfg": "Flawed Emerald",
-	"gfr": "Flawed Ruby",
-	"gfb": "Flawed Sapphire",
-	"skf": "Flawed Skull",
-	"gfy": "Flawed Topaz",
-	"gzv": "Flawless Amethyst",
-	"glw": "Flawless Diamond",
-	"glg": "Flawless Emerald",
-	"glr": "Flawless Ruby",
-	"glb": "Flawless Sapphire",
-	"skl": "Flawless Skull",
-	"gly": "Flawless Topaz",
-	"hpf": "Full Healing Potion",
-	"mpf": "Full Mana Potion",
-	"rvl": "Full Rejuvenation Potion",
-	"gld": "Gold",
-	"g34": "Gold Bird",
-	"hp5": "Greater Healing Potion",
-	"mp5": "Greater Mana Potion",
-	"r25": "Gul Rune",
-	"hp3": "Healing Potion",
-	"hpo": "Healing Potion",
-	"r15": "Hel Rune",
-	"hrb": "Herb",
-	"box": "Horadric Cube",
-	"ibk": "Identify Book",
-	"isc": "Identify Scroll",
-	"r16": "Io Rune",
-	"r24": "Ist Rune",
-	"r06": "Ith Rune",
-	"j34": "Jade Figurine",
-	"r31": "Jah Rune",
-	"jew": "Jewel",
-	"pk3": "Key of Destruction",
-	"pk2": "Key of Hate",
-	"pk1": "Key of Terror",
-	"qbr": "Khalim's Brain",
-	"qey": "Khalim's Eye",
-	"qhr": "Khalim's Heart",
-	"r18": "Ko Rune",
-	"bbb": "Lam Esens Tome",
-	"bpl": "Large Blue Potion",
-	"rpl": "Large Red Potion",
-	"r20": "Lem Rune",
-	"hp1": "Lesser Healing Potion",
-	"mp1": "Lesser Mana Potion",
-	"hp2": "Light Healing Potion",
-	"mp2": "Light Mana Potion",
-	"r28": "Lo Rune",
-	"r17": "Lum Rune",
-	"ice": "Maguffin",
-	"r23": "Mal Rune",
-	"mp3": "Mana Potion",
-	"mpo": "Mana Potion",
-	"mbr": "Mephisto's Brain",
-	"luv": "Mephisto Key",
-	"mss": "Mephisto Soul Stone",
-	"r04": "Nef Rune",
-	"r27": "Ohm Rune",
-	"r09": "Ort Rune",
-	"gpv": "Perfect Amethyst",
-	"gpw": "Perfect Diamond",
-	"gpg": "Perfect Emerald",
-	"gpr": "Perfect Ruby",
-	"gpb": "Perfect Sapphire",
-	"skz": "Perfect Skull",
-	"gpy": "Perfect Topaz",
-	"ear": "Player Ear",
-	"r21": "Pul Rune",
-	"r08": "Ral Rune",
-	"rvs": "Rejuvenation Potion",
-	"rin": "Ring",
-	"gsr": "Ruby",
-	"gsb": "Sapphire",
-	"0sc": "Scroll",
-	"tr1": "Scroll of Horadric",
-	"tr2": "Scroll of Malah",
-	"xyz": "Potion of Life",
-	"r13": "Shael Rune",
-	"key": "Skeleton Key",
-	"sku": "Skull",
-	"bps": "Small Blue Potion",
-	"rps": "Small Red Potion",
-	"r12": "Sol Rune",
-	"vps": "Stamina Potion",
-	"std": "Standard of Heroes",
-	"hp4": "Strong Healing Potion",
-	"mp4": "Strong Mana Potion",
-	"r29": "Sur Rune",
-	"r07": "Tal Rune",
-	"wms": "Thawing Potion",
-	"r10": "Thul Rune",
-	"r03": "Tir Rune",
-	"toa": "Token of Absolution",
-	"gsy": "Topaz",
-	"tch": "Torch",
-	"tbk": "Town Portal Book",
-	"tsc": "Town Portal Scroll",
-	"tes": "Twisted Essence of Suffering",
-	"r22": "Um Rune",
-	"r26": "Vex Rune",
-	"vip": "Viper Amulet",
-	"r33": "Zod Rune",
+	Amethyst:                      "Amethyst",
+	AmnRune:                       "Amn Rune",
+	Amulet:                        "Amulet",
+	AntidotePotion:                "Antidote Potion",
+	Arrows:                        "Arrows",
+	BaalsEye:                      "Baal's Eye",
+	BarkScroll:                    "Bark Scroll",
+	BerRune:                       "Ber Rune",
+	Bolts:                         "Bolts",
+	BookofSkill:                   "Book of Skill",
+	BurningEssenceofTerror:        "Burning Essence of Terror",
+	ChamRune:                      "Cham Rune",
+	ChargedEssenceofHatred:        "Charged Essence of Hatred",
+	GrandCharm:                    "Grand Charm",
+	LargeCharm:                    "Large Charm",
+	SmallCharm:                    "Small Charm",
+	ChippedAmethyst:               "Chipped Amethyst",
+	ChippedDiamond:                "Chipped Diamond",
+	ChippedEmerald:                "Chipped Emerald",
+	ChippedRuby:                   "Chipped Ruby",
+	ChippedSapphire:               "Chipped Sapphire",
+	ChippedSkull:                  "Chipped Skull",
+	ChippedTopaz:                  "Chipped Topaz",
+	DecipheredBarkScroll:          "Deciphered Bark Scroll",
+	DiablosHorn:                   "Diablo's Horn",
+	Diamond:                       "Diamond",
+	DolRune:                       "Dol Rune",
+	ElRune:                        "El Rune",
+	EldRune:                       "Eld Rune",
+	Elixir:                        "Elixir",
+	Emerald:                       "Emerald",
+	EthRune:                       "Eth Rune",
+	FalRune:                       "Fal Rune",
+	FesteringEssenceofDestruction: "Festering Essence of Destruction",
+	FlawedAmethyst:                "Flawed Amethyst",
+	FlawedDiamond:                 "Flawed Diamond",
+	FlawedEmerald:                 "Flawed Emerald",
+	FlawedRuby:                    "Flawed Ruby",
+	FlawedSapphire:                "Flawed Sapphire",
+	FlawedSkull:                   "Flawed Skull",
+	FlawedTopaz:                   "Flawed Topaz",
+	FlawlessAmethyst:              "Flawless Amethyst",
+	FlawlessDiamond:               "Flawless Diamond",
+	FlawlessEmerald:               "Flawless Emerald",
+	FlawlessRuby:                  "Flawless Ruby",
+	FlawlessSapphire:              "Flawless Sapphire",
+	FlawlessSkull:                 "Flawless Skull",
+	FlawlessTopaz:                 "Flawless Topaz",
+	FullHealingPotion:             "Full Healing Potion",
+	FullManaPotion:                "Full Mana Potion",
+	FullRejuvenationPotion:        "Full Rejuvenation Potion",
+	Gold:                          "Gold",
+	GoldBird:                      "Gold Bird",
+	GreaterHealingPotion:          "Greater Healing Potion",
+	GreaterManaPotion:             "Greater Mana Potion",
+	GulRune:                       "Gul Rune",
+	HealingPotion:                 "Healing Potion",
+	HealingPotionMid:              "Healing Potion",
+	HelRune:                       "Hel Rune",
+	Herb:                          "Herb",
+	HoradricCube:                  "Horadric Cube",
+	IdentifyBook:                  "Identify Book",
+	IdentifyScroll:                "Identify Scroll",
+	IoRune:                        "Io Rune",
+	IstRune:                       "Ist Rune",
+	IthRune:                       "Ith Rune",
+	JadeFigurine:                  "Jade Figurine",
+	JahRune:                       "Jah Rune",
+	Jewel:                         "Jewel",
+	KeyofDestruction:              "Key of Destruction",
+	KeyofHate:                     "Key of Hate",
+	KeyofTerror:                   "Key of Terror",
+	KhalimsBrain:                  "Khalim's Brain",
+	KhalimsEye:                    "Khalim's Eye",
+	KhalimsHeart:                  "Khalim's Heart",
+	KoRune:                        "Ko Rune",
+	LamEsensTome:                  "Lam Esens Tome",
+	LargeBluePotion:               "Large Blue Potion",
+	LargeRedPotion:                "Large Red Potion",
+	LemRune:                       "Lem Rune",
+	LesserHealingPotion:           "Lesser Healing Potion",
+	LesserManaPotion:              "Lesser Mana Potion",
+	LightHealingPotion:            "Light Healing Potion",
+	LightManaPotion:               "Light Mana Potion",
+	LoRune:                        "Lo Rune",
+	LumRune:                       "Lum Rune",
+	Maguffin:                      "Maguffin",
+	MalRune:                       "Mal Rune",
+	ManaPotion:                    "Mana Potion",
+	ManaPotionMid:                 "Mana Potion",
+	MephistosBrain:                "Mephisto's Brain",
+	MephistoKey:                   "Mephisto Key",
+	MephistoSoulStone:             "Mephisto Soul Stone",
+	NefRune:                       "Nef Rune",
+	OhmRune:                       "Ohm Rune",
+	OrtRune:                       "Ort Rune",
+	PerfectAmethyst:               "Perfect Amethyst",
+	PerfectDiamond:                "Perfect Diamond",
+	PerfectEmerald:                "Perfect Emerald",
+	PerfectRuby:                   "Perfect Ruby",
+	PerfectSapphire:               "Perfect Sapphire",
+	PerfectSkull:                  "Perfect Skull",
+	PerfectTopaz:                  "Perfect Topaz",
+	PlayerEar:                     "Player Ear",
+	PulRune:                       "Pul Rune",
+	RalRune:                       "Ral Rune",
+	RejuvenationPotion:            "Rejuvenation Potion",
+	Ring:                          "Ring",
+	Ruby:                          "Ruby",
+	Sapphire:                      "Sapphire",
+	Scroll:                        "Scroll",
+	ScrollofHoradric:              "Scroll of Horadric",
+	ScrollofMalah:                 "Scroll of Malah",
+	PotionofLife:                  "Potion of Life",
+	ShaelRune:                     "Shael Rune",
+	SkeletonKey:                   "Skeleton Key",
+	Skull:                         "Skull",
+	SmallBluePotion:               "Small Blue Potion",
+	SmallRedPotion:                "Small Red Potion",
+	SolRune:                       "Sol Rune",
+	StaminaPotion:                 "Stamina Potion",
+	StandardofHeroes:              "Standard of Heroes",
+	StrongHealingPotion:           "Strong Healing Potion",
+	StrongManaPotion:              "Strong Mana Potion",
+	SurRune:                       "Sur Rune",
+	TalRune:                       "Tal Rune",
+	ThawingPotion:                 "Thawing Potion",
+	ThulRune:                      "Thul Rune",
+	TirRune:                       "Tir Rune",
+	TokenofAbsolution:             "Token of Absolution",
+	Topaz:                         "Topaz",
+	Torch:                         "Torch",
+	TownPortalBook:                "Town Portal Book",
+	TownPortalScroll:              "Town Portal Scroll",
+	TwistedEssenceofSuffering:     "Twisted Essence of Suffering",
+	UmRune:                        "Um Rune",
+	VexRune:                       "Vex Rune",
+	ViperAmulet:                   "Viper Amulet",
+	ZodRune:                       "Zod Rune",
 }
 
 var rareNames = map[uint64]string{
