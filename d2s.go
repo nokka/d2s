@@ -232,7 +232,7 @@ func parseItems(bfr io.ByteReader, char *Character) error {
 		return errors.New("failed to find the items header")
 	}
 
-	items, err := parseItemList(bfr, int(itemHeaderData.Count))
+	items, err := ParseItemList(bfr, int(itemHeaderData.Count))
 	if err != nil {
 		return err
 	}
@@ -296,7 +296,7 @@ func parseCorpse(bfr io.ByteReader, char *Character) error {
 			return errors.New("failed to find the merc items header")
 		}
 
-		corpseItems, err := parseItemList(bfr, int(itemHeaderData.Count))
+		corpseItems, err := ParseItemList(bfr, int(itemHeaderData.Count))
 		if err != nil {
 			return err
 		}
@@ -342,7 +342,7 @@ func parseMercItems(bfr io.ByteReader, char *Character) error {
 			return errors.New("failed to find the merc items header")
 		}
 
-		items, err := parseItemList(bfr, int(itemHeaderData.Count))
+		items, err := ParseItemList(bfr, int(itemHeaderData.Count))
 		if err != nil {
 			return err
 		}
@@ -376,7 +376,7 @@ func parseIronGolem(bfr io.ByteReader, char *Character) error {
 	}
 
 	if golemHeaderData.HasGolem == 1 {
-		item, err := parseItemList(bfr, 1)
+		item, err := ParseItemList(bfr, 1)
 		if err != nil {
 			return err
 		}
@@ -387,7 +387,7 @@ func parseIronGolem(bfr io.ByteReader, char *Character) error {
 	return nil
 }
 
-func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
+func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 	var itemList []Item
 
 	ibr := bitReader{r: bfr}
@@ -447,7 +447,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 			}
 
 			switch parsed.Quality {
-
 			case lowQuality:
 				parsed.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
 				readBits += 3
@@ -699,7 +698,6 @@ func parseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 			bitsToAlign := uint(8 - remainder)
 			_ = reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
 		}
-
 	}
 
 	return itemList, nil
@@ -998,7 +996,6 @@ func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
 
 		var values []int64
 		for _, bitLength := range prop.Bits {
-
 			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
 			readBits += int(bitLength)
 
