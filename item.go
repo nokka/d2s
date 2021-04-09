@@ -43,7 +43,7 @@ type Item struct {
 	RunewordID          uint64             `json:"runeword_id,omitempty"`
 	RunewordName        string             `json:"runeword_name,omitempty"`
 	RunewordAttributes  []MagicAttribute   `json:"runeword_attributes"`
-	SetID               uint64             `json:"set_id,omitempty"`
+	SetID               uint64             `json:"set_id"`
 	SetName             string             `json:"set_name,omitempty"`
 	SetListCount        uint64             `json:"set_list_count"`
 	SetAttributes       [][]MagicAttribute `json:"set_attributes"`
@@ -52,7 +52,7 @@ type Item struct {
 	RareName            string             `json:"rare_name,omitempty"`
 	RareName2           string             `json:"rare_name2,omitempty"`
 	MagicalNameIDs      []uint64           `json:"magical_name_ids,omitempty"`
-	UniqueID            uint64             `json:"unique_id,omitempty"`
+	UniqueID            uint64             `json:"unique_id"`
 	UniqueName          string             `json:"unique_name,omitempty"`
 	MagicAttributes     []MagicAttribute   `json:"magic_attributes"`
 	SocketedItems       []Item             `json:"socketed_items"`
@@ -894,7 +894,6 @@ var weaponDamageMap = map[string]WeaponDamage{
 	GothicSword:      {Min: 14, Max: 40, TwoMin: 39, TwoMax: 60},
 	Zweihander:       {Min: 19, Max: 35, TwoMin: 29, TwoMax: 54},
 	ExecutionerSword: {Min: 24, Max: 40, TwoMin: 47, TwoMax: 80},
-	"7sh":            {Min: 22, Max: 56, TwoMin: 50, TwoMax: 94},
 	HighlandBlade:    {Min: 22, Max: 62, TwoMin: 67, TwoMax: 96},
 	BalrogBlade:      {Min: 15, Max: 75, TwoMin: 55, TwoMax: 118},
 	ChampionSword:    {Min: 24, Max: 54, TwoMin: 71, TwoMax: 83},
