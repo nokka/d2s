@@ -2929,7 +2929,7 @@ var uniqueNames = map[uint64]string{
 	327: "Spiritkeeper",
 	328: "Hellrack",
 	329: "Alma Negra",
-	330: "Darkforge Spawn",
+	330: "Darkforce Spawn",
 	331: "Widowmaker",
 	332: "Bloodraven's Charge",
 	333: "Ghostflame",
