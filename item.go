@@ -1317,7 +1317,8 @@ var magicalProperties = map[uint64]MagicalProperty{
 	// additional skill points are given.
 	107: {Bits: []uint{9, 3}, Name: "+{1} To {0}"},
 	108: {Bits: []uint{1}, Name: "Rest In Peace"},
-	109: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
+	// Curse Resistance, not found in vanilla but can be placed on NV charms.
+	109: {Bits: []uint{9}, Name: "Unknown (Invisible)"},
 	181: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
 	182: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
 	183: {Bits: []uint{9, 5}, Name: "+{1} to spell {0} (char_class Only)"},
