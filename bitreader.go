@@ -1,18 +1,37 @@
 package d2s
 
-import "io"
+import (
+	"io"
+)
 
 // bitReader wraps an io.Reader and provides the ability to read bytes bit-by-bit from it.
 type bitReader struct {
-	r    io.ByteReader
-	n    uint64
-	bits uint
-	err  error
+	r        io.ByteReader
+	n        uint64
+	bits     uint
+	bitsRead uint
 }
 
 func (br *bitReader) ReadByte() (byte, error) {
+	// Add on the total amount of bits read.
+	br.bitsRead += 8
+
 	return br.r.ReadByte()
 }
+
+func (br *bitReader) Reset() {
+	br.bitsRead = 0
+}
+
+// Align will try and align the bit reader to the nearest byte.
+func (br *bitReader) Align() {
+	remainder := br.bitsRead % 8
+	if remainder > 0 {
+		bitsToAlign := uint(8 - remainder)
+		br.ReadBits(bitsToAlign)
+	}
+}
+
 func (br *bitReader) ReadBits(bits uint) (uint64, error) {
 	var n uint64
 
@@ -33,6 +52,9 @@ func (br *bitReader) ReadBits(bits uint) (uint64, error) {
 	n = (br.n >> (br.bits - bits)) & ((1 << bits) - 1)
 	n = reverseBits(n, bits)
 	br.bits -= bits
+
+	// Add on the total amount of bits read.
+	br.bitsRead += bits
 
 	return n, nil
 }
