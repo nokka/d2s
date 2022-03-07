@@ -37,23 +37,23 @@ func parse(bfr *bufio.Reader) (*Character, error) {
 	char := &Character{}
 
 	if err := parseHeader(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse header: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseAttributes(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse attributes: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseSkills(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse skills: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseItems(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse items: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseCorpse(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse corpse: %s, %s", char.Header.Name, err)
 	}
 
 	// Normalize the character status, that is being stored as a byte.
@@ -61,13 +61,13 @@ func parse(bfr *bufio.Reader) (*Character, error) {
 
 	if status.Expansion {
 		if err := parseMercItems(bfr, char); err != nil {
-			return nil, encodeError(char, err.Error())
+			return nil, fmt.Errorf("failed to parse merc items: %s, %s", char.Header.Name, err)
 		}
 	}
 
 	if char.Header.Class == Necromancer && status.Expansion {
 		if err := parseIronGolem(bfr, char); err != nil {
-			return nil, encodeError(char, err.Error())
+			return nil, fmt.Errorf("failed to parse iron golem: %s, %s", char.Header.Name, err)
 		}
 	}
 
@@ -1123,8 +1123,4 @@ func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
 	}
 
 	return magicAttributes, readBits, nil
-}
-
-func encodeError(char *Character, msg string) error {
-	return fmt.Errorf("char name: %s, %s", char.Header.Name, msg)
 }
