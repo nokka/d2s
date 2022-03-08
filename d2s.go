@@ -15,7 +15,6 @@ func Parse(file io.Reader) (*Character, error) {
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(file)
 
-	// Perform the actual reading.
 	return parse(bfr)
 }
 
@@ -27,7 +26,6 @@ func ParseFromContent(data []byte) (*Character, error) {
 	// Implements buffered reading, wraps io.Reader.
 	bfr := bufio.NewReader(r)
 
-	// Perform the actual reading.
 	return parse(bfr)
 }
 
@@ -37,23 +35,23 @@ func parse(bfr *bufio.Reader) (*Character, error) {
 	char := &Character{}
 
 	if err := parseHeader(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse header: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseAttributes(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse attributes: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseSkills(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse skills: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseItems(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse items: %s, %s", char.Header.Name, err)
 	}
 
 	if err := parseCorpse(bfr, char); err != nil {
-		return nil, encodeError(char, err.Error())
+		return nil, fmt.Errorf("failed to parse corpse: %s, %s", char.Header.Name, err)
 	}
 
 	// Normalize the character status, that is being stored as a byte.
@@ -61,13 +59,13 @@ func parse(bfr *bufio.Reader) (*Character, error) {
 
 	if status.Expansion {
 		if err := parseMercItems(bfr, char); err != nil {
-			return nil, encodeError(char, err.Error())
+			return nil, fmt.Errorf("failed to parse merc items: %s, %s", char.Header.Name, err)
 		}
 	}
 
 	if char.Header.Class == Necromancer && status.Expansion {
 		if err := parseIronGolem(bfr, char); err != nil {
-			return nil, encodeError(char, err.Error())
+			return nil, fmt.Errorf("failed to parse iron golem: %s, %s", char.Header.Name, err)
 		}
 	}
 
@@ -101,10 +99,9 @@ func parseAttributes(bfr io.ByteReader, char *Character) error {
 	br := bitReader{r: bfr}
 
 	for {
-		id := reverseBits(br.ReadBits64(9, true), 9)
-
-		if br.Err() != nil {
-			return br.Err()
+		id, err := br.ReadBits(9)
+		if err != nil {
+			return err
 		}
 
 		// If all 9 bits are set, we've hit the end of the attributes section
@@ -120,9 +117,9 @@ func parseAttributes(bfr io.ByteReader, char *Character) error {
 		}
 
 		// The attribute value.
-		attr := reverseBits(br.ReadBits64(length, true), length)
-		if br.Err() != nil {
-			return br.Err()
+		attr, err := br.ReadBits(length)
+		if err != nil {
+			return err
 		}
 
 		switch id {
@@ -171,15 +168,13 @@ func parseSkills(bfr io.Reader, char *Character) error {
 	// Make a buffer that can hold 32 bytes, which can hold the entire skillset.
 	buf := make([]byte, 32)
 
-	_, err := io.ReadFull(bfr, buf[:32])
+	_, err := io.ReadFull(bfr, buf)
 	if err != nil {
 		return err
 	}
 
 	skillHeaderData := skillData{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &skillHeaderData)
-
-	if err != nil {
+	if err := binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &skillHeaderData); err != nil {
 		return err
 	}
 
@@ -216,15 +211,13 @@ func parseItems(bfr io.ByteReader, char *Character) error {
 	// Make a buffer that can hold 4 bytes, which can hold the items header.
 	buf := make([]byte, 4)
 
-	_, err := io.ReadFull(bfr.(io.Reader), buf[:4])
+	_, err := io.ReadFull(bfr.(io.Reader), buf)
 	if err != nil {
 		return err
 	}
 
 	itemHeaderData := itemData{}
-	err = binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData)
-
-	if err != nil {
+	if err := binary.Read(bytes.NewBuffer(buf), binary.LittleEndian, &itemHeaderData); err != nil {
 		return err
 	}
 
@@ -232,12 +225,10 @@ func parseItems(bfr io.ByteReader, char *Character) error {
 		return errors.New("failed to find the items header")
 	}
 
-	items, err := ParseItemList(bfr, int(itemHeaderData.Count))
+	char.Items, err = ParseItemList(bfr, int(itemHeaderData.Count))
 	if err != nil {
 		return err
 	}
-
-	char.Items = items
 
 	return nil
 }
@@ -270,7 +261,6 @@ func parseCorpse(bfr io.ByteReader, char *Character) error {
 
 	// The character is currently dead and will have the corpse item list here.
 	if corpseHeaderData.Count == 1 {
-
 		// Character is dead, so we'll save the state.
 		char.IsDead = 1
 
@@ -309,15 +299,21 @@ func parseCorpse(bfr io.ByteReader, char *Character) error {
 
 // Parses all items on the merc, if it exists, otherwise just reads the header.
 func parseMercItems(bfr io.ByteReader, char *Character) error {
-	ibr := bitReader{r: bfr}
+	br := bitReader{r: bfr}
 
 	// offset: 0 "j"
-	j := ibr.ReadBits64(8, false)
+	j, err := br.ReadByte()
+	if err != nil {
+		return err
+	}
 
 	// offset: 8, "f"
-	f := ibr.ReadBits64(8, false)
+	f, err := br.ReadByte()
+	if err != nil {
+		return err
+	}
 
-	if fmt.Sprintf("%c", j) != "j" || fmt.Sprintf("%c", f) != "f" {
+	if string(j) != "j" || string(f) != "f" {
 		return errors.New("failed to find merc header jf")
 	}
 
@@ -387,10 +383,9 @@ func parseIronGolem(bfr io.ByteReader, char *Character) error {
 	return nil
 }
 
-func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
+func ParseItemList(byteReader io.ByteReader, itemCount int) ([]Item, error) {
 	var itemList []Item
-
-	ibr := bitReader{r: bfr}
+	br := bitReader{r: byteReader}
 
 	// We'll start this number at items count, but the thing is, if an item
 	// has items socketed on it, they will follow the item they're socketed in,
@@ -399,116 +394,120 @@ func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 	numberOfItemsToRead := itemCount
 
 	for i := 0; i < numberOfItemsToRead; i++ {
-		var readBits int
-		parsed := Item{}
+		// Reset the bit reader when reading a new item.
+		br.Reset()
 
+		item := Item{}
 		// Read the 111 bit basic item structure, all items have this structure.
-		err := parseSimpleBits(&ibr, &parsed)
-		readBits += 111
-
+		err := parseSimpleBits(&br, &item)
 		if err != nil {
-			return []Item{}, err
+			return itemList, err
 		}
 
-		if parsed.SimpleItem == 0 {
+		if item.SimpleItem == 0 {
 			// offset 111, item id is 8 chars, each 4 bit
-			parsed.ID = reverseBits(ibr.ReadBits64(32, true), 32)
-			readBits += 32
+			if item.ID, err = br.ReadBits(32); err != nil {
+				return itemList, err
+			}
 
 			// offset 143
-			parsed.Level = reverseBits(ibr.ReadBits64(7, true), 7)
-			readBits += 7
+			if item.Level, err = br.ReadBits(7); err != nil {
+				return itemList, err
+			}
 
 			// offset 150
-			parsed.Quality = reverseBits(ibr.ReadBits64(4, true), 4)
-			readBits += 4
+			if item.Quality, err = br.ReadBits(4); err != nil {
+				return itemList, err
+			}
 
-			// If this is true, it means the item has more than one picture associated
-			// with it.
-			parsed.MultiplePictures = reverseBits(ibr.ReadBits64(1, true), 1)
-			readBits++
+			// If true, it means the item has more than one picture associated with it.
+			if item.MultiplePictures, err = br.ReadBits(1); err != nil {
+				return itemList, err
+			}
 
-			if parsed.MultiplePictures == 1 {
+			if item.MultiplePictures == 1 {
 				// The next 3 bits contain the picture ID.
-				parsed.PictureID = reverseBits(ibr.ReadBits64(3, true), 3)
-				readBits += 3
+				if item.PictureID, err = br.ReadBits(3); err != nil {
+					return itemList, err
+				}
 			}
 
 			// If this is true, it means the item is class specific.
-			parsed.ClassSpecific = reverseBits(ibr.ReadBits64(1, true), 1)
-			readBits++
+			if item.ClassSpecific, err = br.ReadBits(1); err != nil {
+				return itemList, err
+			}
 
 			// If the item is class specific, the next 11 bits will
 			// contain the class specific data.
-			if parsed.ClassSpecific == 1 {
+			if item.ClassSpecific == 1 {
 				// TODO: Parse this into something useful
-				_ = reverseBits(ibr.ReadBits64(11, true), 11)
-				readBits += 11
+				br.ReadBits(11)
 			}
 
-			switch parsed.Quality {
+			switch item.Quality {
 			case lowQuality:
-				parsed.LowQualityID = reverseBits(ibr.ReadBits64(3, true), 3)
-				readBits += 3
+				if item.LowQualityID, err = br.ReadBits(3); err != nil {
+					return itemList, err
+				}
 
 			case normal:
 			// No extra data present
-
 			case highQuality:
 				// TODO: Figure out what these 3 bits are on a high quality item
-				_ = reverseBits(ibr.ReadBits64(3, true), 3)
-				readBits += 3
-
+				br.ReadBits(3)
 			case magicallyEnhanced:
-				parsed.MagicPrefix = reverseBits(ibr.ReadBits64(11, true), 11)
-				prefixName, ok := magicalPrefixes[parsed.MagicPrefix]
-				if ok {
-					parsed.MagicPrefixName = prefixName
+				if item.MagicPrefix, err = br.ReadBits(11); err != nil {
+					return itemList, err
 				}
 
-				parsed.MagicSuffix = reverseBits(ibr.ReadBits64(11, true), 11)
-				suffixName, ok := magicalSuffixes[parsed.MagicSuffix]
-				if ok {
-					parsed.MagicSuffixName = suffixName
+				if prefixName, ok := magicalPrefixes[item.MagicPrefix]; ok {
+					item.MagicPrefixName = prefixName
 				}
-				readBits += 22
 
+				if item.MagicSuffix, err = br.ReadBits(11); err != nil {
+					return itemList, err
+				}
+
+				if suffixName, ok := magicalSuffixes[item.MagicSuffix]; ok {
+					item.MagicSuffixName = suffixName
+				}
 			case partOfSet:
-				parsed.SetID = reverseBits(ibr.ReadBits64(12, true), 12)
-
-				setName, ok := setNames[parsed.SetID]
-				if ok {
-					parsed.SetName = setName
+				if item.SetID, err = br.ReadBits(12); err != nil {
+					return itemList, err
 				}
 
-				readBits += 12
-
+				if setName, ok := setNames[item.SetID]; ok {
+					item.SetName = setName
+				}
 			case rare, crafted:
-				rBits, _ := parseRareOrCraftedBits(&ibr, &parsed)
-				readBits += rBits
+				if err := parseRareOrCraftedBits(&br, &item); err != nil {
+					return itemList, err
+				}
 
 			case unique:
-				parsed.UniqueID = reverseBits(ibr.ReadBits64(12, true), 12)
-
-				uniqueName, ok := uniqueNames[parsed.UniqueID]
-				if ok {
-					parsed.UniqueName = uniqueName
+				if item.UniqueID, err = br.ReadBits(12); err != nil {
+					return itemList, err
 				}
 
-				readBits += 12
+				if uniqueName, ok := uniqueNames[item.UniqueID]; ok {
+					item.UniqueName = uniqueName
+				}
 			}
 
 			// MARK: Runeword data
-			if parsed.GivenRuneword == 1 {
-				parseRunewordBits(&ibr, &parsed)
-				readBits += 16
+			if item.GivenRuneword == 1 {
+				if err := parseRunewordBits(&br, &item); err != nil {
+					return itemList, err
+				}
 			}
 
-			if parsed.Personalized == 1 {
+			if item.Personalized == 1 {
 				var name string
 				for {
-					c := reverseBits(ibr.ReadBits64(7, true), 7)
-					readBits += 7
+					c, err := br.ReadBits(7)
+					if err != nil {
+						return itemList, err
+					}
 
 					if c == 0 {
 						break
@@ -517,104 +516,108 @@ func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 					name += fmt.Sprintf("%c", c)
 				}
 
-				parsed.PersonalizedName = name
+				item.PersonalizedName = name
 			}
 
 			// If the item is a tome, it will contain 5 extra bits, we're not
 			// interested in these bits, the value is usually 1, but not sure
 			// what it is.
-			if tomeMap[parsed.Type] {
-				_ = reverseBits(ibr.ReadBits64(5, true), 5)
-				readBits += 5
+			if tomeMap[item.Type] {
+				br.ReadBits(5)
 			}
 
 			// All items have this field between the personalization (if it exists)
 			// and the item specific data
-			parsed.Timestamp = reverseBits(ibr.ReadBits64(1, true), 1)
-			readBits++
+			if item.Timestamp, err = br.ReadBits(1); err != nil {
+				return itemList, err
+			}
 
-			if parsed.TypeID == armor || parsed.TypeID == shield {
+			if item.TypeID == armor || item.TypeID == shield {
 				// If the item is an armor, it will have this field of defense data.
-				defRating := reverseBits(ibr.ReadBits64(11, true), 11)
-				readBits += 11
+				defRating, err := br.ReadBits(11)
+				if err != nil {
+					return itemList, err
+				}
 
 				// We need to subtract 10 defense rating from all armors for
 				// some reason, I'm not sure why.
-				parsed.DefenseRating = int64((defRating - 10))
+				item.DefenseRating = int64((defRating - 10))
 			}
 
-			if parsed.TypeID == armor || parsed.TypeID == weapon || parsed.TypeID == shield {
-				parsed.MaxDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-				readBits += 8
+			if item.TypeID == armor || item.TypeID == weapon || item.TypeID == shield {
+				if item.MaxDurability, err = br.ReadBits(8); err != nil {
+					return itemList, err
+				}
 
 				// Some weapons like phase blades don't have durability, so we'll
 				// check if the item has max durability, then we can safely assume
 				// it has current durability too.
-				if parsed.MaxDurability > 0 {
-					parsed.CurrentDurability = reverseBits(ibr.ReadBits64(8, true), 8)
-					// Seems to be a random bit here.
-					_ = reverseBits(ibr.ReadBits64(1, true), 1)
+				if item.MaxDurability > 0 {
+					if item.CurrentDurability, err = br.ReadBits(8); err != nil {
+						return itemList, err
+					}
 
-					readBits += 9
+					// Seems to be a random bit here.
+					br.ReadBits(1)
 				}
 			}
 
-			if quantityMap[parsed.Type] {
+			if quantityMap[item.Type] {
 				// If the item is a stacked item, e.g. a javelin or something, these 9
 				// bits will contain the quantity.
-				parsed.Quantity = reverseBits(ibr.ReadBits64(9, true), 9)
-				readBits += 9
+				if item.Quantity, err = br.ReadBits(9); err != nil {
+					return itemList, err
+				}
 			}
 
 			// If the item is socketed, it will contain 4 bits of data which are the nr
 			// of total sockets the item have, regardless of how many are occupied by
 			// an item.
-			if parsed.Socketed == 1 {
-				parsed.TotalNrOfSockets = reverseBits(ibr.ReadBits64(4, true), 4)
-				readBits += 4
+			if item.Socketed == 1 {
+				if item.TotalNrOfSockets, err = br.ReadBits(4); err != nil {
+					return itemList, err
+				}
 			}
 
 			// If the item is part of a set, these bit will tell us how many lists
 			// of magical properties follow the one regular magical property list.
 			var setListValue uint64 = 0
-			if parsed.Quality == partOfSet {
-				setListValue = reverseBits(ibr.ReadBits64(5, true), 5)
-				readBits += 5
+			if item.Quality == partOfSet {
+				setListValue, err = br.ReadBits(5)
+				if err != nil {
+					return itemList, err
+				}
 
 				listCount, ok := setListMap[setListValue]
 				if !ok {
-					return []Item{}, fmt.Errorf("unknown set list number %d", setListValue)
+					return itemList, fmt.Errorf("unknown set list number %d", setListValue)
 				}
 
-				parsed.SetListCount = listCount
+				item.SetListCount = listCount
 			}
 
 			// MARK: Time to parse 9 bit magical property ids followed by their n bit
 			// length values, but only if the item is magical or above.
-			magicAttrList, rb, err := parseMagicalList(&ibr)
-			readBits += rb
-
+			magicAttrList, err := parseMagicalList(&br)
 			if err != nil {
 				return itemList, err
 			}
 
-			parsed.MagicAttributes = magicAttrList
+			item.MagicAttributes = magicAttrList
 
 			// Item has more magical property lists due to being a set item.
-			if parsed.SetListCount > 0 {
-				for i := 0; i < int(parsed.SetListCount); i++ {
-					setAttrList, rb, err := parseMagicalList(&ibr)
-					readBits += rb
-
+			if item.SetListCount > 0 {
+				for i := 0; i < int(item.SetListCount); i++ {
+					setAttrList, err := parseMagicalList(&br)
 					if err != nil {
 						return itemList, err
 					}
 
-					parsed.SetAttributes = append(parsed.SetAttributes, setAttrList)
+					item.SetAttributes = append(item.SetAttributes, setAttrList)
 				}
-				reqSetIDs, ok := setReqIDsMap[parsed.SetID]
+				reqSetIDs, ok := setReqIDsMap[item.SetID]
 				if ok {
-					parsed.SetAttributesIDsReq = reqSetIDs
+					item.SetAttributesIDsReq = reqSetIDs
 				} else {
 					// The bits set in setListValue correspond to the number
 					// of items that need to be worn for each list of magical properties
@@ -624,55 +627,50 @@ func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 							continue
 						}
 						// bit position 0 means it requires >= 2 items worn, etc
-						parsed.SetAttributesNumReq = append(parsed.SetAttributesNumReq, uint(i+2))
+						item.SetAttributesNumReq = append(item.SetAttributesNumReq, uint(i+2))
 					}
 				}
 			}
 
-			if parsed.GivenRuneword == 1 {
-				runewordAttrList, rb, err := parseMagicalList(&ibr)
-				readBits += rb
-
+			if item.GivenRuneword == 1 {
+				runewordAttrList, err := parseMagicalList(&br)
 				if err != nil {
 					return itemList, err
 				}
 
-				parsed.RunewordAttributes = runewordAttrList
+				item.RunewordAttributes = runewordAttrList
 			}
 		}
 
-		if parsed.LocationID == socketed {
+		if item.LocationID == socketed {
 			last := len(itemList) - 1
 
 			// The socketed item is a weapon, so we'll read the socketed properties
 			// from the weapons map.
 			if itemList[last].TypeID == weapon {
-				attrList, ok := socketablesWeapons[parsed.Type]
-				if ok {
-					parsed.MagicAttributes = attrList
+				if attrList, ok := socketablesWeapons[item.Type]; ok {
+					item.MagicAttributes = attrList
 				}
 			}
 
 			// The socketed item is an armor piece, so we'll read the socketed properties
 			// from the armor map.
 			if itemList[last].TypeID == armor {
-				attrList, ok := socketablesArmor[parsed.Type]
-				if ok {
-					parsed.MagicAttributes = attrList
+				if attrList, ok := socketablesArmor[item.Type]; ok {
+					item.MagicAttributes = attrList
 				}
 			}
 
 			// The socketed item is a shield, so we'll read the socketed properties
 			// from the shield map.
 			if itemList[last].TypeID == shield {
-				attrList, ok := socketablesShields[parsed.Type]
-				if ok {
-					parsed.MagicAttributes = attrList
+				if attrList, ok := socketablesShields[item.Type]; ok {
+					item.MagicAttributes = attrList
 				}
 			}
 
 			// Add item to the socket list
-			itemList[last].SocketedItems = append(itemList[last].SocketedItems, parsed)
+			itemList[last].SocketedItems = append(itemList[last].SocketedItems, item)
 
 		} else {
 			// Ok, so this item it self is not in a socket, but it might have socketed
@@ -683,146 +681,153 @@ func ParseItemList(bfr io.ByteReader, itemCount int) ([]Item, error) {
 			// We'll also make sure the item isn't a simple item, because apparently
 			// some quest items like Mephisto's Soul Stone has 2 sockets, but
 			// no items in it.
-			if parsed.NrOfItemsInSockets > 0 && parsed.SimpleItem == 0 {
-				numberOfItemsToRead += int(parsed.NrOfItemsInSockets)
+			if item.NrOfItemsInSockets > 0 && item.SimpleItem == 0 {
+				numberOfItemsToRead += int(item.NrOfItemsInSockets)
 			}
 
-			itemList = append(itemList, parsed)
+			itemList = append(itemList, item)
 		}
 
 		// If the item is not byte aligned, we'll have to byte align it before
-		// reading the next item, so we'll simply queue the reader at the next
-		// byte boundary by calculating the remainder.
-		remainder := readBits % 8
-		if remainder > 0 {
-			bitsToAlign := uint(8 - remainder)
-			_ = reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
-		}
+		// reading the next item.
+		br.Align()
 	}
 
 	return itemList, nil
 }
 
 // Parses the 108 bits of data all items have, both simple items and extended items.
-func parseSimpleBits(ibr *bitReader, item *Item) error {
-	var readBits int
+func parseSimpleBits(br *bitReader, item *Item) error {
 	// offset: 0 "J"
-	j := ibr.ReadBits64(8, false)
-	readBits += 8
+	j, err := br.ReadByte()
+	if err != nil {
+		return err
+	}
 
 	// offset: 8, "M"
-	m := ibr.ReadBits64(8, false)
-	readBits += 8
+	m, err := br.ReadByte()
+	if err != nil {
+		return err
+	}
 
-	if fmt.Sprintf("%c", j) != "J" || fmt.Sprintf("%c", m) != "M" {
+	if string(j) != "J" || string(m) != "M" {
 		return errors.New("failed to find item header JM")
 	}
 
 	// offset: 16, unknown
-	ibr.ReadBits64(4, true)
-	readBits += 4
+	br.ReadBits(4)
 
 	// offset: 20
-	item.Identified = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.Identified, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset: 21, unknown
-	ibr.ReadBits64(6, true)
-	readBits += 6
+	br.ReadBits(6)
 
 	// offset: 27
-	item.Socketed = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.Socketed, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 28, unknown
-	ibr.ReadBits64(1, true)
-	readBits++
+	br.ReadBits(1)
 
 	// offset 29
-	item.New = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.New, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 30, unknown
-	_ = reverseBits(ibr.ReadBits64(2, true), 2)
-	readBits += 2
+	br.ReadBits(2)
 
 	// offset 32
-	item.IsEar = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.IsEar, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 33
-	item.StarterItem = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.StarterItem, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 34, unknown
-	_ = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
+	br.ReadBits(3)
 
 	// offset 37, if it's a simple item, it only contains 111 bits data
-	item.SimpleItem = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.SimpleItem, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 38
-	item.Ethereal = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.Ethereal, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 39, unknown
-	_ = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	br.ReadBits(1)
 
 	// offset 40
-	item.Personalized = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.Personalized, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 41, unknown
-	_ = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	br.ReadBits(1)
 
 	// offset 42
-	item.GivenRuneword = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	if item.GivenRuneword, err = br.ReadBits(1); err != nil {
+		return err
+	}
 
 	// offset 43, unknown
-	_ = reverseBits(ibr.ReadBits64(5, true), 5)
-	readBits += 5
+	br.ReadBits(5)
 
 	// offset 48
-	item.Version = reverseBits(ibr.ReadBits64(8, true), 8)
-	readBits += 8
+	if item.Version, err = br.ReadBits(8); err != nil {
+		return err
+	}
 
 	// offset 56, unknown
-	_ = reverseBits(ibr.ReadBits64(2, true), 2)
-	readBits += 2
+	br.ReadBits(2)
 
 	// offset 58
-	item.LocationID = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
+	if item.LocationID, err = br.ReadBits(3); err != nil {
+		return err
+	}
 
 	// offset 61
-	item.EquippedID = reverseBits(ibr.ReadBits64(4, true), 4)
-	readBits += 4
+	if item.EquippedID, err = br.ReadBits(4); err != nil {
+		return err
+	}
 
 	// offset 65
-	item.PositionX = reverseBits(ibr.ReadBits64(4, true), 4)
-	readBits += 4
+	if item.PositionX, err = br.ReadBits(4); err != nil {
+		return err
+	}
 
 	// offset 69
-	item.PositionY = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
+	if item.PositionY, err = br.ReadBits(3); err != nil {
+		return err
+	}
 
 	// offset 72
-	_ = reverseBits(ibr.ReadBits64(1, true), 1)
-	readBits++
+	br.ReadBits(1)
 
 	// offset 73, if item is neither equipped or in the belt, this tells us where it is.
-	item.AltPositionID = reverseBits(ibr.ReadBits64(3, true), 3)
-	readBits += 3
+	if item.AltPositionID, err = br.ReadBits(3); err != nil {
+		return err
+	}
 
 	if item.IsEar == 0 {
 		// offset 76, item type, 4 chars, each 8 bit (not byte aligned)
 		var itemType string
 		for j := 0; j < 4; j++ {
-			itemType += fmt.Sprintf("%c", reverseBits(ibr.ReadBits64(8, true), 8))
+			t, err := br.ReadBits(8)
+			if err != nil {
+				return err
+			}
+			itemType += fmt.Sprintf("%c", t)
 		}
 
 		item.Type = strings.Trim(itemType, " ")
@@ -860,9 +865,7 @@ func parseSimpleBits(ibr *bitReader, item *Item) error {
 				}
 
 				item.BaseDamage = &baseDamage
-
 			}
-
 		case other:
 			typeName, ok := miscCodes[item.Type]
 			if ok {
@@ -872,24 +875,32 @@ func parseSimpleBits(ibr *bitReader, item *Item) error {
 
 		// offset 108
 		// If sockets exist, read the items, they'll be 108 bit basic items * nrOfSockets
-		item.NrOfItemsInSockets = reverseBits(ibr.ReadBits64(3, true), 3)
+		if item.NrOfItemsInSockets, err = br.ReadBits(3); err != nil {
+			return err
+		}
 	} else {
-
 		// offset 76, the item is an ear, we need to read the ear data.
-		earClass := reverseBits(ibr.ReadBits64(3, true), 3)
-		readBits += 3
+		earClass, err := br.ReadBits(3)
+		if err != nil {
+			return err
+		}
 
-		earLevel := reverseBits(ibr.ReadBits64(7, true), 7)
-		readBits += 7
+		earLevel, err := br.ReadBits(7)
+		if err != nil {
+			return err
+		}
 
 		var name string
 		for {
-			c := reverseBits(ibr.ReadBits64(7, true), 7)
+			c, err := br.ReadBits(7)
+			if err != nil {
+				return err
+			}
 
 			if c == 0 {
 				break
 			}
-			readBits += 7
+
 			name += fmt.Sprintf("%c", c)
 		}
 
@@ -900,13 +911,8 @@ func parseSimpleBits(ibr *bitReader, item *Item) error {
 		}
 
 		// If the ear is not byte aligned, we'll have to byte align it before
-		// reading the next property, so we'll simply queue the reader at the next
-		// byte boundary by calculating the remainder.
-		remainder := readBits % 8
-		if remainder > 0 {
-			bitsToAlign := uint(8 - remainder)
-			_ = reverseBits(ibr.ReadBits64(bitsToAlign, true), bitsToAlign)
-		}
+		// reading the next property.
+		br.Align()
 	}
 
 	return nil
@@ -914,25 +920,27 @@ func parseSimpleBits(ibr *bitReader, item *Item) error {
 
 // Parses the rare or crafted bits that only exists on rare and crafted items,
 // the bit length may vary depending on how many properties the item have.
-func parseRareOrCraftedBits(ibr *bitReader, item *Item) (int, error) {
-	var readBits int
-
-	nameID1 := reverseBits(ibr.ReadBits64(8, true), 8)
-	readBits += 8
+func parseRareOrCraftedBits(br *bitReader, item *Item) error {
+	nameID1, err := br.ReadBits(8)
+	if err != nil {
+		return err
+	}
 
 	name1, ok := rareNames[nameID1]
 	if !ok {
-		return readBits, fmt.Errorf("unknown rare name id: %d", nameID1)
+		return fmt.Errorf("unknown rare name id: %d", nameID1)
 	}
 
 	item.RareName = name1
 
-	nameID2 := reverseBits(ibr.ReadBits64(8, true), 8)
-	readBits += 8
+	nameID2, err := br.ReadBits(8)
+	if err != nil {
+		return err
+	}
 
 	name2, ok := rareNames[nameID2]
 	if !ok {
-		return readBits, fmt.Errorf("unknown rare name id: %d", nameID2)
+		return fmt.Errorf("unknown rare name id: %d", nameID2)
 	}
 
 	item.RareName2 = name2
@@ -941,46 +949,51 @@ func parseRareOrCraftedBits(ibr *bitReader, item *Item) (int, error) {
 	// for the prefix/suffix id defined in MagicPrefix.txt and MagicSuffix.txt.
 	// Even indices are prefixes, odd suffixes.
 	for i := 0; i < 6; i++ {
-		prefix := reverseBits(ibr.ReadBits64(1, true), 1)
-		readBits++
+		prefix, err := br.ReadBits(1)
+		if err != nil {
+			return err
+		}
 
 		if prefix == 1 {
-			item.MagicalNameIDs = append(item.MagicalNameIDs, reverseBits(ibr.ReadBits64(11, true), 11))
-			readBits += 11
+			magicalID, err := br.ReadBits(11)
+			if err != nil {
+				return err
+			}
+			item.MagicalNameIDs = append(item.MagicalNameIDs, magicalID)
 		} else {
 			item.MagicalNameIDs = append(item.MagicalNameIDs, 0)
 		}
 	}
 
-	return readBits, nil
+	return nil
 }
 
-func parseRunewordBits(ibr *bitReader, item *Item) {
-	runewordID := reverseBits(ibr.ReadBits64(12, true), 12)
+func parseRunewordBits(br *bitReader, item *Item) error {
+	runewordID, err := br.ReadBits(12)
+	if err != nil {
+		return err
+	}
+
 	item.RunewordID = runewordID
 
-	runewordName, ok := runewordNames[runewordID]
-	if ok {
+	if runewordName, ok := runewordNames[runewordID]; ok {
 		item.RunewordName = runewordName
 	}
 
 	// Unknown 4 bits, seems to be 5 all the time.
-	_ = reverseBits(ibr.ReadBits64(4, true), 4)
+	br.ReadBits(4)
+
+	return nil
 }
 
 // Parses the magical property list in the byte queue that belongs to an item
 // and returns the list of properties.
-func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
-
+func parseMagicalList(br *bitReader) ([]MagicAttribute, error) {
 	var magicAttributes []MagicAttribute
-	var readBits int
-
 	for {
-		id := reverseBits(ibr.ReadBits64(9, true), 9)
-		readBits += 9
-
-		if ibr.Err() != nil {
-			return magicAttributes, readBits, ibr.Err()
+		id, err := br.ReadBits(9)
+		if err != nil {
+			return magicAttributes, err
 		}
 
 		// If all 9 bits are set, we've hit the end of the stats section
@@ -991,13 +1004,15 @@ func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
 
 		prop, ok := magicalProperties[id]
 		if !ok {
-			return magicAttributes, readBits, fmt.Errorf("unknown magical property: %d", id)
+			return magicAttributes, fmt.Errorf("unknown magical property: %d", id)
 		}
 
 		var values []int64
 		for _, bitLength := range prop.Bits {
-			val := reverseBits(ibr.ReadBits64(bitLength, true), bitLength)
-			readBits += int(bitLength)
+			val, err := br.ReadBits(bitLength)
+			if err != nil {
+				return magicAttributes, err
+			}
 
 			if prop.Bias != 0 {
 				val -= prop.Bias
@@ -1015,9 +1030,5 @@ func parseMagicalList(ibr *bitReader) ([]MagicAttribute, int, error) {
 		magicAttributes = append(magicAttributes, attr)
 	}
 
-	return magicAttributes, readBits, nil
-}
-
-func encodeError(char *Character, msg string) error {
-	return fmt.Errorf("char name: %s, %s", char.Header.Name, msg)
+	return magicAttributes, nil
 }

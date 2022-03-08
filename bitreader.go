@@ -1,59 +1,62 @@
 package d2s
 
-import "io"
+import (
+	"io"
+)
 
-// bitReader wraps an io.Reader and provides the ability to read values,
-// bit-by-bit, from it. Its Read* methods don't return the usual error
-// because the error handling was verbose. Instead, any error is kept and can
-// be checked afterwards.
+// bitReader wraps an io.Reader and provides the ability to read bytes bit-by-bit from it.
 type bitReader struct {
-	r    io.ByteReader
-	n    uint64
-	bits uint
-	err  error
+	r        io.ByteReader
+	n        uint64
+	bits     uint
+	bitsRead uint
 }
 
-// ReadBits64 reads the given number of bits and returns them in the
-// least-significant part of a uint64. In the event of an error, it returns 0
-// and the error can be obtained by calling Err().
-func (br *bitReader) ReadBits64(bits uint, reverse bool) (n uint64) {
+func (br *bitReader) ReadByte() (byte, error) {
+	// Add on the total amount of bits read.
+	br.bitsRead += 8
+
+	return br.r.ReadByte()
+}
+
+func (br *bitReader) Reset() {
+	br.bitsRead = 0
+}
+
+// Align will try and align the bit reader to the nearest byte.
+func (br *bitReader) Align() {
+	remainder := br.bitsRead % 8
+	if remainder > 0 {
+		bitsToAlign := uint(8 - remainder)
+		br.ReadBits(bitsToAlign)
+	}
+}
+
+func (br *bitReader) ReadBits(bits uint) (uint64, error) {
+	var n uint64
+
 	for bits > br.bits {
 		b, err := br.r.ReadByte()
-
-		if reverse {
-			b = reverseByte(b)
-		}
-
 		if err == io.EOF {
-			err = io.ErrUnexpectedEOF
+			return n, io.ErrUnexpectedEOF
 		}
 		if err != nil {
-			br.err = err
-			return 0
+			return n, err
 		}
+		b = reverseByte(b)
 		br.n <<= 8
 		br.n |= uint64(b)
 		br.bits += 8
 	}
 
-	// br.n looks like this (assuming that br.bits = 14 and bits = 6):
-	// Bit: 111111
-	//      5432109876543210
-	//
-	//         (6 bits, the desired output)
-	//        |-----|
-	//        V     V
-	//      0101101101001110
-	//        ^            ^
-	//        |------------|
-	//           br.bits (num valid bits)
-	//
-	// This the next line right shifts the desired bits into the
-	// least-significant places and masks off anything above.
 	n = (br.n >> (br.bits - bits)) & ((1 << bits) - 1)
+	n = reverseBits(n, bits)
 	br.bits -= bits
 
-	return
+	// Add on the total amount of bits read.
+	br.bitsRead += bits
+
+	return n, nil
 }
 
 func reverseByte(b byte) byte {
@@ -74,8 +77,4 @@ func reverseBits(b uint64, n uint) uint64 {
 		b >>= 1
 	}
 	return d
-}
-
-func (br *bitReader) Err() error {
-	return br.err
 }
